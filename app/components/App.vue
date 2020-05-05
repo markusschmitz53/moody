@@ -2,34 +2,40 @@
     <BottomNavigation>
         <TabStrip>
             <TabStripItem class="navigation__item">
-                <Label text="Home"></Label>
-                <Image src.decode="font://&#xf015;" class="fas t-36"></Image>
+                <Image src.decode="font://&#xf550;" class="fas t-36"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Label text="Browse"></Label>
-                <Image src.decode="font://&#xf1ea;" class="far t-36"></Image>
+                <Image src.decode="font://&#xf21e;" class="fas t-36"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Label text="Search"></Label>
-                <Image src.decode="font://&#xf002;" class="fas t-36"></Image>
+                <Image src.decode="font://&#xf274;" class="far t-36"></Image>
+            </TabStripItem>
+            <TabStripItem class="navigation__item">
+                <Image src.decode="font://&#xf086;" class="far t-36"></Image>
             </TabStripItem>
         </TabStrip>
 
         <TabContentItem>
             <Frame>
-                <Items />
+                <Home />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
             <Frame>
-                <Browse />
+                <Activity />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
             <Frame>
-                <Search />
+                <Mood />
+            </Frame>
+        </TabContentItem>
+
+        <TabContentItem>
+            <Frame>
+                <Question />
             </Frame>
         </TabContentItem>
 
@@ -37,15 +43,17 @@
 </template>
 
 <script>
-import Items from "./Items.vue";
-import Browse from "./Browse.vue";
-import Search from "./Search.vue";
+import Home from "./Home.vue";
+import Activity from "./Activity.vue";
+import Mood from "./Mood.vue";
+import Question from "./Question.vue";
 
 export default {
   components: {
-    Items,
-    Browse,
-    Search
+    Home,
+    Activity,
+    Mood,
+    Question
   }
 };
 </script>

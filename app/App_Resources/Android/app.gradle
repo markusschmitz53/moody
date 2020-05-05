@@ -1,5 +1,8 @@
 // Add your native dependencies here:
-
+dependencies {
+	implementation 'com.google.android.gms:play-services-base:17.2.1'
+	implementation 'com.google.android.gms:play-services-location:17.0.0'
+}
 // Uncomment to add recyclerview-v7 dependency
 //dependencies {
 //	implementation 'com.android.support:recyclerview-v7:+'
@@ -8,11 +11,15 @@
 // If you want to add something to be applied before applying plugins' include.gradle files
 // e.g. project.ext.googlePlayServicesVersion = "15.0.1"
 // create a file named before-plugins.gradle in the current directory and place it there
-
 android {
   defaultConfig {
     minSdkVersion 17
     generatedDensities = []
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "Jane.apk"
+        }
+    }
   }
   aaptOptions {
     additionalParameters "--no-version-vectors"
