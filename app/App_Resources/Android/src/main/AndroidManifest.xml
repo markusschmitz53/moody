@@ -37,5 +37,10 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="com.tns.ErrorReportActivity"/>
+
+		<service android:name="de.markusschmitz.ActivityIntentService"
+		         android:enabled="true"
+		         android:exported="false">
+		</service>
 	</application>
 </manifest>
