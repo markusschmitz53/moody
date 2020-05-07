@@ -12,7 +12,7 @@
 </template>
 
 <script>
-	const ActivityDetection = require("nativescript-activity-detection");
+	const ActivityDetection = require("../ActivityRecognitionV2");
 	const AppSettings = require("tns-core-modules/application-settings");
 	const timerModule = require("tns-core-modules/timer");
 
@@ -50,10 +50,19 @@
 			},
 			onActivity(eventData) {
 				let activityType = eventData.activity.type;
-				let activityConfidence = eventData.activity.confidence;
+				let transition = eventData.activity.transition;
 				let date = new Date();
 				let activity;
 
+				let index = AppSettings.getAllKeys().length + '';
+				if (!index) {
+					index = '0';
+				}
+
+				AppSettings.setString(index, activityType + ' (' + transition + ')');
+				AppSettings.flush();
+				this.reloadActivities();
+/*
 				switch(activityType) {
 					case 0:
 						activity = 'IN_VEHICLE';
@@ -98,12 +107,13 @@
 						AppSettings.flush();
 						this.reloadActivities();
 					}
-				}
+				}*/
 			},
 			onTapListen() {
 		    	this.isListening = true;
-
+				console.info('# Triggered listen');
 		    	let activityDetection = ActivityDetection.getInstance();
+
 				activityDetection.on(ActivityDetection.activityEvent, this.onActivity);
 				activityDetection.start();
 /*
