@@ -1,32 +1,50 @@
 <template>
-	<Page marginBottom="2%" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
-		<ActionBar>
-			<Label :visibility="!questionDoneForToday ? 'visible' : 'collapse'" text="Wie fühlst du dich heute?"></Label>
-			<Label :visibility="questionDoneForToday ? 'visible' : 'collapse'" text="Danke :)"></Label>
-		</ActionBar>
-
-		<FlexboxLayout flexDirection="column" justifyContent="space-between">
-			<ListPicker :visibility="!questionDoneForToday ? 'visible' : 'collapse'" selectedIndex="4" :items="items" v-model="selectedItemIndex"
-						@selectedIndexChange="selectedIndexChanged"/>
-			<Label :visibility="!questionDoneForToday ? 'visible' : 'collapse'" class="hint text-muted" :text="currentHint"/>
-			<StackLayout :visibility="!questionDoneForToday ? 'visible' : 'collapse'" orientation="horizontal">
-				<Slider width="80%" value="8" minValue="0" maxValue="24" @valueChange="sleepValueChange($event)"></Slider>
-				<Label verticalAlignment="center" :text="sleepHours"/>
+	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
+		<template v-if="!questionDoneForToday">
+		<FlexboxLayout flexDirection="column" justifyContent="space-around">
+			<StackLayout class="m-t-30" orientation="horizontal" verticalAlignment="center">
+				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
+				<Label width="30%" class="h3 m-t-2 text-center" color="#CCC" :text="dateToday"></Label>
+				<Label @tap="onTapDayForward" width="35%" class="h3 text-left" color="#AAA" text=">"></Label>
 			</StackLayout>
-			<StackLayout :visibility="!questionDoneForToday ? 'visible' : 'collapse'" class="hint" orientation="horizontal">
+			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
+				<Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15" :text="currentHint"/>
+				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
+			</FlexboxLayout>
+			<StackLayout horizontalAlignment="left" orientation="horizontal">
+				<Label textAlignment="center" width="40%" class="h1 m-l-15" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
+				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeStart" selectedIndex="46"
+							class="m-x-10"/>
+				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" selectedIndex="18"
+							class="m-x-10"/>
+			</StackLayout>
+			<!--<Image src.decode="font://&#xf017;" tintColor="#CCC" class="far m-x-30" width="32"></Image>-->
+			<!--<Slider width="80%" value="8" minValue="0" maxValue="24" @valueChange="sleepValueChange($event)"></Slider>-->
+			<StackLayout class="hint" orientation="horizontal">
 				<Label width="80%" class="text-left p-l-30" verticalAlignment="center" text="Fühlst du dich gereizt?"/>
 				<Switch :checked="isIrritable" @checkedChange="isIrritable = $event.value"></Switch>
 			</StackLayout>
-			<Button :visibility="!questionDoneForToday ? 'visible' : 'collapse'" text="ok" :isEnabled="savingEnabled" @tap="onTap" class="-outline -rounded-lg"></Button>
-			<Button :visibility="questionDoneForToday ? 'visible' : 'collapse'" text="reset" @tap="onTapReset" class="m-t-30 -outline -rounded-lg"></Button>
+			<Button text="ok" :isEnabled="savingEnabled" @tap="onTap" class="-outline -rounded-lg"></Button>
         </FlexboxLayout>
+		</template>
+		<template v-else>
+			<FlexboxLayout flexDirection="column" justifyContent="space-between">
+				<Label text="Alles erledigt für heute :)"
+					   class="h2 w-100 text-center m-t-30 p-t-30"></Label>
+				<Button text="reset" @tap="onTapReset"
+						class="m-t-30 -outline -rounded-lg"></Button>
+			</FlexboxLayout>
+		</template>
 	</Page>
 </template>
-
 <script>
-	import * as firebase from"nativescript-plugin-firebase";
 	import * as dialogs from "tns-core-modules/ui/dialogs";
 	import * as appSettings from "tns-core-modules/application-settings";
+	import LifeChartService from "../LifeChart.service";
+	import VibratorService from "../Vibrator.service";
+
+	const LifeChart = new LifeChartService();
+	const Vibrator = new VibratorService();
 
 	export default {
 		data   : () => {
@@ -34,100 +52,73 @@
 				savingEnabled       : true,
 				isIrritable         : false,
 				questionDoneForToday: false,
+				dateToday			: '',
+				currentDate			: null,
 				dayToday            : new Date().getDay() + '',
 				selectedItemIndex   : 0,
 				sleepHours          : 0,
+				sleepStart          : 0,
+				sleepEnd            : 0,
 				currentHint         : '',
-				items               : [
-					{
-						value   : 4,
-						name    : 'manie_4',
-						hint    : 'unfähig irgendetwas zu tun oder hospitalisiert',
-						toString: () => {
-							return 'Manie: schwer';
-						}
-					},
-					{
-						value   : 3,
-						name    : 'manie_3',
-						hint    : 'große Schwierigkeiten mit zielgerichteten Aktivitäten',
-						toString: () => {
-							return 'Manie: deutlich';
-						}
-					},
-					{
-						value   : 2,
-						name    : 'manie_2',
-						hint    : 'einige Schwierigkeiten mit zielgerichteten Aktivitäten',
-						toString: () => {
-							return 'Manie: mäßig';
-						}
-					},
-					{
-						value   : 1,
-						name    : 'manie_1',
-						hint    : 'mehr energiegeladen & produktiv keine/geringe Beeinträchtigung',
-						toString: () => {
-							return 'Manie: leicht';
-						}
-					},
-					{
-						value   : 0,
-						name    : 'neutral',
-						hint    : '',
-						toString: () => {
-							return 'Neutral';
-						}
-					},
-					{
-						value   : -1,
-						name    : 'depression_1',
-						hint    : 'kann alles mühelos oder beinahe mühelos tun',
-						toString: () => {
-							return 'Depression: leicht';
-						}
-					},
-					{
-						value   : -2,
-						name    : 'depression_2',
-						hint    : 'kann alles nur mit einiger Mühe tun',
-						toString: () => {
-							return 'Depression: mäßig';
-						}
-					},
-					{
-						value   : -3,
-						name    : 'depression_3',
-						hint    : 'kann alles nur mit großer Mühe tun',
-						toString: () => {
-							return 'Depression: deutlich';
-						}
-					},
-					{
-						value   : -4,
-						name    : 'depression_4',
-						hint    : 'unfähig irgendwas zu tun oder hospitalisiert',
-						toString: () => {
-							return 'Depression: schwer';
-						}
-					}
-				]
-
+				items               : null,
+				timeItems           : null
 			};
 		},
 		methods: {
-			sleepValueChange(event) {
-				this.sleepHours = event.value;
+			onTapDayForward() {
+				this.setDateToday(1);
+			},
+			onTapDayBackward() {
+				this.setDateToday(-1);
+			},
+			sleepValueChangeStart(event) {
+				this.sleepStart = this.timeItems[event.value];
+				this.updateTimeSlept();
+			},
+			sleepValueChangeEnd(event) {
+				this.sleepEnd = this.timeItems[event.value];
+				this.updateTimeSlept();
+			},
+			updateTimeSlept() {
+				let sleepStartTimeParts = this.sleepStart.split(':');
+				let sleepEndTimeParts = this.sleepEnd.split(':');
+
+				if (sleepStartTimeParts.length !== 2 || sleepEndTimeParts.length !== 2)
+					return;
+
+				let today = new Date();
+				let yesterday = new Date();
+				yesterday.setDate(today.getDate() - 1)
+				let date1 = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), sleepStartTimeParts[0], sleepStartTimeParts[1], 0)
+				let date2 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), sleepEndTimeParts[0], sleepEndTimeParts[1], 0)
+				this.sleepHours = Math.abs(date2 - date1) / 36e5;
+			},
+			setDateToday(_changeDate) {
+				if (_changeDate === 1) {
+					this.currentDate.setDate(this.currentDate.getDate() + 1);
+				} else if (_changeDate === -1) {
+					this.currentDate.setDate(this.currentDate.getDate() - 1);
+				} else {
+					this.currentDate = new Date();
+				}
+
+				let dd = String(this.currentDate.getDate()).padStart(2, '0');
+				let mm = String(this.currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+				let yyyy = this.currentDate.getFullYear();
+				this.dateToday = (dd + '.' + mm + '.' + yyyy);
 			},
 			onPageLoaded() {
+				this.setDateToday();
+				this.items = LifeChart.getMoodItems();
+				this.timeItems = LifeChart.getTimeItems();
+
+				this.selectedItemIndex = 4;
+				this.currentHint = this.items[this.selectedItemIndex].hint;
+
+				this.sleepStart = this.timeItems[46];
+				this.sleepEnd = this.timeItems[18];
 				let storeDateString = appSettings.getString('lastLifeChartDay');
 				this.questionDoneForToday = (storeDateString === this.dayToday);
-				if (this.questionDoneForToday) {
-
-				} else {
-
-				}
-				this.selectedItemIndex = 4;
 			},
 			selectedIndexChanged() {
 				if (this.items[this.selectedItemIndex]) {
@@ -140,43 +131,43 @@
 				this.selectedItemIndex = 4;
 				this.isIrritable = false;
 				this.savingEnabled = true;
+				this.sleepHours = 0;
 			},
 			onTap() {
 		    	this.savingEnabled = false;
 		    	this.questionDoneForToday = true;
 				appSettings.setString('lastLifeChartDay', this.dayToday);
 
-				firebase.push(
-						'/events/lifechart',
+				let promise = LifeChart.save(
 						{
-							type           : 'lifechart',
-							mood           : this.items[this.selectedItemIndex].name,
-							irritable      : this.isIrritable,
-							sleepHours     : this.sleepHours,
-							timestamp      : java.lang.System.currentTimeMillis(),
-							serverTimestamp: firebase.ServerValue.TIMESTAMP
-						}
-				).then(
-						(result) => {
-							let message = 'mood: ' + this.items[this.selectedItemIndex].name + "\n" +
-										  'sleep: ' + this.sleepHours + "\n" +
-										  'irritable: ' + this.isIrritable;
-
-							dialogs.alert({
-											  title       : "Thanks!",
-											  message     : message,
-											  okButtonText: "cool"
-										  });
-						},
-						(error) => {
-							console.error("error");
-							dialogs.alert({
-											  title       : "",
-											  message     : "an error occured:" + error,
-											  okButtonText: "oh no :("
-										  });
+							type      : 'lifechart',
+							mood      : this.items[this.selectedItemIndex].name,
+							irritable : this.isIrritable,
+							sleepHours: this.sleepHours,
+							date: this.dateToday,
+							timestamp : java.lang.System.currentTimeMillis()
 						}
 				);
+
+				promise.then((result) => {
+					let message = 'date: ' + this.dateToday + "\n" +
+								  'mood: ' + this.items[this.selectedItemIndex].name + "\n" +
+								  'sleep: ' + this.sleepHours + "\n" +
+								  'irritable: ' + this.isIrritable;
+					Vibrator.vibrate(100);
+					dialogs.alert({
+									  title       : "Thanks!",
+									  message     : message,
+									  okButtonText: "cool"
+								  });
+				}, (error) => {
+					console.error("error");
+					dialogs.alert({
+									  title       : "",
+									  message     : "an error occured:" + error,
+									  okButtonText: "oh no :("
+								  });
+				});
 			}
 		}
 	};

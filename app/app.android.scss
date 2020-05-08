@@ -1,4 +1,12 @@
 // Import common styles
 @import "app-common";
 
+.range-seek-bar {
+    bar-color: #8990C4;
+    bar-highlight-color: #2434AD;
+    thumb-color: #1A246D;
+    bar-height: 5;
+    corner-radius: 10;
+}
+
 // Place any CSS rules you want to apply only on Android here

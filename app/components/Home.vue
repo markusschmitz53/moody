@@ -17,8 +17,6 @@
 
 <script>
     const timerModule = require("tns-core-modules/timer");
-    const Vibrate = require("nativescript-vibrate").Vibrate;
-    const vibrator = new Vibrate();
 
     export default {
     data: () => {
@@ -36,7 +34,6 @@
         onPageLoaded() {
             this.timerId = timerModule.setInterval(() => {
                 if (this.items.length < 3) {
-                    vibrator.vibrate(300);
                     this.items.push({
                                         text: 'Beantworte mir eine Frage ' + this.items.length,
                                         link: 'yo' + this.items.length
