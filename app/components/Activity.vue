@@ -6,6 +6,7 @@
 		<FlexboxLayout flexDirection="column" justifyContent="space-between">
 			<Label height="80%" class="hint" :text="currentText"  textWrap="true"/>
 			<Button text="listen" :isEnabled="!isListening" @tap="onTapListen" class="-outline -rounded-lg "></Button>
+			<Button text="stop" :isEnabled="isListening" @tap="onTapStop" class="-outline -rounded-lg "></Button>
 			<Button text="reset" @tap="onTap" class="-outline -rounded-lg "></Button>
         </FlexboxLayout>
 	</Page>
@@ -48,20 +49,26 @@
 					}
 				}
 			},
+			setAppsettingsString(_string) {
+		    	let index = AppSettings.getAllKeys().length + '';
+				if (!index) {
+					index = '0';
+				}
+
+				AppSettings.setString(index, _string);
+				AppSettings.flush();
+				this.reloadActivities();
+			},
+			onConnection(eventData) {
+		    	this.setAppsettingsString(eventData.message);
+			},
 			onActivity(eventData) {
 				let activityType = eventData.activity.type;
 				let transition = eventData.activity.transition;
 				let date = new Date();
 				let activity;
+				this.setAppsettingsString(activityType + ' (' + transition + ')');
 
-				let index = AppSettings.getAllKeys().length + '';
-				if (!index) {
-					index = '0';
-				}
-
-				AppSettings.setString(index, activityType + ' (' + transition + ')');
-				AppSettings.flush();
-				this.reloadActivities();
 /*
 				switch(activityType) {
 					case 0:
@@ -115,6 +122,7 @@
 		    	let activityDetection = ActivityDetection.getInstance();
 
 				activityDetection.on(ActivityDetection.activityEvent, this.onActivity);
+				activityDetection.on(ActivityDetection.connectionEvent, this.onConnection);
 				activityDetection.start();
 /*
 				timerModule.setInterval(() => {
@@ -128,6 +136,11 @@
 				}, 10000);*/
 
 				this.reset();
+			},
+			onTapStop() {
+		    	this.isListening = false;
+				let activityDetection = ActivityDetection.getInstance();
+				activityDetection.stop();
 			},
 			onTap() {
 				this.reset();
