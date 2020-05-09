@@ -1,5 +1,5 @@
 <template>
-	<Page marginBottom="2%" class="page" @navigatingTo="onPageLoaded">
+	<Page marginBottom="2%" class="page" @navigatingTo="onPageLoaded" actionBarHidden="true">
 		<ActionBar>
 			<Label text="Activity"></Label>
 		</ActionBar>

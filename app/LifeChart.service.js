@@ -3,11 +3,12 @@ import * as firebase from 'nativescript-plugin-firebase';
 export default class LifeChartService {
 
   constructor() {
-      this.timeItems = [];
+      this.timeItems = ['23:30'];
       for (let i = 0; i < 24; i++) {
           this.timeItems.push(i + ':00');
           this.timeItems.push(i + ':30');
       }
+      this.timeItems.push('00:00');
   }
 
   getData() {

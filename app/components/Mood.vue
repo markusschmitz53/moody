@@ -1,7 +1,7 @@
 <template>
 	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
 		<template v-if="!questionDoneForToday">
-		<FlexboxLayout flexDirection="column" justifyContent="space-around">
+		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
 			<StackLayout class="m-t-30" orientation="horizontal" verticalAlignment="center">
 				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
 				<Label width="30%" class="h3 m-t-2 text-center" color="#CCC" :text="dateToday"></Label>
@@ -13,18 +13,27 @@
 			</FlexboxLayout>
 			<StackLayout horizontalAlignment="left" orientation="horizontal">
 				<Label textAlignment="center" width="40%" class="h1 m-l-15" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
-				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeStart" selectedIndex="46"
+				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeStart" :selectedIndex="sleepStartSelectedIndex"
 							class="m-x-10"/>
 				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" selectedIndex="18"
 							class="m-x-10"/>
 			</StackLayout>
 			<!--<Image src.decode="font://&#xf017;" tintColor="#CCC" class="far m-x-30" width="32"></Image>-->
 			<!--<Slider width="80%" value="8" minValue="0" maxValue="24" @valueChange="sleepValueChange($event)"></Slider>-->
-			<StackLayout class="hint" orientation="horizontal">
-				<Label width="80%" class="text-left p-l-30" verticalAlignment="center" text="Fühlst du dich gereizt?"/>
-				<Switch :checked="isIrritable" @checkedChange="isIrritable = $event.value"></Switch>
-			</StackLayout>
-			<Button text="ok" :isEnabled="savingEnabled" @tap="onTap" class="-outline -rounded-lg"></Button>
+			<FlexboxLayout flexDirection="row" justifyContent="space-around" alignItems="center">
+				<StackLayout orientation="horizontal">
+					<Image src.decode="font://&#xf556;" :tintColor="isIrritableTintColor" class="far m-x-5" width="32"></Image>
+					<Switch :checked="isIrritable" @checkedChange="onIsIrritableChange"></Switch>
+				</StackLayout>
+				<StackLayout orientation="horizontal">
+					<Button @tap="addComorbidSymptom" class="-outline -rounded-sm">
+						<FormattedString>
+							<Span class="far h1" text.decode="+"></Span>
+						</FormattedString>
+					</Button>
+				</StackLayout>
+			</FlexboxLayout>
+			<Button text="fertig" :isEnabled="savingEnabled" @tap="onTap" class="-primary -rounded-lg"></Button>
         </FlexboxLayout>
 		</template>
 		<template v-else>
@@ -54,17 +63,27 @@
 				questionDoneForToday: false,
 				dateToday			: '',
 				currentDate			: null,
+				isIrritableTintColor: '#CCCCCC',
 				dayToday            : new Date().getDay() + '',
 				selectedItemIndex   : 0,
 				sleepHours          : 0,
 				sleepStart          : 0,
 				sleepEnd            : 0,
+				sleepStartedSameDay : false,
+				sleepStartSelectedIndex: 46,
 				currentHint         : '',
-				items               : null,
+				items               : [],
 				timeItems           : null
 			};
 		},
 		methods: {
+			addComorbidSymptom() {
+				console.log('add');
+			},
+			onIsIrritableChange(event) {
+				this.isIrritable = event.value;
+				this.isIrritableTintColor = this.isIrritable ? '#FF0000' : '#CCC';
+			},
 			onTapDayForward() {
 				this.setDateToday(1);
 			},
@@ -72,6 +91,15 @@
 				this.setDateToday(-1);
 			},
 			sleepValueChangeStart(event) {
+				if (event.oldValue === this.timeItems.length - 2 && event.value === this.timeItems.length - 1) {
+					this.sleepStartSelectedIndex = 1;
+					this.sleepStartedSameDay = true;
+				}
+				else if (event.value === 0 && event.oldValue === 1) {
+					this.sleepStartSelectedIndex = this.timeItems.length - 2;
+					this.sleepStartedSameDay = false;
+				}
+
 				this.sleepStart = this.timeItems[event.value];
 				this.updateTimeSlept();
 			},
@@ -88,7 +116,12 @@
 
 				let today = new Date();
 				let yesterday = new Date();
-				yesterday.setDate(today.getDate() - 1)
+
+				if (this.sleepStartedSameDay)
+					yesterday.setDate(today.getDate());
+				else
+					yesterday.setDate(today.getDate() - 1);
+
 				let date1 = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), sleepStartTimeParts[0], sleepStartTimeParts[1], 0)
 				let date2 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), sleepEndTimeParts[0], sleepEndTimeParts[1], 0)
 				this.sleepHours = Math.abs(date2 - date1) / 36e5;

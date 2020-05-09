@@ -1,11 +1,8 @@
 <template lang="html">
-    <Page @navigatingTo="onPageLoaded">
-        <ActionBar>
-			<Label text=""></Label>
-		</ActionBar>
-        <ScrollView orientation="vertical">
+    <Page @navigatingTo="onPageLoaded" actionBarHidden="true">
+        <ScrollView class="m-t-30" orientation="vertical">
             <stack-layout>
-               <card-view v-for="item in items" ripple="true" @tap="openLink(item.link)" height="100" marginRight="40" marginLeft="40" marginTop="40"  marginBottom="0" elevation="30" radius="10">-->
+               <card-view v-for="item in items" v-bind:data="item" v-bind:key="item.link" ripple="true" @tap="openLink(item.link)" height="100" marginRight="40" marginLeft="40" marginTop="40"  marginBottom="0" elevation="30" radius="10">-->
                     <stack-layout >
                         <label class="m-x-20 m-y-20" :text="item.text"></label>
                     </stack-layout>
@@ -24,7 +21,7 @@
             timerId: null,
             items : [
                 {
-                    text: 'Beantworte mir eine Frage 1',
+                    text: 'Du könntest mir deinen Namen verraten?',
                     link: 'yo1'
                 }
             ]
@@ -35,7 +32,7 @@
             this.timerId = timerModule.setInterval(() => {
                 if (this.items.length < 3) {
                     this.items.push({
-                                        text: 'Beantworte mir eine Frage ' + this.items.length,
+                                        text: 'Beantwortest du mir eine Frage? ' + this.items.length,
                                         link: 'yo' + this.items.length
                                     });
                 } else {

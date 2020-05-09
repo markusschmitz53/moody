@@ -1,8 +1,5 @@
 <template>
-  <Page @navigatedTo="navigatedTo" class="page">
-      <ActionBar>
-          <Label text=""></Label>
-      </ActionBar>
+  <Page @navigatedTo="navigatedTo" class="page" actionBarHidden="true">
       <FlexboxLayout  flexDirection="column" justifyContent="center" id="questionBox">
           <Label :text="question" class="w-100 text-center"></Label>
           <TextField v-if="textanswer" v-model="nameOfUser" @textChange="onTextChange"
