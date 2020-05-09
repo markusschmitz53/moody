@@ -1,6 +1,4 @@
 *.idea
-app/App_Resources/Android/google-services.json
-
 # NativeScript
 hooks/
 !hooks/after-createProject/*.js
