@@ -30,28 +30,15 @@ var instance;
 com.pip3r4o.android.app.IntentService.extend('de.markusschmitz.ActivityIntentService', {
 	onHandleIntent: function (intent) {
 		if (instance) {
-            instance.notify({
-                                eventName: connectionEvent,
-                                message  : 'onIntent #1'
-                            });
 			if (ActivityTransitionResult.hasResult(intent)) {
 				let result = ActivityTransitionResult.extractResult(intent);
-				let events = result.transitionEvents.toArray();
-
-                instance.notify({
-                                    eventName: connectionEvent,
-                                    message  : 'onIntent #2'
-                                });
+				let events = result.getTransitionEvents().toArray();
 
                 if (events && events.length) {
                     let event;
 
-                    instance.notify({
-                                        eventName: connectionEvent,
-                                        message  : 'onIntent #3'
-                                    });
-
-                    while (event = events.pop()) {
+                    for (let i = 0; i < events.length; i++) {
+                        event = events[i];
                         let transitionType = event.getTransitionType();
                         let activityType = event.getActivityType();
                         instance.notifyActivity(activityType, transitionType);
@@ -133,14 +120,17 @@ class NativeActivityRecognition extends Observable {
                                                             onSuccess: function () {
                                                                 this.notify({
                                                                                 eventName: connectionEvent,
-                                                                                message: 'transition request successful'
+                                                                                message: 'listening ...'
                                                                             });
                                                             }.bind(this)
                                                         }));
         task.addOnFailureListener(new OnFailureListener({
                                                             onFailure: function (error) {
-                                                                console.error('# Activity Detection: transition request error');
-                                                                console.error(error);
+                                                                console.error('# Activity Detection: transition request error', error);
+                                                                this.notify({
+                                                                                eventName: connectionEvent,
+                                                                                message: 'starting listener failed'
+                                                                            });
                                                             }.bind(this)
                                                         }));
 	}
