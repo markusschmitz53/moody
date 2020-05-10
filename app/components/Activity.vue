@@ -14,8 +14,11 @@
 
 <script>
 	const ActivityDetection = require("../ActivityRecognitionV2");
+	const NotificationReceiveService = require("../NotificationReceiveService");
+	const NotificationService = require("../NotificationService");
 	const AppSettings = require("tns-core-modules/application-settings");
 	const timerModule = require("tns-core-modules/timer");
+	const app = require('tns-core-modules/application');
 
 	export default {
 		data   : () => {
@@ -59,17 +62,19 @@
 				AppSettings.flush();
 				this.reloadActivities();
 			},
+			onNotification(eventData) {
+		    	console.info('notification');
+				this.setAppsettingsString(eventData.message);
+			},
 			onConnection(eventData) {
 		    	this.setAppsettingsString(eventData.message);
 			},
 			onActivity(eventData) {
 				let activityType = eventData.activity.type;
-				let transition = eventData.activity.transition;
+				let transitionType = eventData.activity.transition;
 				let date = new Date();
-				let activity;
-				this.setAppsettingsString(activityType + ' (' + transition + ')');
+				let activity, transition;
 
-/*
 				switch(activityType) {
 					case 0:
 						activity = 'IN_VEHICLE';
@@ -97,6 +102,17 @@
 						break;
 				}
 
+				switch(transitionType) {
+					case 0:
+						transition = 'enter';
+						break;
+					case 1:
+						transition = 'exit';
+						break;
+				}
+
+				this.setAppsettingsString(activity + ' (' + transition + ')');
+/*
 				if (activityType !== this.lastActivityType) {
 					let index = AppSettings.getAllKeys().length + '';
 					if (!index) {
@@ -116,7 +132,32 @@
 					}
 				}*/
 			},
+			showNotification(_title, _message) {
+				let notificationServiceInstance = NotificationService.getInstance();
+				notificationServiceInstance.showNotification(_title, _message);
+			},
 			onTapListen() {
+				this.showNotification('test', 'yoooo ' + Math.random());
+
+				this.isListening = true;
+				console.info('# Triggered listen');
+				app.android.registerBroadcastReceiver(android.content.Intent.ACTION_SCREEN_OFF,
+													  (androidContext, intent) => {
+														  console.log("off")
+													  });
+				app.android.registerBroadcastReceiver(android.content.Intent.ACTION_SCREEN_ON,
+													  (androidContext, intent) => {
+														  console.log("on")
+													  });
+		    	//let notificationServiceInstance = NotificationReceiveService.getInstance();
+				//notificationServiceInstance.on(NotificationReceiveService.notificationEvent, this.onNotification);
+			},
+
+			getDeleteIntent(context) {
+
+			},
+
+			onTapListenActivity() {
 		    	this.isListening = true;
 				console.info('# Triggered listen');
 		    	let activityDetection = ActivityDetection.getInstance();
@@ -138,6 +179,11 @@
 				this.reset();
 			},
 			onTapStop() {
+		    	this.isListening = false;
+				app.android.unregisterBroadcastReceiver(android.content.Intent.ACTION_SCREEN_OFF);
+				app.android.unregisterBroadcastReceiver(android.content.Intent.ACTION_SCREEN_ON);
+			},
+			onTapStopActivity() {
 		    	this.isListening = false;
 				let activityDetection = ActivityDetection.getInstance();
 				activityDetection.stop();
