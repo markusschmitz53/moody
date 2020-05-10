@@ -26,9 +26,9 @@
 					<Switch :checked="isIrritable" @checkedChange="onIsIrritableChange"></Switch>
 				</StackLayout>
 				<StackLayout orientation="horizontal">
-					<Button @tap="addComorbidSymptom" class="-outline -rounded-sm">
+					<Button @tap="addComorbidSymptom" class="-outline -rounded-sm" width="50">
 						<FormattedString>
-							<Span class="far h1" text.decode="+"></Span>
+							<Span class="far h1" color="#444" text.decode="+"></Span>
 						</FormattedString>
 					</Button>
 				</StackLayout>
