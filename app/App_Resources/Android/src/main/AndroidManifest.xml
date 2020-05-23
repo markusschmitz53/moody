@@ -18,6 +18,7 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.BATTERY_STATS"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 	<application
 		android:name="com.tns.NativeScriptApplication"
@@ -40,22 +41,9 @@
 		</activity>
 		<activity android:name="com.tns.ErrorReportActivity"/>
 
-		<service android:name="de.markusschmitz.ActivityIntentService"
-		         android:enabled="true"
-		         android:exported="false">
-		</service>
-
-		<service android:name="de.markusschmitz.NotificationReceiveService"
-				 android:enabled="true"
-				 android:exported="false"/>
-
-		<receiver android:name="de.markusschmitz.broadcastreceiver.NotificationEventReceiver"
-				  android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.ACTION_SCREEN_ON"/>
-				<action android:name="android.intent.action.ACTION_SCREEN_OFF"/>
-				<action android:name="android.intent.action.ACTION_BATTERY_CHANGED"/>
-			</intent-filter>
-		</receiver>
+		<service android:name="de.markusschmitz.GrabberService"
+                    android:permission="android.permission.BIND_JOB_SERVICE"
+                    android:enabled="true"
+                    android:exported="false" />
 	</application>
 </manifest>

@@ -13,6 +13,8 @@
 </template>
 
 <script>
+	import * as firebase from 'nativescript-plugin-firebase';
+
 	const ActivityDetection = require("../ActivityRecognitionV2");
 	const NotificationReceiveService = require("../NotificationReceiveService");
 	const NotificationService = require("../NotificationService");

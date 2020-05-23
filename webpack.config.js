@@ -18,8 +18,9 @@ module.exports = env => {
     // Add your custom Activities, Services and other android app components here.
     const appComponents = env.appComponents || [];
     appComponents.push(...[
-        "tns-core-modules/ui/frame",
-        "tns-core-modules/ui/frame/activity",
+        'tns-core-modules/ui/frame',
+        'tns-core-modules/ui/frame/activity',
+        resolve(__dirname, 'app/GrabberService.js'),
     ]);
 
     const platform = env && (env.android && "android" || env.ios && "ios" || env.platform);

@@ -1,4 +1,6 @@
-const { Observable } = require("data/observable");
+import * as firebase from 'nativescript-plugin-firebase';
+
+/*const { Observable } = require("data/observable");
 const application = require('application');
 const utils = require("utils/utils");
 
@@ -36,11 +38,28 @@ class NotificationReceiveService extends Observable {
         manager.notify(1, builder.build());
     }
 }
+module.exports = {
+	getInstance: function () {
+		if (!instance) {
+			instance = new NotificationReceiveService();
+		}
 
-android.content.BroadcastReceiver.extend('de.markusschmitz.broadcastreceiver.NotificationEventReceiver', {
+		return instance;
+	},
+	notificationEvent: notificationEvent
+};*/
+
+android.content.BroadcastReceiver.extend('de.markusschmitz.broadcastreceivers.NotificationEventReceiver', {
    onReceive: function (context, intent) {
-       // creates the service when notification is received
-    console.log("test");
+       let _object = {
+           serverTimestamp:firebase.ServerValue.TIMESTAMP,
+           payload: 'received'
+       };
+
+      firebase.push(
+          '/eventsTest/broadcast',
+          _object
+      );
    }
 });
 
@@ -56,14 +75,3 @@ android.content.WakefulBroadcastReceiver.extend('de.markusschmitz.NotificationEv
        }
    }
 })*/
-
-module.exports = {
-	getInstance: function () {
-		if (!instance) {
-			instance = new NotificationReceiveService();
-		}
-
-		return instance;
-	},
-	notificationEvent: notificationEvent
-};

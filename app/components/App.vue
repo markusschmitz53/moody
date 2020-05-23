@@ -10,6 +10,9 @@
             <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf274;" class="far t-36"></Image>
             </TabStripItem>
+            <TabStripItem class="navigation__item">
+                <Image src.decode="font://&#xf274;" class="far t-36"></Image>
+            </TabStripItem>
             <!--
             <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf086;" class="far t-36"></Image>
@@ -34,6 +37,12 @@
                 <Mood />
             </Frame>
         </TabContentItem>
+
+        <TabContentItem>
+            <Frame>
+                <Grabber />
+            </Frame>
+        </TabContentItem>
 <!--
         <TabContentItem>
             <Frame>
@@ -49,13 +58,15 @@ import Home from "./Home.vue";
 import Activity from "./Activity.vue";
 import Mood from "./Mood.vue";
 import Question from "./Question.vue";
+import Grabber from "./Grabber.vue";
 
 export default {
   components: {
     Home,
     Activity,
     Mood,
-    Question
+    Question,
+    Grabber
   }
 };
 </script>
