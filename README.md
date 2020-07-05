@@ -1,1 +1,3 @@
 # Jane
+
+tns debug android
