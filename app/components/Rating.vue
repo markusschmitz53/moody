@@ -39,7 +39,7 @@
 			</FlexboxLayout>
 			<FlexboxLayout width="100%">
 				<Button width="90%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
-				<Button @tap="onCheckButtonTap" class="button-z-index">
+				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index">
 					<FormattedString>
 						<Span class="far h1 button-icon" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
 					</FormattedString>
@@ -64,6 +64,7 @@
 		data: () => {
 			return {
 				savingEnabled          : true,
+				currentRecordKey       : null,
 				isDysphoric            : false,
 				questionDoneForToday   : false,
 				dateToday              : '',
@@ -112,9 +113,15 @@
 			},
 			onTapDayForward() {
 				this.setDateToday(1);
+				this.currentRecordKey = null;
+				this.questionDoneForToday = false;
+				let ratingRecord = LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onTapDayBackward() {
 				this.setDateToday(-1);
+				this.currentRecordKey = null;
+				this.questionDoneForToday = false;
+				let ratingRecord = LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onSliderValueChange(event) {
 				let face = ':-|';
@@ -189,6 +196,19 @@
 				this.dateTodayDb = yyyy + '-' + mm + '-' + dd;
 				this.currentHourAndMinute = hh + ':' + ii;
 			},
+			onRecordLoaded(result) {
+				if (!result.error) {
+					let records = result.children;
+
+					if (records && records.length) {
+						this.currentRecordKey = records[0].key;
+						this.questionDoneForToday = true;
+						this.assessmentStatusColor = '#444';
+					}
+				} else {
+					console.error(result.error);
+				}
+			},
 			onPageLoaded() {
 				this.setDateToday();
 				this.onSliderValueChange();
@@ -196,11 +216,8 @@
 				this.timeItems = LifeChart.getTimeItems();
 				this.sleepStart = this.timeItems[46];
 				this.sleepEnd = this.timeItems[18];
-				let storeDateString = appSettings.getString('lastLifeChartDay');
-				this.questionDoneForToday = (storeDateString === this.dayToday);
-				if (this.questionDoneForToday) {
-					this.assessmentStatusColor = '#0A822E';
-				}
+
+				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 
 				this.updateTimeSlept();
 			},
@@ -250,20 +267,35 @@
 				Vibrator.vibrate(75);
 				appSettings.setString('lastLifeChartDay', this.dayToday);
 
-				let promise = LifeChart.saveDailyAssessment(
-						{
-							sleepHours: this.sleepHours,
-							mood      : this.moodRating,
-							date      : this.dateTodayDb
-						}
-				);
+				let promise;
+
+				if (!this.currentRecordKey) {
+					promise = LifeChart.saveDailyAssessment(
+							{
+								sleepHours: this.sleepHours,
+								mood      : this.moodRating,
+								date      : this.dateTodayDb
+							}
+					);
+				} else {
+					promise = LifeChart.updateDailyAssessment(this.currentRecordKey,
+							{
+								sleepHours: this.sleepHours,
+								mood      : this.moodRating,
+								date      : this.dateTodayDb
+							}
+					);
+				}
 
 				promise.then((result) => {
+					if (!this.currentRecordKey) {
+						this.currentRecordKey = result.key;
+					}
 					let message = 'Tag: ' + this.dateTodayDb + "\n" +
 								  'Schlaf Stunden: ' + this.sleepHours + "\n" +
 								  'Stimmung: ' + this.moodRating;
 					dialogs.alert({
-									  title       : "danke!",
+									  title       : "",
 									  message     : message,
 									  okButtonText: "cool"
 								  });

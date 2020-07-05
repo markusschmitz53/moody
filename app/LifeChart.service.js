@@ -103,6 +103,24 @@ export default class LifeChartService {
         ];
     }
 
+    getRatingForDay(_date, _callback) {
+         return firebase.query(
+            _callback,
+            this.rootPathEvents + 'lifechart',
+            {
+                singleEvent: true,
+                orderBy    : {
+                    type : firebase.QueryOrderByType.CHILD,
+                    value: 'date' // mandatory when type is 'child'
+                },
+                range      : {
+                    type : firebase.QueryRangeType.EQUAL_TO,
+                    value: _date
+                }
+            }
+        );
+    }
+
     saveFunctionalImpairment(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.type = this.TYPE_FUNCTIONAL_IMPAIRMENT;
@@ -114,15 +132,33 @@ export default class LifeChartService {
         );
     }
 
+    updateDailyAssessment(_key, _object) {
+        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
+        _object.type = this.TYPE_DAILY_ASSESSMENT;
+        _object.timestamp = java.lang.System.currentTimeMillis();
+
+        let path = this.rootPathEvents + 'lifechart/';
+
+        return firebase.update(path + _key, _object);
+    }
+
     saveDailyAssessment(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.type = this.TYPE_DAILY_ASSESSMENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
+        let path = this.rootPathEvents + 'lifechart/';
+
         return firebase.push(
-            this.rootPathEvents + 'lifechart',
+            path,
             _object
-        );
+        ).then(function (result) {
+            firebase.update(path + result.key, {
+                key: result.key
+            });
+
+            return result;
+        });
     }
 
     saveLifeEvent(_object) {
