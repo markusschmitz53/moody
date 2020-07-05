@@ -21,6 +21,7 @@
     "nativescript-plugin-firebase": "^10.5.2",
     "nativescript-range-seek-bar": "^1.0.3",
     "nativescript-secure-storage": "^2.6.0",
+    "nativescript-ui-listview": "^8.2.0",
     "nativescript-vibrate": "^3.0.0",
     "nativescript-vue": "~2.5.0",
     "parse": "^2.13.0",
@@ -35,7 +36,7 @@
     "babel-loader": "~8.0.0",
     "nativescript-dev-webpack": "~1.5.1",
     "nativescript-vue-template-compiler": "~2.5.0",
-    "node-sass": "^4.7.1",
+    "node-sass": "^4.14.1",
     "vue-loader": "~15.9.0"
   },
   "gitHead": "2250137db8c1e0bd0eb543e8e4563cb71480c00d",
