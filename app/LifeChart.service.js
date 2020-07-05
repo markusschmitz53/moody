@@ -6,6 +6,7 @@ export default class LifeChartService {
         this.TYPE_FUNCTIONAL_IMPAIRMENT = 'functionalImpairment';
         this.TYPE_DAILY_ASSESSMENT = 'dailyAssessment';
         this.TYPE_COMORBID_SYMPTOM = 'comorbidSymptom';
+        this.TYPE_LIFE_EVENT = 'lifeEvent';
 
         this.timeItems = ['23:30'];
         this.rootPathEvents = '/eventsV2/';
@@ -124,6 +125,27 @@ export default class LifeChartService {
         );
     }
 
+    saveLifeEvent(_object) {
+        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
+        _object.type = this.TYPE_LIFE_EVENT;
+        _object.timestamp = java.lang.System.currentTimeMillis();
+
+        let path = this.rootPathEvents + 'lifeEvents/';
+
+       return firebase.push(
+            path,
+            _object
+        ).then(function (result) {
+            firebase.update(path + result.key, {
+                key: result.key
+            });
+
+            return result;
+        });
+
+
+    }
+
     saveComorbidSymptom(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.type = this.TYPE_COMORBID_SYMPTOM;
@@ -145,8 +167,31 @@ export default class LifeChartService {
 
     }
 
-    onAddedComorbidSymptom(result) {
+    removeLifeEvent(key) {
+        let data = {};
+        data[key] = null;
+        return firebase.update(this.rootPathEvents + 'lifeEvents/', data);
+    }
 
+    getLifeEvents(date, callback) {
+        return firebase.query(
+            callback,
+            this.rootPathEvents + 'lifeEvents',
+            {
+                // set this to true if you want to check if the value exists or just want the event to fire once
+                // default false, so it listens continuously.
+                // Only when true, this function will return the data in the promise as well!
+                singleEvent: true,
+                orderBy    : {
+                    type : firebase.QueryOrderByType.CHILD,
+                    value: 'date' // mandatory when type is 'child'
+                },
+                range      : {
+                    type : firebase.QueryRangeType.EQUAL_TO,
+                    value: date
+                }
+            }
+        );
     }
 
     removeComorbidSymptom(key) {

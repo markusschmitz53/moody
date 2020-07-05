@@ -20,7 +20,7 @@
 			</FlexboxLayout>
 			<FlexboxLayout class="m-t-15" flexDirection="row" justifyContent="space-around" alignItems="center">
 				<StackLayout orientation="horizontal">
-					<Button @tap="" class="-rounded-sm" width="50">
+					<Button @tap="addLifeEvent" class="-rounded-sm" width="50">
 						<FormattedString>
 							<Span class="far h1 button-icon" color="#444" text.decode="&#xf073;"></Span>
 						</FormattedString>
@@ -54,6 +54,7 @@
 	import LifeChartService from '~/LifeChart.service';
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
+	import LifeEventsComponent from "./LifeEvents";
 	import Mood from './Mood';
 
 	const LifeChart = new LifeChartService();
@@ -87,6 +88,13 @@
 		methods: {
 			addComorbidSymptom() {
 				this.$showModal(ComborbidSymptomsComponent, {
+						props: {
+							dateTodayDb: this.dateTodayDb
+						}
+					});
+			},
+			addLifeEvent() {
+				this.$showModal(LifeEventsComponent, {
 						props: {
 							dateTodayDb: this.dateTodayDb
 						}

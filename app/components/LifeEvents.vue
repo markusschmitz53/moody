@@ -9,22 +9,22 @@
 					<template v-if="isLoading">
 						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 					</template>
-					<template v-if="!isLoading && noSymptoms">
-						<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Symptome</Label>
+					<template v-if="!isLoading && noRecords">
+						<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
 					</template>
 					<RadListView height="100%" ref="listView"
-								 :items="symptoms"
+								 :items="records"
 								 @itemTap="onItemTap">
 						<v-template>
 							<StackLayout orientation="horizontal">
 								<Label :text="item.text" :id="item.valueFieldId" width="60%"
 									   class="m-l-25 m-t-20 h3"></Label>
 								<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
-										@tap="onTapRemoveSymptom" color="#CCC"></Button>
+										@tap="onTapRemoveRecord" color="#CCC"></Button>
 							</StackLayout>
 						</v-template>
 					</RadListView>
-					<TextField class="m-x-30 m-t-30 m-b-15" hint="Komorbides Symptom" :text='currentSymptomText'
+					<TextField class="m-x-30 m-t-30 m-b-15" hint="Lebensereignis" :text='currentText'
 							   returnKeyType="done"
 							   @returnPress="onReturnPress($event)">
 					</TextField>
@@ -48,12 +48,12 @@
   		props: ['dateTodayDb'],
 		data: () => {
 			return {
-				symptoms: new ObservableArray([]),
-				symptomCount: 0,
-				currentSymptomText: '',
-				isLoading: false,
-				noSymptoms: true,
-				itemList: []
+				records     : new ObservableArray([]),
+				recordCount : 0,
+				currentText : '',
+				isLoading   : false,
+				noRecords   : true,
+				itemList    : []
 			}
 		},
 		methods: {
@@ -62,24 +62,23 @@
 			onShownModally(event) {
 				this.page = event.object.page;
 				this.isLoading = true;
-				LifeChart.getComborbidSymptoms(this.dateTodayDb, this.onComborbidSymptomQueryEvent);
+				LifeChart.getLifeEvents(this.dateTodayDb, this.onQueryEvent);
 			},
-			onComborbidSymptomQueryEvent(result) {
+			onQueryEvent(result) {
 				this.isLoading = false;
 				if (!result.error) {
 					let records = result.children;
 
 					if (records && records.length) {
-						this.noSymptoms = false;
+						this.noRecords = false;
 						for (let i = 0; i < records.length; i++) {
-							++this.symptomCount;
-							this.symptoms.push({
-												   text        : records[i].symptom,
+							++this.recordCount;
+							this.records.push({
+												   text        : records[i].event,
 												   key         : records[i].key,
-												   valueFieldId: 'value-' + this.symptomCount,
-												   buttonId    : this.symptomCount
+												   valueFieldId: 'value-' + this.recordCount,
+												   buttonId    : this.recordCount
 											   });
-							//this.addSymptomElement(records[i].symptom);
 						}
 					}
 				}
@@ -90,12 +89,12 @@
 			onTapDone(event) {
 				event.object.page.closeModal();
 			},
-			onTapRemoveSymptom(event) {
+			onTapRemoveRecord(event) {
 				let page = event.object.page,
 						id = event.object.id,
 						selectedRecord = event.object.bindingContext,
 						item,
-						symptomArrayLengthBeforeChange = this.symptoms.length;
+						recordArrayLengthBeforeChange = this.records.length;
 
 				if (!page.getViewById('value-' + id)) {
 					throw new Error("Couldn't find value field");
@@ -103,18 +102,18 @@
 
 				item = page.getViewById('value-' + id).text;
 
-				let promise = LifeChart.removeComorbidSymptom(selectedRecord.key);
+				let promise = LifeChart.removeLifeEvent(selectedRecord.key);
 				promise.then((result) => {
-					this.symptoms.splice(this.symptoms.indexOf(selectedRecord), 1);
-					if (symptomArrayLengthBeforeChange === this.symptoms.length) {
+					this.records.splice(this.records.indexOf(selectedRecord), 1);
+					if (recordArrayLengthBeforeChange === this.records.length) {
 						dialogs.alert({
 										  title       : "",
-										  message     : "Symptom konnte nicht entfernt werden",
+										  message     : "uh, da stimmt was nich",
 										  okButtonText: "oopsie"
 									  });
 						return;
 					}
-					this.noSymptoms = (this.symptoms.length === 0);
+					this.noRecords = (this.records.length === 0);
 				}, (error) => {
 					dialogs.alert({
 									  title       : "Fehler!",
@@ -126,22 +125,22 @@
 			onReturnPress(event) {
 				let text = event.object.text;
 
-				this.currentSymptomText = '';
+				this.currentText = '';
 				event.object.text = '';
 
-				let promise = LifeChart.saveComorbidSymptom({
-																symptom: text,
+				let promise = LifeChart.saveLifeEvent({
+																event: text,
 																date   : this.dateTodayDb
 															});
 
 				promise.then((result) => {
-					this.noSymptoms = false;
-					++this.symptomCount;
-					this.symptoms.push({
+					this.noRecords = false;
+					++this.recordCount;
+					this.records.push({
 										   text        : text,
 										   key         : result.key,
-										   valueFieldId: 'value-' + this.symptomCount,
-										   buttonId    : this.symptomCount
+										   valueFieldId: 'value-' + this.recordCount,
+										   buttonId    : this.recordCount
 									   });
 				}, (error) => {
 					dialogs.alert({

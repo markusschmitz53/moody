@@ -8,12 +8,16 @@
 				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
 			</FlexboxLayout>
 			<FlexboxLayout class="m-b-20" flexDirection="row" justifyContent="space-around" alignItems="center">
-				<StackLayout class="m-l-20" orientation="horizontal" width="30%">
-					<Image src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far m-x-5" width="32"></Image>
-					<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
+				<StackLayout class="m-x-10" orientation="horizontal">
+					<StackLayout width="30%" class="m-l-20 reduced-margin" orientation="horizontal">
+						<Image src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far m-x-5"
+							   width="32"></Image>
+						<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
+					</StackLayout>
+					<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg reduced-margin"></Button>
+					<Button width="40%" text="fertig" :isEnabled="savingEnabled" @tap="onTapDone"
+							class="-primary -rounded-lg reduced-margin"></Button>
 				</StackLayout>
-				<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg"></Button>
-				<Button text="fertig" :isEnabled="savingEnabled" @tap="onTapDone" class="-primary -rounded-lg"></Button>
 			</FlexboxLayout>
         </FlexboxLayout>
 		</template>
@@ -126,4 +130,9 @@
     .hint {
         text-align: center;
     }
+
+	.reduced-margin {
+		margin-right: 10px;
+		margin-left: 10px;
+	}
 </style>
