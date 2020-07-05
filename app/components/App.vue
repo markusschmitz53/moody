@@ -2,20 +2,26 @@
     <BottomNavigation>
         <TabStrip>
             <TabStripItem class="navigation__item">
+                <Image src.decode="font://&#xf274;" class="far t-36"></Image>
+            </TabStripItem>
+            <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf550;" class="fas t-36"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf21e;" class="fas t-36"></Image>
             </TabStripItem>
-            <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf274;" class="far t-36"></Image>
-            </TabStripItem>
             <!--
-            <TabStripItem class="navigation__item">
+            <TabStripItem class="n avigation__item">
                 <Image src.decode="font://&#xf086;" class="far t-36"></Image>
             </TabStripItem>
             -->
         </TabStrip>
+
+        <TabContentItem>
+            <Frame id="main">
+                <Rating />
+            </Frame>
+        </TabContentItem>
 
         <TabContentItem>
             <Frame>
@@ -29,11 +35,6 @@
             </Frame>
         </TabContentItem>
 
-        <TabContentItem>
-            <Frame>
-                <Mood />
-            </Frame>
-        </TabContentItem>
 <!--
         <TabContentItem>
             <Frame>
@@ -48,12 +49,14 @@
 import Home from "./Home.vue";
 import Activity from "./Activity.vue";
 import Mood from "./Mood.vue";
+import Rating from "./Rating.vue";
 import Question from "./Question.vue";
 
 export default {
   components: {
     Home,
     Activity,
+    Rating,
     Mood,
     Question
   }

@@ -2,38 +2,19 @@
 	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
 		<template v-if="!questionDoneForToday">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<StackLayout class="m-t-30" orientation="horizontal" verticalAlignment="center">
-				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
-				<Label width="30%" class="h3 m-t-2 text-center" color="#CCC" :text="dateToday"></Label>
-				<Label @tap="onTapDayForward" width="35%" class="h3 text-left" color="#AAA" text=">"></Label>
-			</StackLayout>
+			<FlexboxLayout height="25%"></FlexboxLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15" :text="currentHint"/>
 				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
 			</FlexboxLayout>
-			<StackLayout horizontalAlignment="left" orientation="horizontal">
-				<Label textAlignment="center" width="40%" class="h1 m-l-15" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
-				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeStart" :selectedIndex="sleepStartSelectedIndex"
-							class="m-x-10"/>
-				<ListPicker :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" selectedIndex="18"
-							class="m-x-10"/>
-			</StackLayout>
-			<!--<Image src.decode="font://&#xf017;" tintColor="#CCC" class="far m-x-30" width="32"></Image>-->
-			<!--<Slider width="80%" value="8" minValue="0" maxValue="24" @valueChange="sleepValueChange($event)"></Slider>-->
-			<FlexboxLayout flexDirection="row" justifyContent="space-around" alignItems="center">
-				<StackLayout orientation="horizontal">
-					<Image src.decode="font://&#xf556;" :tintColor="isIrritableTintColor" class="far m-x-5" width="32"></Image>
-					<Switch :checked="isIrritable" @checkedChange="onIsIrritableChange"></Switch>
+			<FlexboxLayout class="m-b-20" flexDirection="row" justifyContent="space-around" alignItems="center">
+				<StackLayout class="m-l-20" orientation="horizontal" width="30%">
+					<Image src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far m-x-5" width="32"></Image>
+					<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
 				</StackLayout>
-				<StackLayout orientation="horizontal">
-					<Button @tap="addComorbidSymptom" class="-outline -rounded-sm" width="50">
-						<FormattedString>
-							<Span class="far h1" color="#444" text.decode="+"></Span>
-						</FormattedString>
-					</Button>
-				</StackLayout>
+				<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg"></Button>
+				<Button text="fertig" :isEnabled="savingEnabled" @tap="onTap" class="-primary -rounded-lg"></Button>
 			</FlexboxLayout>
-			<Button text="fertig" :isEnabled="savingEnabled" @tap="onTap" class="-primary -rounded-lg"></Button>
         </FlexboxLayout>
 		</template>
 		<template v-else>
@@ -56,102 +37,35 @@
 	const Vibrator = new VibratorService();
 
 	export default {
+    	props: ["dateToday", "dateTodayDb", "currentHourAndMinute"],
 		data   : () => {
 			return {
-				savingEnabled       : true,
-				isIrritable         : false,
-				questionDoneForToday: false,
-				dateToday			: '',
-				currentDate			: null,
-				isIrritableTintColor: '#CCCCCC',
-				dayToday            : new Date().getDay() + '',
-				selectedItemIndex   : 0,
-				sleepHours          : 0,
-				sleepStart          : 0,
-				sleepEnd            : 0,
-				sleepStartedSameDay : false,
+				savingEnabled          : true,
+				isDysphoric            : false,
+				questionDoneForToday   : false,
+				currentDate            : null,
+				isDysphoricTintColor   : '#CCCCCC',
+				selectedItemIndex      : 0,
+				sleepHours             : 0,
+				sleepStart             : 0,
+				sleepEnd               : 0,
+				sleepStartedSameDay    : false,
 				sleepStartSelectedIndex: 46,
-				currentHint         : '',
-				items               : [],
-				timeItems           : null
+				currentHint            : '',
+				items                  : [],
+				timeItems              : null
 			};
 		},
 		methods: {
-			addComorbidSymptom() {
-				console.log('add');
-			},
-			onIsIrritableChange(event) {
-				this.isIrritable = event.value;
-				this.isIrritableTintColor = this.isIrritable ? '#FF0000' : '#CCC';
-			},
-			onTapDayForward() {
-				this.setDateToday(1);
-			},
-			onTapDayBackward() {
-				this.setDateToday(-1);
-			},
-			sleepValueChangeStart(event) {
-				if (event.oldValue === this.timeItems.length - 2 && event.value === this.timeItems.length - 1) {
-					this.sleepStartSelectedIndex = 1;
-					this.sleepStartedSameDay = true;
-				}
-				else if (event.value === 0 && event.oldValue === 1) {
-					this.sleepStartSelectedIndex = this.timeItems.length - 2;
-					this.sleepStartedSameDay = false;
-				}
-
-				this.sleepStart = this.timeItems[event.value];
-				this.updateTimeSlept();
-			},
-			sleepValueChangeEnd(event) {
-				this.sleepEnd = this.timeItems[event.value];
-				this.updateTimeSlept();
-			},
-			updateTimeSlept() {
-				let sleepStartTimeParts = this.sleepStart.split(':');
-				let sleepEndTimeParts = this.sleepEnd.split(':');
-
-				if (sleepStartTimeParts.length !== 2 || sleepEndTimeParts.length !== 2)
-					return;
-
-				let today = new Date();
-				let yesterday = new Date();
-
-				if (this.sleepStartedSameDay)
-					yesterday.setDate(today.getDate());
-				else
-					yesterday.setDate(today.getDate() - 1);
-
-				let date1 = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), sleepStartTimeParts[0], sleepStartTimeParts[1], 0)
-				let date2 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), sleepEndTimeParts[0], sleepEndTimeParts[1], 0)
-				this.sleepHours = Math.abs(date2 - date1) / 36e5;
-			},
-			setDateToday(_changeDate) {
-				if (_changeDate === 1) {
-					this.currentDate.setDate(this.currentDate.getDate() + 1);
-				} else if (_changeDate === -1) {
-					this.currentDate.setDate(this.currentDate.getDate() - 1);
-				} else {
-					this.currentDate = new Date();
-				}
-
-				let dd = String(this.currentDate.getDate()).padStart(2, '0');
-				let mm = String(this.currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
-				let yyyy = this.currentDate.getFullYear();
-				this.dateToday = (dd + '.' + mm + '.' + yyyy);
+			onIsDysphoricChange(event) {
+				this.isDysphoric = event.value;
+				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCC';
 			},
 			onPageLoaded() {
-				this.setDateToday();
 				this.items = LifeChart.getMoodItems();
-				this.timeItems = LifeChart.getTimeItems();
 
 				this.selectedItemIndex = 4;
 				this.currentHint = this.items[this.selectedItemIndex].hint;
-
-				this.sleepStart = this.timeItems[46];
-				this.sleepEnd = this.timeItems[18];
-				let storeDateString = appSettings.getString('lastLifeChartDay');
-				this.questionDoneForToday = (storeDateString === this.dayToday);
 			},
 			selectedIndexChanged() {
 				if (this.items[this.selectedItemIndex]) {
@@ -159,37 +73,41 @@
 				}
 			},
 			onTapReset() {
-				appSettings.remove('lastLifeChartDay');
-				this.questionDoneForToday = false;
 				this.selectedItemIndex = 4;
-				this.isIrritable = false;
-				this.savingEnabled = true;
-				this.sleepHours = 0;
+				this.isDysphoric = false;
+			},
+			onTapBack() {
+				this.$navigateBack({
+									   frame: 'main'
+								   });
 			},
 			onTap() {
-		    	this.savingEnabled = false;
-		    	this.questionDoneForToday = true;
-				appSettings.setString('lastLifeChartDay', this.dayToday);
-
-				let promise = LifeChart.save(
+			/*	this.$navigateBack({
+					frame       : 'main'
+				});*/
+				console.log({
+								impairment: this.items[this.selectedItemIndex].name,
+								dysphoric : this.isDysphoric,
+								date      : this.dateTodayDb,
+								time      : this.currentHourAndMinute
+							});
+				return;
+				let promise = LifeChart.saveFunctionalImpairment(
 						{
-							type      : 'lifechart',
-							mood      : this.items[this.selectedItemIndex].name,
-							irritable : this.isIrritable,
-							sleepHours: this.sleepHours,
-							date: this.dateToday,
-							timestamp : java.lang.System.currentTimeMillis()
+							impairment: this.items[this.selectedItemIndex].name,
+							dysphoric : this.isDysphoric,
+							date      : this.dateTodayDb,
+							time      : this.currentHourAndMinute
 						}
 				);
 
 				promise.then((result) => {
-					let message = 'date: ' + this.dateToday + "\n" +
-								  'mood: ' + this.items[this.selectedItemIndex].name + "\n" +
-								  'sleep: ' + this.sleepHours + "\n" +
-								  'irritable: ' + this.isIrritable;
+					let message = 'Datum: ' + this.dateToday + "\n" +
+								  'Einschränkung: ' + this.items[this.selectedItemIndex].name + "\n" +
+								  'Dysphorisch/Gereizt: ' + this.isDysphoric;
 					Vibrator.vibrate(100);
 					dialogs.alert({
-									  title       : "Thanks!",
+									  title       : "danke!",
 									  message     : message,
 									  okButtonText: "cool"
 								  });
@@ -197,7 +115,7 @@
 					console.error("error");
 					dialogs.alert({
 									  title       : "",
-									  message     : "an error occured:" + error,
+									  message     : "es gab einen Fehler:" + error,
 									  okButtonText: "oh no :("
 								  });
 				});
