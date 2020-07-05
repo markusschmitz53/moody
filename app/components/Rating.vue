@@ -1,6 +1,5 @@
 <template>
 	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
-		<template v-if="!questionDoneForToday">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
 			<StackLayout height="10%" class="m-t-30" orientation="horizontal" verticalAlignment="center">
 				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
@@ -38,17 +37,15 @@
 					</Button>
 				</StackLayout>
 			</FlexboxLayout>
-			<Button text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
-        </FlexboxLayout>
-		</template>
-		<template v-else>
-			<FlexboxLayout flexDirection="column" justifyContent="space-between">
-				<Label text="Alles erledigt für heute :)"
-					   class="h2 w-100 text-center m-t-30 p-t-30"></Label>
-				<Button text="reset" @tap="onTapReset"
-						class="m-t-30 -outline -rounded-lg"></Button>
+			<FlexboxLayout width="100%">
+				<Button width="90%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
+				<Button @tap="onCheckButtonTap" class="button-z-index">
+					<FormattedString>
+						<Span class="far h1 button-icon" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
+					</FormattedString>
+				</Button>
 			</FlexboxLayout>
-		</template>
+        </FlexboxLayout>
 	</Page>
 </template>
 <script>
@@ -63,7 +60,7 @@
 	const Vibrator = new VibratorService();
 
 	export default {
-		data   : () => {
+		data: () => {
 			return {
 				savingEnabled          : true,
 				isDysphoric            : false,
@@ -83,7 +80,8 @@
 				moodRating             : 50,
 				moodRatingLabel        : '50',
 				items                  : [],
-				timeItems              : null
+				timeItems              : null,
+				assessmentStatusColor  : '#CCC'
 			};
 		},
 		methods: {
@@ -192,6 +190,9 @@
 				this.sleepEnd = this.timeItems[18];
 				let storeDateString = appSettings.getString('lastLifeChartDay');
 				this.questionDoneForToday = (storeDateString === this.dayToday);
+				if (this.questionDoneForToday) {
+					this.assessmentStatusColor = '#0A822E';
+				}
 
 				this.updateTimeSlept();
 			},
@@ -206,6 +207,13 @@
 				this.selectedItemIndex = 4;
 				this.savingEnabled = true;
 				this.sleepHours = 0;
+			},
+			onCheckButtonTap() {
+				dialogs.alert({
+									  title       : "",
+									  message     : 'alles erledigt für heute',
+									  okButtonText: "cool"
+								  });
 			},
 			validate() {
 				if (!this.dateTodayDb || this.dateTodayDb === '') {
@@ -229,6 +237,7 @@
 				}
 
 				this.questionDoneForToday = true;
+				this.assessmentStatusColor = '#444';
 
 				Vibrator.vibrate(75);
 				appSettings.setString('lastLifeChartDay', this.dayToday);

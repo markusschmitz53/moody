@@ -13,7 +13,7 @@
 					<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
 				</StackLayout>
 				<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg"></Button>
-				<Button text="fertig" :isEnabled="savingEnabled" @tap="onTap" class="-primary -rounded-lg"></Button>
+				<Button text="fertig" :isEnabled="savingEnabled" @tap="onTapDone" class="-primary -rounded-lg"></Button>
 			</FlexboxLayout>
         </FlexboxLayout>
 		</template>
@@ -81,17 +81,7 @@
 									   frame: 'main'
 								   });
 			},
-			onTap() {
-			/*	this.$navigateBack({
-					frame       : 'main'
-				});*/
-				console.log({
-								impairment: this.items[this.selectedItemIndex].name,
-								dysphoric : this.isDysphoric,
-								date      : this.dateTodayDb,
-								time      : this.currentHourAndMinute
-							});
-				return;
+			onTapDone() {
 				let promise = LifeChart.saveFunctionalImpairment(
 						{
 							impairment: this.items[this.selectedItemIndex].name,
@@ -105,12 +95,15 @@
 					let message = 'Datum: ' + this.dateToday + "\n" +
 								  'Einschränkung: ' + this.items[this.selectedItemIndex].name + "\n" +
 								  'Dysphorisch/Gereizt: ' + this.isDysphoric;
-					Vibrator.vibrate(100);
+					Vibrator.vibrate(75);
 					dialogs.alert({
-									  title       : "danke!",
+									  title       : "",
 									  message     : message,
 									  okButtonText: "cool"
 								  });
+					this.$navigateBack({
+										   frame: 'main'
+									   });
 				}, (error) => {
 					console.error("error");
 					dialogs.alert({
