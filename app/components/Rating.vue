@@ -2,15 +2,15 @@
 	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
 			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" verticalAlignment="center">
-				<Button @tap="onTapDayBackward" class="reduced-margin  m-b-30" width="30" height="36">
+				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding  m-b-30" width="30" height="36">
 					<FormattedString>
-						<Span class="fas button-icon-size reduced-margin" color="#CCC" text.decode="&#xf0d9;"></Span>
+						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC" text.decode="&#xf0d9;"></Span>
 					</FormattedString>
 				</Button>
-				<Label width="30%" class="h3 m-t-2 text-center" color="#CCC" :text="dateToday"></Label>
-				<Button @tap="onTapDayForward" class="reduced-margin m-b-30" width="30" height="36">
+				<Label width="30%" class="h3 m-t-4 text-center" color="#CCC" :text="dateToday"></Label>
+				<Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
-						<Span class="fas button-icon-size h2 reduced-margin" color="#CCC" text.decode="&#xf0da;"></Span>
+						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC" text.decode="&#xf0da;"></Span>
 					</FormattedString>
 				</Button>
 			</StackLayout>
@@ -24,32 +24,34 @@
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<Label textWrap="true" color="#CCC" textAlignment="center" width="20%" class="h1 m-l-20" :text="moodRatingLabel"/>
 				<Label textWrap="true" color="#CCC" textAlignment="center" class="hint" :text="moodRating"/>
-				<Slider width="60%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)"></Slider>
+				<Slider width="60%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)">				</Slider>
 			</FlexboxLayout>
-			<FlexboxLayout class="m-t-15" flexDirection="row" justifyContent="space-around" alignItems="center">
-				<StackLayout orientation="horizontal">
-					<StackLayout width="25%" class="m-l-20" orientation="horizontal">
-						<Image @tap="showDysphoricExplanation" src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far"
-							   width="24"></Image>
-						<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
-					</StackLayout>
-					<Button @tap="addLifeEvent" class="-rounded-sm" width="50">
+			<StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
+				<StackLayout class="m-r-10" orientation="horizontal">
+					<Button width="40" @tap="showDysphoricExplanation" class="far reduced-margin button-z-index" >
 						<FormattedString>
-							<Span class="far h1 button-icon" color="#444" text.decode="&#xf073;"></Span>
+							<Span class="far h1" :color="isDysphoricTintColor"
+								  text.decode="&#xf556;"></Span>
 						</FormattedString>
 					</Button>
-					<Button @tap="addComorbidSymptom" class="-rounded-sm m-x-10" width="50">
-						<FormattedString>
-							<Span class="far h1" color="#444" text.decode="&#xf0fe;"/>
-						</FormattedString>
-					</Button>
-					<Button @tap="addImpairmentRating" class="-rounded-sm" width="50">
-						<FormattedString>
-							<Span class="far h1 button-icon" color="#444" text.decode="&#xf080;"></Span>
-						</FormattedString>
-					</Button>
+					<check-box :checked="isDysphoric" @checkedChange="onIsDysphoricChange" />
 				</StackLayout>
-			</FlexboxLayout>
+				<Button @tap="addLifeEvent" width="55" class="reduced-margin m-x-10">
+					<FormattedString>
+						<Span class="far h2" color="#444" text.decode="&#xf073;"></Span>
+					</FormattedString>
+				</Button>
+				<Button @tap="addComorbidSymptom" width="55" class="reduced-margin m-x-10">
+					<FormattedString>
+						<Span class="far h2" color="#444" text.decode="&#xf0fe;"/>
+					</FormattedString>
+				</Button>
+				<Button @tap="addImpairmentRating" width="55" class="reduced-margin m-l-10">
+					<FormattedString>
+						<Span class="far h2" color="#444" text.decode="&#xf080;"></Span>
+					</FormattedString>
+				</Button>
+			</StackLayout>
 			<FlexboxLayout class="m-x-10" width="100%">
 				<Button width="100%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
 				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index">
@@ -103,9 +105,16 @@
 			};
 		},
 		methods: {
+			onSwipe(args) {
+				if (args.direction === 1) {
+					this.onTapDayBackward();
+				} else if (args.direction === 2) {
+					this.onTapDayForward();
+				}
+			},
 			onIsDysphoricChange(event) {
 				this.isDysphoric = event.value;
-				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCC';
+				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCCCCC';
 			},
 			showDysphoricExplanation() {
 				this.$showModal(DysphoricMania, {
@@ -395,9 +404,14 @@
         text-align: center;
     }
 
-	.reduced-margin {
+	.reduced-margin-and-padding {
 		margin: 0;
 		padding: 10;
+	}
+
+	.reduced-margin {
+		margin: 0;
+		padding: 0;
 	}
 
 	.button-icon-size {
