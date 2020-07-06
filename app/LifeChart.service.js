@@ -3,17 +3,18 @@ import * as firebase from 'nativescript-plugin-firebase';
 export default class LifeChartService {
 
     constructor() {
-        this.TYPE_FUNCTIONAL_IMPAIRMENT = 'functionalImpairment';
-        this.TYPE_DAILY_ASSESSMENT = 'dailyAssessment';
         this.TYPE_COMORBID_SYMPTOM = 'comorbidSymptom';
         this.TYPE_LIFE_EVENT = 'lifeEvent';
 
         this.timeItems = ['23:30'];
         this.rootPathEvents = '/eventsV2/';
+        this.rootPathChart = this.rootPathEvents + 'chart/';
 
         for (let i = 0; i < 24; i++) {
-            this.timeItems.push(i + ':00');
-            this.timeItems.push(i + ':30');
+            let number = i + '';
+            number = number.padStart(2, '0');
+            this.timeItems.push(number + ':00');
+            this.timeItems.push(number + ':30');
         }
         this.timeItems.push('00:00');
     }
@@ -106,7 +107,25 @@ export default class LifeChartService {
     getRatingForDay(_date, _callback) {
          return firebase.query(
             _callback,
-            this.rootPathEvents + 'lifechart',
+            this.rootPathChart + 'dailyAssessments/',
+            {
+                singleEvent: true,
+                orderBy    : {
+                    type : firebase.QueryOrderByType.CHILD,
+                    value: 'date' // mandatory when type is 'child'
+                },
+                range      : {
+                    type : firebase.QueryRangeType.EQUAL_TO,
+                    value: _date
+                }
+            }
+        );
+    }
+
+    getFunctionalImpairmentsForDay(_date, _callback) {
+         return firebase.query(
+            _callback,
+            this.rootPathChart + 'functionalImpairments/',
             {
                 singleEvent: true,
                 orderBy    : {
@@ -123,31 +142,42 @@ export default class LifeChartService {
 
     saveFunctionalImpairment(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.type = this.TYPE_FUNCTIONAL_IMPAIRMENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
+        let path = this.rootPathChart + 'functionalImpairments/';
+
         return firebase.push(
-            this.rootPathEvents + 'lifechart',
+            path,
             _object
-        );
+        ).then(function (result) {
+            firebase.update(path + result.key, {
+                key: result.key
+            });
+
+            return result;
+        });
+    }
+
+    removeFunctionalImpairment(key) {
+        let data = {};
+        data[key] = null;
+        return firebase.update(this.rootPathChart + 'functionalImpairments/', data);
     }
 
     updateDailyAssessment(_key, _object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.type = this.TYPE_DAILY_ASSESSMENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
-        let path = this.rootPathEvents + 'lifechart/';
+        let path = this.rootPathChart + 'dailyAssessments/';
 
         return firebase.update(path + _key, _object);
     }
 
     saveDailyAssessment(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.type = this.TYPE_DAILY_ASSESSMENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
-        let path = this.rootPathEvents + 'lifechart/';
+        let path = this.rootPathChart + 'dailyAssessments/';
 
         return firebase.push(
             path,
@@ -166,7 +196,7 @@ export default class LifeChartService {
         _object.type = this.TYPE_LIFE_EVENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
-        let path = this.rootPathEvents + 'lifeEvents/';
+        let path = this.rootPathChart + 'lifeEvents/';
 
        return firebase.push(
             path,
@@ -187,7 +217,7 @@ export default class LifeChartService {
         _object.type = this.TYPE_COMORBID_SYMPTOM;
         _object.timestamp = java.lang.System.currentTimeMillis();
 
-        let path = this.rootPathEvents + 'comorbidSymptoms/';
+        let path = this.rootPathChart + 'comorbidSymptoms/';
 
        return firebase.push(
             path,
@@ -206,13 +236,13 @@ export default class LifeChartService {
     removeLifeEvent(key) {
         let data = {};
         data[key] = null;
-        return firebase.update(this.rootPathEvents + 'lifeEvents/', data);
+        return firebase.update(this.rootPathChart + 'lifeEvents/', data);
     }
 
     getLifeEvents(date, callback) {
         return firebase.query(
             callback,
-            this.rootPathEvents + 'lifeEvents',
+            this.rootPathChart + 'lifeEvents/',
             {
                 // set this to true if you want to check if the value exists or just want the event to fire once
                 // default false, so it listens continuously.
@@ -233,13 +263,13 @@ export default class LifeChartService {
     removeComorbidSymptom(key) {
         let data = {};
         data[key] = null;
-        return firebase.update(this.rootPathEvents + 'comorbidSymptoms/', data);
+        return firebase.update(this.rootPathChart + 'comorbidSymptoms/', data);
     }
 
     getComborbidSymptoms(date, callback) {
         return firebase.query(
             callback,
-            this.rootPathEvents + 'comorbidSymptoms',
+            this.rootPathChart + 'comorbidSymptoms/',
             {
                 // set this to true if you want to check if the value exists or just want the event to fire once
                 // default false, so it listens continuously.
