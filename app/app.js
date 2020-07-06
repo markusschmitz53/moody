@@ -28,3 +28,14 @@ Vue.registerElement(
   'CardView',
   () => require('@nstudio/nativescript-cardview').CardView
 );
+
+Vue.registerElement(
+  'CheckBox',
+  () => require('@nstudio/nativescript-checkbox').CheckBox,
+  {
+    model: {
+      prop: 'checked',
+      event: 'checkedChange'
+    }
+  }
+);
