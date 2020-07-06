@@ -3,22 +3,22 @@
 		<template v-if="!questionDoneForToday">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
 			<FlexboxLayout height="50%">
-				<template v-if="isLoading">
+				<template v-if="isLoading || !minimumLoadingTimeDone">
 					<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
 						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 					</StackLayout>
 				</template>
-				<template v-if="!isLoading">
-				<RadListView height="100%" class="m-t-10" ref="listView"
-							 :items="records">
-					<v-template>
-						<StackLayout orientation="horizontal">
-							<Label :text="item.impairment" width="60%" class="m-l-25 m-t-20 h3"></Label>
-							<Button text="x" class="btn btn-secondary btn-sm h2"
-									@tap="onTapRemoveRecord" color="#CCC"></Button>
-						</StackLayout>
-					</v-template>
-				</RadListView>
+				<template v-else>
+					<RadListView height="100%" class="m-t-10" ref="listView"
+								 :items="records">
+						<v-template>
+							<StackLayout orientation="horizontal">
+								<Label :text="item.impairment" width="60%" class="m-l-25 m-t-20 h3"></Label>
+								<Button text="x" class="btn btn-secondary btn-sm h2"
+										@tap="onTapRemoveRecord" color="#CCC"></Button>
+							</StackLayout>
+						</v-template>
+					</RadListView>
 				</template>
 			</FlexboxLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
@@ -60,6 +60,7 @@
 			return {
 				savingEnabled          : true,
 				isLoading              : false,
+				minimumLoadingTimeDone : false,
 				noRecords              : true,
 				questionDoneForToday   : false,
 				currentDate            : null,
@@ -79,6 +80,11 @@
 			onPageLoaded() {
 				this.items = LifeChart.getMoodItems();
 				this.isLoading = true;
+				this.minimumLoadingTimeDone = false;
+				setTimeout(() => {
+					this.minimumLoadingTimeDone = true;
+				}, 750);
+
 				this.selectedItemIndex = 4;
 				this.currentHint = this.items[this.selectedItemIndex].hint;
 				LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb, this.onRecordsLoaded);

@@ -6,24 +6,26 @@
 			</DockLayout>
 			<ScrollView left="0" top="45" height="70%" width="100%" id="scrollview" orientation="vertical">
 				<StackLayout>
-					<template v-if="isLoading">
+					<template v-if="isLoading || !minimumLoadingTimeDone">
 						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 					</template>
-					<template v-if="!isLoading && noRecords">
+					<template v-if="!isLoading && minimumLoadingTimeDone && noRecords">
 						<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
 					</template>
-					<RadListView height="100%" ref="listView"
-								 :items="records"
-								 @itemTap="onItemTap">
-						<v-template>
-							<StackLayout orientation="horizontal">
-								<Label :text="item.text" :id="item.valueFieldId" width="60%"
-									   class="m-l-25 m-t-20 h3"></Label>
-								<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
-										@tap="onTapRemoveRecord" color="#CCC"></Button>
-							</StackLayout>
-						</v-template>
-					</RadListView>
+					<template v-if="!isLoading && minimumLoadingTimeDone">
+						<RadListView height="100%" ref="listView"
+									 :items="records"
+									 @itemTap="onItemTap">
+							<v-template>
+								<StackLayout orientation="horizontal">
+									<Label :text="item.text" :id="item.valueFieldId" width="60%"
+										   class="m-l-25 m-t-20 h3"></Label>
+									<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
+											@tap="onTapRemoveRecord" color="#CCC"></Button>
+								</StackLayout>
+							</v-template>
+						</RadListView>
+					</template>
 					<TextField class="m-x-30 m-t-30 m-b-15" hint="Lebensereignis" :text='currentText'
 							   returnKeyType="done"
 							   @returnPress="onReturnPress($event)">
@@ -48,12 +50,13 @@
   		props: ['dateTodayDb'],
 		data: () => {
 			return {
-				records     : new ObservableArray([]),
-				recordCount : 0,
-				currentText : '',
-				isLoading   : false,
-				noRecords   : true,
-				itemList    : []
+				records               : new ObservableArray([]),
+				recordCount           : 0,
+				currentText           : '',
+				isLoading             : false,
+				minimumLoadingTimeDone: false,
+				noRecords             : true,
+				itemList              : []
 			}
 		},
 		methods: {
@@ -62,6 +65,10 @@
 			onShownModally(event) {
 				this.page = event.object.page;
 				this.isLoading = true;
+				this.minimumLoadingTimeDone = false;
+				setTimeout(() => {
+					this.minimumLoadingTimeDone = true;
+				}, 750);
 				LifeChart.getLifeEvents(this.dateTodayDb, this.onQueryEvent);
 			},
 			onQueryEvent(result) {

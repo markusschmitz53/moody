@@ -1,10 +1,18 @@
 <template>
 	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<StackLayout height="10%" class="m-t-30" orientation="horizontal" verticalAlignment="center">
-				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
+			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" verticalAlignment="center">
+				<Button @tap="onTapDayBackward" class="reduced-margin  m-b-30" width="30" height="36">
+					<FormattedString>
+						<Span class="fas button-icon-size reduced-margin" color="#CCC" text.decode="&#xf0d9;"></Span>
+					</FormattedString>
+				</Button>
 				<Label width="30%" class="h3 m-t-2 text-center" color="#CCC" :text="dateToday"></Label>
-				<Label @tap="onTapDayForward" width="35%" class="h3 text-left" color="#AAA" text=">"></Label>
+				<Button @tap="onTapDayForward" class="reduced-margin m-b-30" width="30" height="36">
+					<FormattedString>
+						<Span class="fas button-icon-size h2 reduced-margin" color="#CCC" text.decode="&#xf0da;"></Span>
+					</FormattedString>
+				</Button>
 			</StackLayout>
 			<StackLayout horizontalAlignment="left" orientation="horizontal">
 				<Label textAlignment="center" width="25%" class="h1 m-x-20" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
@@ -101,27 +109,31 @@
 			},
 			showDysphoricExplanation() {
 				this.$showModal(DysphoricMania, {
-						props: {
-							currentValue: this.isDysphoric
-						}
-					});
+					animated  : true,
+					props     : {
+						currentValue: this.isDysphoric
+					}
+				});
 			},
 			addComorbidSymptom() {
 				this.$showModal(ComborbidSymptomsComponent, {
-						props: {
-							dateTodayDb: this.dateTodayDb
-						}
-					});
+					animated: true,
+					props: {
+						dateTodayDb: this.dateTodayDb
+					}
+				});
 			},
 			addLifeEvent() {
 				this.$showModal(LifeEventsComponent, {
-						props: {
-							dateTodayDb: this.dateTodayDb
-						}
-					});
+					animated: true,
+					props   : {
+						dateTodayDb: this.dateTodayDb
+					}
+				});
 			},
 			addImpairmentRating() {
 				this.$navigateTo(Mood, {
+					animated: true,
 					frame: 'main',
 					props: {
 						dateToday           : this.dateToday,
@@ -382,4 +394,13 @@
     .hint {
         text-align: center;
     }
+
+	.reduced-margin {
+		margin: 0;
+		padding: 10;
+	}
+
+	.button-icon-size {
+		font-size: 16;
+	}
 </style>
