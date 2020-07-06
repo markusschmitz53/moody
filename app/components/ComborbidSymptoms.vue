@@ -79,7 +79,6 @@
 												   valueFieldId: 'value-' + this.symptomCount,
 												   buttonId    : this.symptomCount
 											   });
-							//this.addSymptomElement(records[i].symptom);
 						}
 					}
 				}
@@ -91,17 +90,8 @@
 				event.object.page.closeModal();
 			},
 			onTapRemoveSymptom(event) {
-				let page = event.object.page,
-						id = event.object.id,
-						selectedRecord = event.object.bindingContext,
-						item,
+				let selectedRecord = event.object.bindingContext,
 						symptomArrayLengthBeforeChange = this.symptoms.length;
-
-				if (!page.getViewById('value-' + id)) {
-					throw new Error("Couldn't find value field");
-				}
-
-				item = page.getViewById('value-' + id).text;
 
 				let promise = LifeChart.removeComorbidSymptom(selectedRecord.key);
 				promise.then((result) => {
@@ -159,29 +149,6 @@
 	// Start custom common variables
 	@import "~@nativescript/theme/scss/variables/blue";
 	// End custom common variables
-
-	.loadingImage {
-		height: 32;
-		width: 32;
-
-		animation-name: rotate;
-		animation-duration: 1s;
-		animation-iteration-count: infinite;
-		animation-timing-function: ease-in-out;
-		animation-fill-mode: backwards;
-	}
-
-	@keyframes rotate {
-		0% {
-			transform: scale(1.0);
-		}
-		50% {
-			transform: scale(0.85);
-		}
-		100% {
-			transform: scale(1.0);
-		}
-	}
 
 	.btn {
 		z-index: 0;
