@@ -1,11 +1,11 @@
 {
   "nativescript": {
     "id": "de.markusschmitz.Jane",
-    "tns-android": {
-      "version": "6.5.0"
-    },
     "tns-ios": {
       "version": "6.5.0"
+    },
+    "tns-android": {
+      "version": "6.5.1"
     }
   },
   "description": "Jane",

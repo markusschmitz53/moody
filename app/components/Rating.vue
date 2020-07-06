@@ -1,5 +1,5 @@
 <template>
-	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
+	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
 			<StackLayout height="10%" class="m-t-30" orientation="horizontal" verticalAlignment="center">
 				<Label @tap="onTapDayBackward" width="35%" class="h3 text-right" color="#AAA" text="<"></Label>
@@ -8,9 +8,9 @@
 			</StackLayout>
 			<StackLayout horizontalAlignment="left" orientation="horizontal">
 				<Label textAlignment="center" width="25%" class="h1 m-x-20" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart" :selectedIndex="sleepStartSelectedIndex"
+				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart" v-model="sleepStartSelectedIndex"
 							class="m-r-20"/>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" selectedIndex="18"
+				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" v-model="sleepEndSelectedIndex"
 							class=""/>
 			</StackLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
@@ -20,25 +20,30 @@
 			</FlexboxLayout>
 			<FlexboxLayout class="m-t-15" flexDirection="row" justifyContent="space-around" alignItems="center">
 				<StackLayout orientation="horizontal">
+					<StackLayout width="25%" class="m-l-20" orientation="horizontal">
+						<Image @tap="showDysphoricExplanation" src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far"
+							   width="24"></Image>
+						<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
+					</StackLayout>
 					<Button @tap="addLifeEvent" class="-rounded-sm" width="50">
 						<FormattedString>
 							<Span class="far h1 button-icon" color="#444" text.decode="&#xf073;"></Span>
 						</FormattedString>
 					</Button>
-					<Button @tap="addComorbidSymptom" class="-rounded-sm m-x-25" width="50">
+					<Button @tap="addComorbidSymptom" class="-rounded-sm m-x-10" width="50">
 						<FormattedString>
 							<Span class="far h1" color="#444" text.decode="&#xf0fe;"/>
 						</FormattedString>
 					</Button>
 					<Button @tap="addImpairmentRating" class="-rounded-sm" width="50">
 						<FormattedString>
-							<Span class="far h1 button-icon" color="#444" text.decode="&#xf14a;"></Span>
+							<Span class="far h1 button-icon" color="#444" text.decode="&#xf080;"></Span>
 						</FormattedString>
 					</Button>
 				</StackLayout>
 			</FlexboxLayout>
-			<FlexboxLayout width="100%">
-				<Button width="90%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
+			<FlexboxLayout class="m-x-10" width="100%">
+				<Button width="100%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
 				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index">
 					<FormattedString>
 						<Span class="far h1 button-icon" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
@@ -54,8 +59,11 @@
 	import LifeChartService from '~/LifeChart.service';
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
+	import DysphoricMania from "./hints/DysphoricMania";
 	import LifeEventsComponent from "./LifeEvents";
 	import Mood from './Mood';
+	import {Observable} from '@nativescript/core';
+	const fromObject = require("tns-core-modules/data/observable").fromObject;
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
@@ -72,12 +80,12 @@
 				currentDate            : null,
 				isDysphoricTintColor   : '#CCCCCC',
 				dayToday               : '',
-				selectedItemIndex      : 0,
 				sleepHours             : 0,
 				sleepStart             : 0,
 				sleepEnd               : 0,
 				sleepStartedSameDay    : false,
 				sleepStartSelectedIndex: 46,
+				sleepEndSelectedIndex  : 18,
 				currentHint            : '',
 				moodRating             : 50,
 				moodRatingLabel        : '50',
@@ -87,6 +95,17 @@
 			};
 		},
 		methods: {
+			onIsDysphoricChange(event) {
+				this.isDysphoric = event.value;
+				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCC';
+			},
+			showDysphoricExplanation() {
+				this.$showModal(DysphoricMania, {
+						props: {
+							currentValue: this.isDysphoric
+						}
+					});
+			},
 			addComorbidSymptom() {
 				this.$showModal(ComborbidSymptomsComponent, {
 						props: {
@@ -113,15 +132,13 @@
 			},
 			onTapDayForward() {
 				this.setDateToday(1);
-				this.currentRecordKey = null;
-				this.questionDoneForToday = false;
-				let ratingRecord = LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
+				this.resetRating();
+				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onTapDayBackward() {
 				this.setDateToday(-1);
-				this.currentRecordKey = null;
-				this.questionDoneForToday = false;
-				let ratingRecord = LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
+				this.resetRating();
+				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onSliderValueChange(event) {
 				let face = ':-|';
@@ -201,7 +218,38 @@
 					let records = result.children;
 
 					if (records && records.length) {
-						this.currentRecordKey = records[0].key;
+						let record = records[0];
+
+						let sleepStartIndex = record.sleepStartIndex;
+						let sleepEndIndex = record.sleepEndIndex;
+						this.currentRecordKey = record.key;
+						this.moodRating = record.mood;
+						this.sleepHours = record.sleepHours;
+						this.isDysphoric = record.dysphoric;
+
+						if (!record.key) {
+							throw new Error("Record is missing key");
+						}
+
+						if (!sleepStartIndex) {
+							this.sleepStartSelectedIndex = 46;
+						}
+						else {
+							this.sleepStartSelectedIndex = sleepStartIndex;
+						}
+
+						if (!sleepEndIndex) {
+							this.sleepEndSelectedIndex = 18;
+						}
+						else {
+							this.sleepEndSelectedIndex = sleepEndIndex;
+						}
+
+
+						this.sleepStartedSameDay = record.sleepStartedSameDay;
+	/*					this.sleepStart = this.timeItems[46];
+						this.sleepEnd = this.timeItems[18];*/
+
 						this.questionDoneForToday = true;
 						this.assessmentStatusColor = '#444';
 					}
@@ -209,29 +257,33 @@
 					console.error(result.error);
 				}
 			},
-			onPageLoaded() {
+			onPageLoaded(event) {
+				this.page = event.object.page;
+
 				this.setDateToday();
 				this.onSliderValueChange();
 
 				this.timeItems = LifeChart.getTimeItems();
-				this.sleepStart = this.timeItems[46];
-				this.sleepEnd = this.timeItems[18];
+				this.resetTimeSlept();
+				this.updateTimeSlept();
 
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
-
-				this.updateTimeSlept();
 			},
-			selectedIndexChanged() {
-				if (this.items[this.selectedItemIndex]) {
-					this.currentHint = this.items[this.selectedItemIndex].hint;
-				}
+			resetTimeSlept() {
+				this.sleepStart = this.timeItems[46];
+				this.sleepEnd = this.timeItems[18];
+				this.sleepStartSelectedIndex = 46;
+				this.sleepEndSelectedIndex = 18;
 			},
-			onTapReset() {
-				appSettings.remove('lastLifeChartDay');
+			resetRating() {
 				this.questionDoneForToday = false;
-				this.selectedItemIndex = 4;
 				this.savingEnabled = true;
-				this.sleepHours = 0;
+				this.isDysphoric = false;
+				this.moodRating = 50;
+				this.currentRecordKey = null;
+
+				this.resetTimeSlept();
+				this.updateTimeSlept();
 			},
 			onCheckButtonTap() {
 				dialogs.alert({
@@ -265,25 +317,33 @@
 				this.assessmentStatusColor = '#444';
 
 				Vibrator.vibrate(75);
-				appSettings.setString('lastLifeChartDay', this.dayToday);
 
 				let promise;
 
 				if (!this.currentRecordKey) {
 					promise = LifeChart.saveDailyAssessment(
 							{
-								sleepHours: this.sleepHours,
-								mood      : this.moodRating,
-								date      : this.dateTodayDb
+								sleepHours         : this.sleepHours,
+								sleepStartIndex    : this.sleepStartSelectedIndex,
+								sleepEndIndex      : this.sleepEndSelectedIndex,
+								sleepStartedSameDay: this.sleepStartedSameDay,
+								mood               : this.moodRating,
+								dysphoric          : this.isDysphoric,
+								date               : this.dateTodayDb
 							}
 					);
-				} else {
+				}
+				else {
 					promise = LifeChart.updateDailyAssessment(this.currentRecordKey,
-							{
-								sleepHours: this.sleepHours,
-								mood      : this.moodRating,
-								date      : this.dateTodayDb
-							}
+															  {
+																  sleepStartedSameDay: this.sleepStartedSameDay,
+																  sleepStartIndex    : this.sleepStartSelectedIndex,
+																  sleepEndIndex      : this.sleepEndSelectedIndex,
+																  sleepHours         : this.sleepHours,
+																  mood               : this.moodRating,
+																  dysphoric          : this.isDysphoric,
+																  date               : this.dateTodayDb
+															  }
 					);
 				}
 
@@ -293,7 +353,8 @@
 					}
 					let message = 'Tag: ' + this.dateTodayDb + "\n" +
 								  'Schlaf Stunden: ' + this.sleepHours + "\n" +
-								  'Stimmung: ' + this.moodRating;
+								  'Stimmung: ' + this.moodRating + "\n" +
+								  'Dysphorisch: ' + this.isDysphoric;
 					dialogs.alert({
 									  title       : "",
 									  message     : message,

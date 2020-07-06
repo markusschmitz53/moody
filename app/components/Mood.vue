@@ -1,21 +1,34 @@
 <template>
-	<Page marginBottom="2%" actionBarHidden="true" @loaded="onPageLoaded" @navigatingTo="onPageLoaded">
+	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<template v-if="!questionDoneForToday">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<FlexboxLayout height="25%"></FlexboxLayout>
+			<FlexboxLayout height="50%">
+				<template v-if="isLoading">
+					<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
+						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
+					</StackLayout>
+				</template>
+				<template v-if="!isLoading">
+				<RadListView height="100%" class="m-t-10" ref="listView"
+							 :items="records">
+					<v-template>
+						<StackLayout orientation="horizontal">
+							<Label :text="item.impairment" width="60%" class="m-l-25 m-t-20 h3"></Label>
+							<Button text="x" class="btn btn-secondary btn-sm h2"
+									@tap="onTapRemoveRecord" color="#CCC"></Button>
+						</StackLayout>
+					</v-template>
+				</RadListView>
+				</template>
+			</FlexboxLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15" :text="currentHint"/>
 				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
 			</FlexboxLayout>
-			<FlexboxLayout class="m-b-20" flexDirection="row" justifyContent="space-around" alignItems="center">
-				<StackLayout class="m-x-10" orientation="horizontal">
-					<StackLayout width="30%" class="m-l-20 reduced-margin" orientation="horizontal">
-						<Image src.decode="font://&#xf556;" :tintColor="isDysphoricTintColor" class="far m-x-5"
-							   width="32"></Image>
-						<Switch :checked="isDysphoric" @checkedChange="onIsDysphoricChange"></Switch>
-					</StackLayout>
+			<FlexboxLayout class="m-x-10" flexDirection="row" justifyContent="space-around" alignItems="center">
+				<StackLayout orientation="horizontal">
 					<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg reduced-margin"></Button>
-					<Button width="40%" text="fertig" :isEnabled="savingEnabled" @tap="onTapDone"
+					<Button width="70%" text="hinzufügen" :isEnabled="savingEnabled" @tap="onTapDone"
 							class="-primary -rounded-lg reduced-margin"></Button>
 				</StackLayout>
 			</FlexboxLayout>
@@ -36,19 +49,20 @@
 	import * as appSettings from "tns-core-modules/application-settings";
 	import LifeChartService from "../LifeChart.service";
 	import VibratorService from "../Vibrator.service";
+	import { ObservableArray } from 'tns-core-modules/data/observable-array';
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
 
 	export default {
-    	props: ["dateToday", "dateTodayDb", "currentHourAndMinute"],
-		data   : () => {
+		props: ["dateToday", "dateTodayDb", "currentHourAndMinute"],
+		data : () => {
 			return {
 				savingEnabled          : true,
-				isDysphoric            : false,
+				isLoading              : false,
+				noRecords              : true,
 				questionDoneForToday   : false,
 				currentDate            : null,
-				isDysphoricTintColor   : '#CCCCCC',
 				selectedItemIndex      : 0,
 				sleepHours             : 0,
 				sleepStart             : 0,
@@ -57,19 +71,57 @@
 				sleepStartSelectedIndex: 46,
 				currentHint            : '',
 				items                  : [],
-				timeItems              : null
+				timeItems              : null,
+				records                : new ObservableArray([])
 			};
 		},
 		methods: {
-			onIsDysphoricChange(event) {
-				this.isDysphoric = event.value;
-				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCC';
-			},
 			onPageLoaded() {
 				this.items = LifeChart.getMoodItems();
-
+				this.isLoading = true;
 				this.selectedItemIndex = 4;
 				this.currentHint = this.items[this.selectedItemIndex].hint;
+				LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb, this.onRecordsLoaded);
+			},
+			onRecordsLoaded(result) {
+				this.isLoading = false;
+				if (!result.error) {
+					let records = result.children;
+
+					if (records && records.length) {
+						this.noSymptoms = false;
+						for (let i = 0; i < records.length; i++) {
+							this.records.push({
+												  impairment: records[i].impairment,
+												  key       : records[i].key
+											  });
+						}
+					}
+				}
+			},
+			onTapRemoveRecord(event) {
+				let selectedRecord = event.object.bindingContext,
+						recordArrayLengthBeforeChange = this.records.length;
+
+				let promise = LifeChart.removeFunctionalImpairment(selectedRecord.key);
+				promise.then(() => {
+					this.records.splice(this.records.indexOf(selectedRecord), 1);
+					if (recordArrayLengthBeforeChange === this.records.length) {
+						dialogs.alert({
+										  title       : "",
+										  message     : "da ist was schief gegangen",
+										  okButtonText: "oopsie"
+									  });
+						return;
+					}
+					this.noRecords = (this.records.length === 0);
+				}, (error) => {
+					dialogs.alert({
+									  title       : "Fehler!",
+									  message     : "hat nicht geklappt",
+									  okButtonText: "shitte"
+								  });
+				});
 			},
 			selectedIndexChanged() {
 				if (this.items[this.selectedItemIndex]) {
@@ -78,7 +130,6 @@
 			},
 			onTapReset() {
 				this.selectedItemIndex = 4;
-				this.isDysphoric = false;
 			},
 			onTapBack() {
 				this.$navigateBack({
@@ -89,7 +140,6 @@
 				let promise = LifeChart.saveFunctionalImpairment(
 						{
 							impairment: this.items[this.selectedItemIndex].name,
-							dysphoric : this.isDysphoric,
 							date      : this.dateTodayDb,
 							time      : this.currentHourAndMinute
 						}
@@ -97,8 +147,7 @@
 
 				promise.then((result) => {
 					let message = 'Datum: ' + this.dateToday + "\n" +
-								  'Einschränkung: ' + this.items[this.selectedItemIndex].name + "\n" +
-								  'Dysphorisch/Gereizt: ' + this.isDysphoric;
+								  'Einschränkung: ' + this.items[this.selectedItemIndex].name;
 					Vibrator.vibrate(75);
 					dialogs.alert({
 									  title       : "",
