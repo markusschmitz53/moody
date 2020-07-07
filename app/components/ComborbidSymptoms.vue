@@ -1,38 +1,38 @@
 <template>
 	<Page @load="onPageLoaded" @shownModally="onShownModally">
-		<AbsoluteLayout orientation="vertical" backgroundColor="white">
-			<DockLayout left="0" top="0" stretchLastChild="false" height="48" width="100%">
-				<Button dock="right" class="far btn negativeMargin h2" width="64" color="#444" text.decode="&#xf14a;" @tap="onTapDone"></Button>
-			</DockLayout>
-			<ScrollView left="0" top="45" height="70%" width="100%" id="scrollview" orientation="vertical">
-				<StackLayout>
-					<template v-if="isLoading || !minimumLoadingTimeDone">
-						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
-					</template>
-					<template v-if="!isLoading && minimumLoadingTimeDone && noSymptoms">
-						<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Symptome</Label>
-					</template>
-					<template v-if="!isLoading && minimumLoadingTimeDone">
-						<RadListView height="100%" ref="listView"
-									 :items="symptoms"
-									 @itemTap="onItemTap">
-							<v-template>
-								<StackLayout orientation="horizontal">
-									<Label :text="item.text" :id="item.valueFieldId" width="60%"
-										   class="m-l-25 m-t-20 h3"></Label>
-									<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
-											@tap="onTapRemoveSymptom" color="#CCC"></Button>
-								</StackLayout>
-							</v-template>
-						</RadListView>
-					</template>
-					<TextField class="m-x-30 m-t-30 m-b-15" hint="Komorbides Symptom" :text='currentSymptomText'
-							   returnKeyType="done"
-							   @returnPress="onReturnPress($event)">
-					</TextField>
-				</StackLayout>
-			</ScrollView>
-		</AbsoluteLayout>
+		<StackLayout backgroundColor="#FFFFFF" orientation="vertical">
+			<StackLayout orientation="vertical">
+				<DockLayout stretchLastChild="false" height="48" width="100%">
+					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
+							text.decode="&#xf14a;" @tap="onTapDone"></Button>
+				</DockLayout>
+				<ScrollView class="scrollview" id="scrollview" orientation="vertical">
+					<StackLayout margin="2">
+						<template v-if="isLoading || !minimumLoadingTimeDone">
+							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
+						</template>
+						<template v-if="!isLoading && minimumLoadingTimeDone && noSymptoms">
+							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Symptome</Label>
+						</template>
+						<template v-if="!isLoading && minimumLoadingTimeDone">
+							<RadListView class="listview" ref="listView" :items="symptoms" @itemTap="onItemTap">
+								<v-template>
+									<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
+										<Label :text="item.text" :id="item.valueFieldId" width="80%"
+											   class="m-l-20 m-t-10 h3"></Label>
+										<Button :id="item.buttonId" text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
+												@tap="onTapRemoveSymptom" color="#CCC"></Button>
+									</StackLayout>
+								</v-template>
+							</RadListView>
+						</template>
+					</StackLayout>
+				</ScrollView>
+			</StackLayout>
+			<TextField class="m-x-30 m-b-15" height="35" hint="Komorbides Symptom" :text='currentSymptomText'
+					   returnKeyType="done" @returnPress="onReturnPress($event)">
+			</TextField>
+		</StackLayout>
 	</Page>
 </template>
 
@@ -80,7 +80,7 @@
 						this.noSymptoms = false;
 						for (let i = 0; i < records.length; i++) {
 							++this.symptomCount;
-							this.symptoms.push({
+							this.symptoms.unshift({
 												   text        : records[i].symptom,
 												   key         : records[i].key,
 												   valueFieldId: 'value-' + this.symptomCount,
@@ -136,7 +136,7 @@
 				promise.then((result) => {
 					this.noSymptoms = false;
 					++this.symptomCount;
-					this.symptoms.push({
+					this.symptoms.unshift({
 										   text        : text,
 										   key         : result.key,
 										   valueFieldId: 'value-' + this.symptomCount,
@@ -161,10 +161,35 @@
 
 	.btn {
 		z-index: 0;
+		background-color: transparent;
 	}
 
-	.negativeMargin {
-		margin-right: -15px;
-		margin-top: -5px;
+	.list-item {
+		margin: 5 20;
+		padding: 0;
+		height: 50%;
+		background-color: #FAFAFA;
+	}
+
+	.list-item-button {
+		margin: 0;
+		padding: 0;
+		z-index: 0;
+		width: 50;
+		color: #CCC;
+		background-color: transparent;
+	}
+
+	.listview {
+		padding-top: 10;
+		padding-bottom: 10;
+	}
+
+	.scrollview {
+		border-top-width: 1;
+		border-bottom-width: 1;
+		border-color: #FAFAFA;
+		width: 100%;
+		height: 230;
 	}
 </style>

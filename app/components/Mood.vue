@@ -97,7 +97,7 @@
 					if (records && records.length) {
 						this.noSymptoms = false;
 						for (let i = 0; i < records.length; i++) {
-							this.records.push({
+							this.records.unshift({
 												  impairment: records[i].impairment,
 												  key       : records[i].key
 											  });

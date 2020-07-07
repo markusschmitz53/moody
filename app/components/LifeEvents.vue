@@ -1,6 +1,6 @@
 <template>
 	<Page @load="onPageLoaded" @shownModally="onShownModally">
-		<StackLayout backgroundColor="#FFFFFF" orientation="vertical" >
+		<StackLayout backgroundColor="#FFFFFF" orientation="vertical">
 			<StackLayout orientation="vertical">
 				<DockLayout stretchLastChild="false" height="48" width="100%">
 					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
@@ -15,9 +15,7 @@
 							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone">
-							<RadListView class="listview" ref="listView"
-										 :items="records"
-										 @itemTap="onItemTap">
+							<RadListView class="listview" ref="listView" :items="records" @itemTap="onItemTap">
 								<v-template>
 									<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
 										<Label :text="item.text" :id="item.valueFieldId" width="80%"
@@ -31,9 +29,8 @@
 					</StackLayout>
 				</ScrollView>
 			</StackLayout>
-			<TextField class="m-x-30 m-b-10" height="35" hint="Lebensereignis" :text='currentText'
-					   returnKeyType="done"
-					   @returnPress="onReturnPress($event)">
+			<TextField class="m-x-30 m-b-15" height="35" hint="Lebensereignis" :text='currentText'
+					   returnKeyType="done" @returnPress="onReturnPress($event)">
 			</TextField>
 		</StackLayout>
 	</Page>
@@ -83,7 +80,7 @@
 						this.noRecords = false;
 						for (let i = 0; i < records.length; i++) {
 							++this.recordCount;
-							this.records.push({
+							this.records.unshift({
 												   text        : records[i].event,
 												   key         : records[i].key,
 												   valueFieldId: 'value-' + this.recordCount,
@@ -150,7 +147,7 @@
 				promise.then((result) => {
 					this.noRecords = false;
 					++this.recordCount;
-					this.records.push({
+					this.records.unshift({
 										   text        : text,
 										   key         : result.key,
 										   valueFieldId: 'value-' + this.recordCount,
@@ -173,37 +170,9 @@
 	@import "~@nativescript/theme/scss/variables/blue";
 	// End custom common variables
 
-	.loadingImage {
-		height: 32;
-		width: 32;
-
-		animation-name: rotate;
-		animation-duration: 1s;
-		animation-iteration-count: infinite;
-		animation-timing-function: ease-in-out;
-		animation-fill-mode: backwards;
-	}
-
-	@keyframes rotate {
-		0% {
-			transform: scale(1.0);
-		}
-		50% {
-			transform: scale(0.85);
-		}
-		100% {
-			transform: scale(1.0);
-		}
-	}
-
 	.btn {
 		z-index: 0;
 		background-color: transparent;
-	}
-
-	.negativeMargin {
-		margin-right: -15px;
-		margin-top: -5px;
 	}
 
 	.list-item {

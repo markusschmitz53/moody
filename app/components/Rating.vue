@@ -114,7 +114,7 @@
 			},
 			onIsDysphoricChange(event) {
 				this.isDysphoric = event.value;
-				this.isDysphoricTintColor = this.isDysphoric ? '#FF0000' : '#CCCCCC';
+				this.isDysphoricTintColor = this.isDysphoric ? '#FF4400' : '#CCCCCC';
 			},
 			showDysphoricExplanation() {
 				this.$showModal(DysphoricMania, {
@@ -171,9 +171,9 @@
 					face = ':-(';
 				else if (this.moodRating < 55)
 					face = ':-|';
-				else if (this.moodRating > 55)
+				else if (this.moodRating > 55 && this.moodRating < 75)
 					face = ':-)';
-				else if (this.moodRating > 75)
+				else if (this.moodRating >= 75)
 					face = ':-D'
 
 				this.moodRatingLabel = face;
