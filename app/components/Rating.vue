@@ -1,7 +1,7 @@
 <template>
 	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" verticalAlignment="center">
+			<StackLayout height="10%" class="m-t-30" orientation="horizontal" @swipe="onSwipe" horizontalAlignment="center" verticalAlignment="center">
 				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding  m-b-30" width="30" height="36">
 					<FormattedString>
 						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC" text.decode="&#xf0d9;"></Span>

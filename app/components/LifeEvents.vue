@@ -1,13 +1,12 @@
 <template>
 	<Page @load="onPageLoaded" @shownModally="onShownModally">
-		<DockLayout height="400">
-			<StackLayout dock="top" orientation="vertical" backgroundColor="white">
+		<StackLayout backgroundColor="#FFFFFF" orientation="vertical" >
+			<StackLayout orientation="vertical">
 				<DockLayout stretchLastChild="false" height="48" width="100%">
 					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
 							text.decode="&#xf14a;" @tap="onTapDone"></Button>
 				</DockLayout>
-				<ScrollView borderWidth="1" borderColor="#F3F3F3" width="100%" height="230" id="scrollview"
-							orientation="vertical">
+				<ScrollView class="scrollview" id="scrollview" orientation="vertical">
 					<StackLayout margin="2">
 						<template v-if="isLoading || !minimumLoadingTimeDone">
 							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
@@ -16,15 +15,15 @@
 							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone">
-							<RadListView height="100%" ref="listView"
+							<RadListView class="listview" ref="listView"
 										 :items="records"
 										 @itemTap="onItemTap">
 								<v-template>
-									<StackLayout orientation="horizontal">
-										<Label :text="item.text" :id="item.valueFieldId" width="60%"
-											   class="m-l-25 m-t-10 h3"></Label>
-										<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
-												@tap="onTapRemoveRecord" color="#CCC"></Button>
+									<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
+										<Label :text="item.text" :id="item.valueFieldId" width="80%"
+											   class="m-l-20 m-t-10 h3"></Label>
+										<Button :id="item.buttonId" text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
+												@tap="onTapRemoveRecord"></Button>
 									</StackLayout>
 								</v-template>
 							</RadListView>
@@ -32,11 +31,11 @@
 					</StackLayout>
 				</ScrollView>
 			</StackLayout>
-			<TextField dock="bottom" class="m-x-30" height="40" hint="Lebensereignis" :text='currentText'
+			<TextField class="m-x-30 m-b-10" height="35" hint="Lebensereignis" :text='currentText'
 					   returnKeyType="done"
 					   @returnPress="onReturnPress($event)">
 			</TextField>
-		</DockLayout>
+		</StackLayout>
 	</Page>
 </template>
 
@@ -136,6 +135,10 @@
 			onReturnPress(event) {
 				let text = event.object.text;
 
+				if (!text || text === '') {
+					return;
+				}
+
 				this.currentText = '';
 				event.object.text = '';
 
@@ -195,10 +198,40 @@
 
 	.btn {
 		z-index: 0;
+		background-color: transparent;
 	}
 
 	.negativeMargin {
 		margin-right: -15px;
 		margin-top: -5px;
+	}
+
+	.list-item {
+		margin: 5 20;
+		padding: 0;
+		height: 50%;
+		background-color: #FAFAFA;
+	}
+
+	.list-item-button {
+		margin: 0;
+		padding: 0;
+		z-index: 0;
+		width: 50;
+		color: #CCC;
+		background-color: transparent;
+	}
+
+	.listview {
+		padding-top: 10;
+		padding-bottom: 10;
+	}
+
+	.scrollview {
+		border-top-width: 1;
+		border-bottom-width: 1;
+		border-color: #FAFAFA;
+		width: 100%;
+		height: 230;
 	}
 </style>
