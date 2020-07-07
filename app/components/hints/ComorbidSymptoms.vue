@@ -1,9 +1,9 @@
 <template>
 	<Page @shownModally="onShownModally">
 		<StackLayout orientation="vertical" class="p-20" width="100%">
-			<Label class="h3" text="Gereizte Manie"></Label>
-			<Label textWrap="true" class="p m-t-15" text="Eine gereizte oder dysphorische (Hypo) Manie zeichnet sich durch gesteigerten Antrieb und gedrückte Stimmung mit Wut oder Aggressivität aus."></Label>
-			<Label textWrap="true" class="p m-t-20" text="Sie tritt zeitweise bei einem von vier Menschen mit bipolarer Störung auf."></Label>
+			<Label class="h3" text="Komorbide Symptome"></Label>
+			<Label textWrap="true" class="p m-t-15">Von Komorbidität spricht man, wenn eine Begleiterkrankung vorhanden ist oder gleichzeitig mehrere Erkrankungen auftreten.</Label>
+			<Label textWrap="true" class="p m-t-20">Einige Beispiele sind Alkoholmissbrauch, Drogenmissbrauch, Essstörungen, Angsterkrankungen und Zwangsstörungen.</Label>
 		</StackLayout>
 	</Page>
 </template>

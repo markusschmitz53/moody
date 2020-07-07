@@ -12,7 +12,7 @@
 							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone && noRecords">
-							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
+							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Was ist passiert?</Label>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone">
 							<RadListView class="listview" ref="listView" :items="records" @itemTap="onItemTap">

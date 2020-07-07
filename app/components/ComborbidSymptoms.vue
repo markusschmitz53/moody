@@ -1,8 +1,10 @@
 <template>
-	<Page @load="onPageLoaded" @shownModally="onShownModally">
+	<Page @shownModally="onShownModally">
 		<StackLayout backgroundColor="#FFFFFF" orientation="vertical">
 			<StackLayout orientation="vertical">
 				<DockLayout stretchLastChild="false" height="48" width="100%">
+					<Button dock="left" class="far btn h2" margin="0" width="64" color="#CCC"
+							text.decode="&#xf059;" @tap="showExplanation"></Button>
 					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
 							text.decode="&#xf14a;" @tap="onTapDone"></Button>
 				</DockLayout>
@@ -12,7 +14,7 @@
 							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone && noSymptoms">
-							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Symptome</Label>
+							<Label class="m-t-30 text-center hint" color="#CCC">Welches Symptom hattest du?</Label>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone">
 							<RadListView class="listview" ref="listView" :items="symptoms" @itemTap="onItemTap">
@@ -43,6 +45,7 @@
 	import * as dialogs from 'tns-core-modules/ui/dialogs';
 	import LifeChartService from '~/LifeChart.service';
 	import { ObservableArray } from 'tns-core-modules/data/observable-array';
+	import ComorbidSymptoms from '~/components/hints/ComorbidSymptoms';
 
 	const LifeChart = new LifeChartService();
 
@@ -60,8 +63,6 @@
 			}
 		},
 		methods: {
-			onPageLoaded(event) {
-			},
 			onShownModally(event) {
 				this.page = event.object.page;
 				this.isLoading = true;
@@ -122,8 +123,17 @@
 								  });
 				});
 			},
+			showExplanation() {
+				this.$showModal(ComorbidSymptoms, {
+					animated  : true
+				});
+			},
 			onReturnPress(event) {
 				let text = event.object.text;
+
+				if (!text || text === '') {
+					return;
+				}
 
 				this.currentSymptomText = '';
 				event.object.text = '';

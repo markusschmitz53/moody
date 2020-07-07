@@ -1,30 +1,40 @@
 <template>
 	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
-		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<StackLayout height="10%" class="m-t-30" orientation="horizontal" @swipe="onSwipe" horizontalAlignment="center" verticalAlignment="center">
-				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding  m-b-30" width="30" height="36">
+		<FlexboxLayout flexDirection="column" class="m-t-20" justifyContent="space-between">
+			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" @swipe="onSwipe" >
+				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
 						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC" text.decode="&#xf0d9;"></Span>
 					</FormattedString>
 				</Button>
-				<Label width="30%" class="h3 m-t-4 text-center" color="#CCC" :text="dateToday"></Label>
+				<Label width="30%" class="dateLabel text-center" :text="dateToday"></Label>
 				<Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
 						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC" text.decode="&#xf0da;"></Span>
 					</FormattedString>
 				</Button>
 			</StackLayout>
-			<StackLayout horizontalAlignment="left" orientation="horizontal">
-				<Label textAlignment="center" width="25%" class="h1 m-x-20" color="#CCC" verticalAlignment="center" :text="sleepHours"></Label>
+			<StackLayout horizontalAlignment="left" orientation="horizontal" class="">
+				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-start">
+					<Label @tap="showSleepHoursExplanation" textAlignment="center" width="25%" class="h1 m-x-20" :color="sleepHoursColor" verticalAlignment="center"
+						   :text="sleepHours"></Label>
+					<Button @tap="showSleepHoursExplanation" class="button-z-index">
+						<FormattedString>
+							<Span class="fas" :color="sleepHoursColor" fontSize="20" text.decode="&#xf236;"></Span>
+						</FormattedString>
+					</Button>
+				</FlexboxLayout>
 				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart" v-model="sleepStartSelectedIndex"
 							class="m-r-20"/>
 				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" v-model="sleepEndSelectedIndex"
 							class=""/>
 			</StackLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
-				<Label textWrap="true" color="#CCC" textAlignment="center" width="20%" class="h1 m-l-20" :text="moodRatingLabel"/>
-				<Label textWrap="true" color="#CCC" textAlignment="center" class="hint" :text="moodRating"/>
-				<Slider width="60%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)">				</Slider>
+				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-center">
+					<Label @tap="showMoodRatingExplanation" textWrap="true" :color="moodRatingColor" textAlignment="center" width="25%" class="h1 m-x-20" :text="moodRatingLabel"/>
+					<Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center" class="hint m-t-5" :text="moodRating"/>
+				</FlexboxLayout>
+				<Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)"></Slider>
 			</FlexboxLayout>
 			<StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
 				<StackLayout class="m-r-10" orientation="horizontal">
@@ -70,6 +80,8 @@
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
 	import DysphoricMania from "./hints/DysphoricMania";
+	import SleepHours from "./hints/SleepHours";
+	import MoodRating from "./hints/MoodRating";
 	import LifeEventsComponent from "./LifeEvents";
 	import Mood from './Mood';
 	import {Observable} from '@nativescript/core';
@@ -81,10 +93,13 @@
 	export default {
 		data: () => {
 			return {
+				oneSuccessfulLoadDone  : false,
 				savingEnabled          : true,
 				currentRecordKey       : null,
 				isDysphoric            : false,
 				questionDoneForToday   : false,
+				sleepHoursColor    : '#CCC',
+				moodRatingColor    : '#CCC',
 				dateToday              : '',
 				currentHourAndMinute   : '',
 				currentDate            : null,
@@ -122,6 +137,16 @@
 					props     : {
 						currentValue: this.isDysphoric
 					}
+				});
+			},
+			showSleepHoursExplanation() {
+				this.$showModal(SleepHours, {
+					animated  : true
+				});
+			},
+			showMoodRatingExplanation() {
+				this.$showModal(MoodRating, {
+					animated  : true
 				});
 			},
 			addComorbidSymptom() {
@@ -162,6 +187,12 @@
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onSliderValueChange(event) {
+				this.moodRatingColor = '#00CAAB';
+
+				setTimeout(() => {
+					this.moodRatingColor = '#CCC';
+				}, 1250);
+
 				let face = ':-|';
 				if (this.moodRating < 5)
 					face = ':\'-C';
@@ -196,6 +227,12 @@
 				this.updateTimeSlept();
 			},
 			updateTimeSlept() {
+				this.sleepHoursColor = '#00CAAB';
+
+				setTimeout(() => {
+					this.sleepHoursColor = '#CCC';
+				}, 1250);
+
 				let sleepStartTimeParts = this.sleepStart.split(':');
 				let sleepEndTimeParts = this.sleepEnd.split(':');
 
@@ -266,19 +303,22 @@
 							this.sleepEndSelectedIndex = sleepEndIndex;
 						}
 
-
 						this.sleepStartedSameDay = record.sleepStartedSameDay;
-	/*					this.sleepStart = this.timeItems[46];
-						this.sleepEnd = this.timeItems[18];*/
 
 						this.questionDoneForToday = true;
 						this.assessmentStatusColor = '#444';
+
+						this.oneSuccessfulLoadDone = true;
 					}
 				} else {
 					console.error(result.error);
 				}
 			},
 			onPageLoaded(event) {
+				if (this.oneSuccessfulLoadDone) {
+					return;
+				}
+
 				this.page = event.object.page;
 
 				this.setDateToday();
@@ -430,4 +470,14 @@
 		font-size: 25;
 	}
 
+	.dateLabel {
+		color: #444444;
+		font-size: 15;
+		margin-top: 3;
+	}
+
+
+	.slide {
+		margin-left: -5;
+	}
 </style>

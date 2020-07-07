@@ -2,13 +2,13 @@
     <BottomNavigation>
         <TabStrip>
             <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf274;" class="far t-36"></Image>
+                <Image src.decode="font://&#xf274;" class="far"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf550;" class="fas t-36"></Image>
+                <Image src.decode="font://&#xf550;" class="fas"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf21e;" class="fas t-36"></Image>
+                <Image src.decode="font://&#xf21e;" class="fas"></Image>
             </TabStripItem>
             <!--
             <TabStripItem class="n avigation__item">

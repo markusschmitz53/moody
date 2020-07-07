@@ -2,35 +2,41 @@
 	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<template v-if="!questionDoneForToday">
 		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<FlexboxLayout height="50%">
+			<FlexboxLayout height="50%" class="scrollview m-t-15">
 				<template v-if="isLoading || !minimumLoadingTimeDone">
 					<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
 						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 					</StackLayout>
 				</template>
 				<template v-else>
-					<RadListView height="100%" class="m-t-10" ref="listView"
-								 :items="records">
-						<v-template>
-							<StackLayout orientation="horizontal">
-								<Label :text="item.impairment" width="60%" class="m-l-25 m-t-20 h3"></Label>
-								<Button text="x" class="btn btn-secondary btn-sm h2"
-										@tap="onTapRemoveRecord" color="#CCC"></Button>
-							</StackLayout>
-						</v-template>
-					</RadListView>
+					<template v-if="noRecords">
+						<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
+							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Wie schwer fielen dir Aktivitäten?</Label>
+						</StackLayout>
+					</template>
+					<template v-else>
+						<RadListView height="100%" class="m-t-10" ref="listView"
+									 :items="records">
+							<v-template>
+								<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
+									<Label :text="item.impairment" width="80%" class="m-l-20 m-t-10 h3"></Label>
+									<Button text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
+											@tap="onTapRemoveRecord" color="#CCC"></Button>
+								</StackLayout>
+							</v-template>
+						</RadListView>
+					</template>
 				</template>
 			</FlexboxLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15" :text="currentHint"/>
 				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
 			</FlexboxLayout>
-			<FlexboxLayout class="m-x-10" flexDirection="row" justifyContent="space-around" alignItems="center">
-				<StackLayout orientation="horizontal">
-					<Button text="abbrechen" @tap="onTapBack" class="-outline -rounded-lg reduced-margin"></Button>
-					<Button width="70%" text="hinzufügen" :isEnabled="savingEnabled" @tap="onTapDone"
-							class="-primary -rounded-lg reduced-margin"></Button>
-				</StackLayout>
+			<FlexboxLayout flexDirection="row" justifyContent="center" alignItems="center">
+				<Button class="far -rounded-lg reduced-margin fontsize" width="10" color="#444"
+						text.decode="&#xf14a;" @tap="onTapBack"></Button>
+				<Button width="70%" text="hinzufügen" :isEnabled="savingEnabled" @tap="onTapDone"
+						class="-primary -rounded-lg reduced-margin"></Button>
 			</FlexboxLayout>
         </FlexboxLayout>
 		</template>
@@ -95,9 +101,9 @@
 					let records = result.children;
 
 					if (records && records.length) {
-						this.noSymptoms = false;
+						this.noRecords = false;
 						for (let i = 0; i < records.length; i++) {
-							this.records.unshift({
+							this.records.push({
 												  impairment: records[i].impairment,
 												  key       : records[i].key
 											  });
@@ -187,7 +193,35 @@
     }
 
 	.reduced-margin {
-		margin-right: 10px;
-		margin-left: 10px;
+		margin-right: 5;
+		margin-left: 5;
+	}
+
+	.list-item {
+		margin: 5 20;
+		padding: 0;
+		height: 50%;
+		background-color: #FAFAFA;
+	}
+
+	.list-item-button {
+		margin: 0;
+		padding: 0;
+		z-index: 0;
+		width: 50;
+		color: #CCC;
+		background-color: transparent;
+	}
+
+	.scrollview {
+		padding-top: 5;
+		padding-bottom: 5;
+		border-bottom-width: 1;
+		border-color: #FAFAFA;
+	}
+
+
+	.fontsize {
+		font-size: 20;
 	}
 </style>
