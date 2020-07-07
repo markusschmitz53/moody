@@ -1,38 +1,42 @@
 <template>
 	<Page @load="onPageLoaded" @shownModally="onShownModally">
-		<AbsoluteLayout orientation="vertical" backgroundColor="white">
-			<DockLayout left="0" top="0" stretchLastChild="false" height="48" width="100%">
-				<Button dock="right" class="far btn negativeMargin h2" width="64" color="#444" text.decode="&#xf14a;" @tap="onTapDone"></Button>
-			</DockLayout>
-			<ScrollView left="0" top="45" height="70%" width="100%" id="scrollview" orientation="vertical">
-				<StackLayout>
-					<template v-if="isLoading || !minimumLoadingTimeDone">
-						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
-					</template>
-					<template v-if="!isLoading && minimumLoadingTimeDone && noRecords">
-						<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
-					</template>
-					<template v-if="!isLoading && minimumLoadingTimeDone">
-						<RadListView height="100%" ref="listView"
-									 :items="records"
-									 @itemTap="onItemTap">
-							<v-template>
-								<StackLayout orientation="horizontal">
-									<Label :text="item.text" :id="item.valueFieldId" width="60%"
-										   class="m-l-25 m-t-20 h3"></Label>
-									<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
-											@tap="onTapRemoveRecord" color="#CCC"></Button>
-								</StackLayout>
-							</v-template>
-						</RadListView>
-					</template>
-					<TextField class="m-x-30 m-t-30 m-b-15" hint="Lebensereignis" :text='currentText'
-							   returnKeyType="done"
-							   @returnPress="onReturnPress($event)">
-					</TextField>
-				</StackLayout>
-			</ScrollView>
-		</AbsoluteLayout>
+		<DockLayout height="400">
+			<StackLayout dock="top" orientation="vertical" backgroundColor="white">
+				<DockLayout stretchLastChild="false" height="48" width="100%">
+					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
+							text.decode="&#xf14a;" @tap="onTapDone"></Button>
+				</DockLayout>
+				<ScrollView borderWidth="1" borderColor="#F3F3F3" width="100%" height="230" id="scrollview"
+							orientation="vertical">
+					<StackLayout margin="2">
+						<template v-if="isLoading || !minimumLoadingTimeDone">
+							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
+						</template>
+						<template v-if="!isLoading && minimumLoadingTimeDone && noRecords">
+							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Keine Ereignisse</Label>
+						</template>
+						<template v-if="!isLoading && minimumLoadingTimeDone">
+							<RadListView height="100%" ref="listView"
+										 :items="records"
+										 @itemTap="onItemTap">
+								<v-template>
+									<StackLayout orientation="horizontal">
+										<Label :text="item.text" :id="item.valueFieldId" width="60%"
+											   class="m-l-25 m-t-10 h3"></Label>
+										<Button :id="item.buttonId" text="x" class="btn btn-secondary btn-sm h2"
+												@tap="onTapRemoveRecord" color="#CCC"></Button>
+									</StackLayout>
+								</v-template>
+							</RadListView>
+						</template>
+					</StackLayout>
+				</ScrollView>
+			</StackLayout>
+			<TextField dock="bottom" class="m-x-30" height="40" hint="Lebensereignis" :text='currentText'
+					   returnKeyType="done"
+					   @returnPress="onReturnPress($event)">
+			</TextField>
+		</DockLayout>
 	</Page>
 </template>
 

@@ -173,6 +173,12 @@ export default class LifeChartService {
         return firebase.update(path + _key, _object);
     }
 
+    removeDailyAssessment(key) {
+        let data = {};
+        data[key] = null;
+        return firebase.update(this.rootPathChart + 'dailyAssessments/', data);
+    }
+
     saveDailyAssessment(_object) {
         _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.timestamp = java.lang.System.currentTimeMillis();

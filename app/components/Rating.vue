@@ -54,9 +54,9 @@
 			</StackLayout>
 			<FlexboxLayout class="m-x-10" width="100%">
 				<Button width="100%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
-				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index">
+				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index reduced-margin">
 					<FormattedString>
-						<Span class="far h1 button-icon" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
+						<Span class="far button-icon-day-done" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
 					</FormattedString>
 				</Button>
 			</FlexboxLayout>
@@ -307,11 +307,19 @@
 				this.updateTimeSlept();
 			},
 			onCheckButtonTap() {
-				dialogs.alert({
-									  title       : "",
-									  message     : 'alles erledigt für heute',
-									  okButtonText: "cool"
-								  });
+				let that = this;
+				dialogs.confirm({
+									title           : "",
+									message         : "alles erledigt für heute",
+									cancelButtonText: "cool",
+									okButtonText    : "vergiss den Tag"
+								}).then(function (result) {
+					if (result) {
+						LifeChart.removeDailyAssessment(that.currentRecordKey).then((result) => {
+							that.resetRating();
+						});
+					}
+				});
 			},
 			validate() {
 				if (!this.dateTodayDb || this.dateTodayDb === '') {
@@ -417,4 +425,9 @@
 	.button-icon-size {
 		font-size: 16;
 	}
+
+	.button-icon-day-done {
+		font-size: 25;
+	}
+
 </style>
