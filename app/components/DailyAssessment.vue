@@ -31,7 +31,11 @@
 			</StackLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-center">
-					<Label @tap="showMoodRatingExplanation" textWrap="true" :color="moodRatingColor" textAlignment="center" width="25%" class="h1 m-x-20" :text="moodRatingLabel"/>
+					<Label @tap="showMoodRatingExplanation" textWrap="true" textAlignment="center" width="25%" class="m-x-20">
+						<FormattedString>
+							<Span class="far h1" :color="moodRatingColor" :text.decode="moodRatingLabel"></Span>
+						</FormattedString>
+					</Label>
 					<Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center" class="hint m-t-5" :text="moodRating"/>
 				</FlexboxLayout>
 				<Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)"></Slider>
@@ -58,7 +62,7 @@
 				</Button>
 				<Button @tap="addImpairmentRating" width="55" class="reduced-margin m-l-10">
 					<FormattedString>
-						<Span class="far h2" color="#444" text.decode="&#xf080;"></Span>
+						<Span class="far h2" color="#444" text.decode="&#xf15c;"></Span>
 					</FormattedString>
 				</Button>
 			</StackLayout>
@@ -93,30 +97,33 @@
 	export default {
 		data: () => {
 			return {
-				oneSuccessfulLoadDone  : false,
-				savingEnabled          : true,
-				currentRecordKey       : null,
-				isDysphoric            : false,
-				questionDoneForToday   : false,
-				sleepHoursColor    : '#CCC',
-				moodRatingColor    : '#CCC',
-				dateToday              : '',
-				currentHourAndMinute   : '',
-				currentDate            : null,
-				isDysphoricTintColor   : '#CCCCCC',
-				dayToday               : '',
-				sleepHours             : 0,
-				sleepStart             : 0,
-				sleepEnd               : 0,
-				sleepStartedSameDay    : true,
-				sleepStartSelectedIndex: 2,
-				sleepEndSelectedIndex  : 19,
-				currentHint            : '',
-				moodRating             : 50,
-				moodRatingLabel        : '50',
-				items                  : [],
-				timeItems              : null,
-				assessmentStatusColor  : '#CCC'
+				oneSuccessfulLoadDone   : false,
+				savingEnabled           : true,
+				currentRecordKey        : null,
+				isDysphoric             : false,
+				questionDoneForToday    : false,
+				sleepHoursColor         : '#CCC',
+				dateToday               : '',
+				currentHourAndMinute    : '',
+				currentDate             : null,
+				isDysphoricTintColor    : '#CCCCCC',
+				dayToday                : '',
+				sleepHours              : 0,
+				sleepStart              : 0,
+				sleepEnd                : 0,
+				sleepStartedSameDay     : true,
+				sleepStartSelectedIndex : 2,
+				sleepEndSelectedIndex   : 19,
+				currentHint             : '',
+				moodRating              : 50,
+				moodRatingColor         : '#CCC',
+				moodRatingBaseColor     : '#CCC',
+				moodRatingHighlightColor: '#00CAAB',
+				moodRatingWarningColor  : '#55FF4400',
+				moodRatingLabel         : String.fromCharCode(parseInt('f11a', 16)),
+				items                   : [],
+				timeItems               : null,
+				assessmentStatusColor   : '#CCC'
 			};
 		},
 		methods: {
@@ -187,25 +194,37 @@
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onSliderValueChange(event) {
-				this.moodRatingColor = '#00CAAB';
+				this.moodRatingColor = this.moodRatingHighlightColor;
+				let currentBasecolor = this.moodRatingBaseColor;
+
+				let face = String.fromCharCode(parseInt('f11a', 16));
+				if (this.moodRating < 5) {
+					face = String.fromCharCode(parseInt('f5a4', 16));
+					currentBasecolor = this.moodRatingWarningColor;
+				}
+				else if (this.moodRating < 25) {
+					face = String.fromCharCode(parseInt('f5b4', 16));
+					currentBasecolor = this.moodRatingWarningColor;
+				}else if (this.moodRating < 45)
+					face = String.fromCharCode(parseInt('f119', 16));
+				else if (this.moodRating < 55)
+					face = String.fromCharCode(parseInt('f11a', 16)); // :-|
+				else if (this.moodRating > 55 && this.moodRating < 65)
+					face = String.fromCharCode(parseInt('f118', 16)); // :-)
+				else if (this.moodRating >= 65 && this.moodRating < 75)
+					face = String.fromCharCode(parseInt('f580', 16)); // :-D
+				else if (this.moodRating >= 75 && this.moodRating < 90) {
+					face = String.fromCharCode(parseInt('f581', 16));
+					currentBasecolor = this.moodRatingWarningColor;
+				}
+				else if (this.moodRating >= 90) {
+					face = String.fromCharCode(parseInt('f587', 16));
+					currentBasecolor = this.moodRatingWarningColor;
+				}
 
 				setTimeout(() => {
-					this.moodRatingColor = '#CCC';
+					this.moodRatingColor = currentBasecolor;
 				}, 1250);
-
-				let face = ':-|';
-				if (this.moodRating < 5)
-					face = ':\'-C';
-				else if (this.moodRating < 25)
-					face = ':\'-(';
-				else if (this.moodRating < 45)
-					face = ':-(';
-				else if (this.moodRating < 55)
-					face = ':-|';
-				else if (this.moodRating > 55 && this.moodRating < 75)
-					face = ':-)';
-				else if (this.moodRating >= 75)
-					face = ':-D'
 
 				this.moodRatingLabel = face;
 			},

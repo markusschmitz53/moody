@@ -5,14 +5,16 @@
                 <Image src.decode="font://&#xf274;" class="far"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf201;" class="fas"></Image>
+                <Image src.decode="font://&#xf080;" class="far"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
-                <Image src.decode="font://&#xf550;" class="fas"></Image>
+                <Image src.decode="font://&#xf086;" class="far"></Image>
             </TabStripItem>
+            <!--
             <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf21e;" class="fas"></Image>
             </TabStripItem>
+            -->
         </TabStrip>
 
         <TabContentItem>
