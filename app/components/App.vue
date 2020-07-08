@@ -19,7 +19,7 @@
 
         <TabContentItem>
             <Frame id="main">
-                <Rating />
+                <DailyAssessment />
             </Frame>
         </TabContentItem>
 
@@ -48,16 +48,16 @@
 <script>
 import Home from "./Home.vue";
 import Activity from "./Activity.vue";
-import Mood from "./Mood.vue";
-import Rating from "./Rating.vue";
+import FunctionalImpairment from "./FunctionalImpairment.vue";
+import DailyAssessment from "./DailyAssessment.vue";
 import Question from "./Question.vue";
 
 export default {
   components: {
     Home,
     Activity,
-    Rating,
-    Mood,
+    DailyAssessment,
+    FunctionalImpairment,
     Question
   }
 };

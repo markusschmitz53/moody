@@ -83,7 +83,7 @@
 	import SleepHours from "./hints/SleepHours";
 	import MoodRating from "./hints/MoodRating";
 	import LifeEventsComponent from "./LifeEvents";
-	import Mood from './Mood';
+	import Mood from './FunctionalImpairment';
 	import {Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
 
