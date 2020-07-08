@@ -47,18 +47,7 @@ export default {
             }
         },
         onTap () {
-            var SecureStorage = require("nativescript-secure-storage").SecureStorage;
 
-            // instantiate the plugin
-            var secureStorage = new SecureStorage();
-            secureStorage.set({
-                                  key  : "nameOfUser",
-                                  value: this.nameOfUser
-                              }).then(
-                    function (success) {
-                        console.log("Successfully set a value? " + success);
-                    }
-            );
         }
     }
 };
