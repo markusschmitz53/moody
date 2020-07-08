@@ -475,8 +475,6 @@
 		font-size: 15;
 		margin-top: 3;
 	}
-
-
 	.slide {
 		margin-left: -5;
 	}

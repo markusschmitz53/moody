@@ -1,5 +1,5 @@
-const { Observable } = require("data/observable");
-const application = require('application');
+const { Observable } = require("tns-core-modules/data/observable");
+const application = require('tns-core-modules/application');
 
 const OnSuccessListener = com.google.android.gms.tasks.OnSuccessListener;
 const OnFailureListener = com.google.android.gms.tasks.OnFailureListener;

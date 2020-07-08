@@ -5,43 +5,33 @@
                 <Image src.decode="font://&#xf274;" class="far"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
+                <Image src.decode="font://&#xf201;" class="fas"></Image>
+            </TabStripItem>
+            <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf550;" class="fas"></Image>
             </TabStripItem>
             <TabStripItem class="navigation__item">
                 <Image src.decode="font://&#xf21e;" class="fas"></Image>
             </TabStripItem>
-            <!--
-            <TabStripItem class="n avigation__item">
-                <Image src.decode="font://&#xf086;" class="far t-36"></Image>
-            </TabStripItem>
-            -->
         </TabStrip>
 
         <TabContentItem>
-            <Frame id="main">
+            <Frame id="main" class="m-b-10">
                 <DailyAssessment />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
-            <Frame>
+            <Frame class="m-b-10">
                 <Home />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
-            <Frame>
+            <Frame class="m-b-10">
                 <Activity />
             </Frame>
         </TabContentItem>
-
-<!--
-        <TabContentItem>
-            <Frame>
-                <Question />
-            </Frame>
-        </TabContentItem>
--->
     </BottomNavigation>
 </template>
 
@@ -69,5 +59,17 @@ export default {
 // End custom common variables
 
 // Custom styles
+TabStrip {
+    background-color: #FFF;
+    border-color: #FAFAFA;
+    border-top-width: 2;
+}
 
+TabStripItem:active Image {
+    color: #006968;
+}
+
+TabStripItem Image {
+    color: #CCC;
+}
 </style>

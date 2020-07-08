@@ -1,9 +1,7 @@
 import Vue from "nativescript-vue";
 import App from "./components/App";
 import firebase from 'nativescript-plugin-firebase';
-import { RangeSeekBar } from "nativescript-range-seek-bar/range-seek-bar";
 import RadListView from 'nativescript-ui-listview/vue';
-
 Vue.use(RadListView);
 
 firebase.init({
@@ -21,8 +19,6 @@ firebase.init({
 new Vue({
     render: h => h(App)
 }).$start();
-
-Vue.registerElement('RangeSeekBar', () => RangeSeekBar);
 
 Vue.registerElement(
   'CardView',

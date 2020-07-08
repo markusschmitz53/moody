@@ -1,6 +1,6 @@
-const { Observable } = require("data/observable");
-const application = require('application');
-const utils = require("utils/utils");
+const { Observable } = require("tns-core-modules/data/observable");
+const application = require('tns-core-modules/application');
+const utils = require("tns-core-modules/utils/utils");
 
 var Intent = android.content.Intent;
 var instance;
