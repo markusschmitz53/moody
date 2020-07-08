@@ -1,6 +1,10 @@
 import Vue from "nativescript-vue";
 import App from "./components/App";
 import firebase from 'nativescript-plugin-firebase';
+
+import RadChart from 'nativescript-ui-chart/vue';
+Vue.use(RadChart);
+
 import RadListView from 'nativescript-ui-listview/vue';
 Vue.use(RadListView);
 

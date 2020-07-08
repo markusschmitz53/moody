@@ -151,7 +151,7 @@
 			onTapDone() {
 				let promise = LifeChart.saveFunctionalImpairment(
 						{
-							impairment: this.items[this.selectedItemIndex].name,
+							impairment: this.items[this.selectedItemIndex].value,
 							date      : this.dateTodayDb,
 							time      : this.currentHourAndMinute
 						}

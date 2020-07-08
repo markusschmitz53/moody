@@ -104,6 +104,34 @@ export default class LifeChartService {
         ];
     }
 
+    getAssessments(_callback) {
+         return firebase.query(
+            _callback,
+            this.rootPathChart + 'dailyAssessments/',
+            {
+                singleEvent: true,
+                orderBy    : {
+                    type : firebase.QueryOrderByType.CHILD,
+                    value: 'date' // mandatory when type is 'child'
+                }
+            }
+        );
+    }
+
+    getFunctionalImpairments(_callback) {
+         return firebase.query(
+            _callback,
+            this.rootPathChart + 'functionalImpairments/',
+            {
+                singleEvent: true,
+                orderBy    : {
+                    type : firebase.QueryOrderByType.CHILD,
+                    value: 'date' // mandatory when type is 'child'
+                }
+            }
+        );
+    }
+
     getRatingForDay(_date, _callback) {
          return firebase.query(
             _callback,

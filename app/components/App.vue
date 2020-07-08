@@ -23,6 +23,12 @@
 
         <TabContentItem>
             <Frame class="m-b-10">
+                <Charts />
+            </Frame>
+        </TabContentItem>
+
+        <TabContentItem>
+            <Frame class="m-b-10">
                 <Home />
             </Frame>
         </TabContentItem>
@@ -38,6 +44,7 @@
 <script>
 import Home from "./Home.vue";
 import Activity from "./Activity.vue";
+import Charts from "./Charts.vue";
 import FunctionalImpairment from "./FunctionalImpairment.vue";
 import DailyAssessment from "./DailyAssessment.vue";
 import Question from "./Question.vue";
@@ -46,6 +53,7 @@ export default {
   components: {
     Home,
     Activity,
+    Charts,
     DailyAssessment,
     FunctionalImpairment,
     Question

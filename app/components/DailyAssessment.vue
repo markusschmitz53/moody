@@ -108,9 +108,9 @@
 				sleepHours             : 0,
 				sleepStart             : 0,
 				sleepEnd               : 0,
-				sleepStartedSameDay    : false,
-				sleepStartSelectedIndex: 46,
-				sleepEndSelectedIndex  : 18,
+				sleepStartedSameDay    : true,
+				sleepStartSelectedIndex: 2,
+				sleepEndSelectedIndex  : 19,
 				currentHint            : '',
 				moodRating             : 50,
 				moodRatingLabel        : '50',
@@ -178,12 +178,12 @@
 			},
 			onTapDayForward() {
 				this.setDateToday(1);
-				this.resetRating();
+				this.reset();
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onTapDayBackward() {
 				this.setDateToday(-1);
-				this.resetRating();
+				this.reset();
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			onSliderValueChange(event) {
@@ -232,7 +232,6 @@
 				setTimeout(() => {
 					this.sleepHoursColor = '#CCC';
 				}, 1250);
-
 				let sleepStartTimeParts = this.sleepStart.split(':');
 				let sleepEndTimeParts = this.sleepEnd.split(':');
 
@@ -290,14 +289,14 @@
 						}
 
 						if (!sleepStartIndex) {
-							this.sleepStartSelectedIndex = 46;
+							this.sleepStartSelectedIndex = 2;
 						}
 						else {
 							this.sleepStartSelectedIndex = sleepStartIndex;
 						}
 
 						if (!sleepEndIndex) {
-							this.sleepEndSelectedIndex = 18;
+							this.sleepEndSelectedIndex = 19;
 						}
 						else {
 							this.sleepEndSelectedIndex = sleepEndIndex;
@@ -331,17 +330,18 @@
 				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
 			},
 			resetTimeSlept() {
-				this.sleepStart = this.timeItems[46];
-				this.sleepEnd = this.timeItems[18];
-				this.sleepStartSelectedIndex = 46;
-				this.sleepEndSelectedIndex = 18;
+				this.sleepStart = this.timeItems[2];
+				this.sleepEnd = this.timeItems[19];
+				this.sleepStartSelectedIndex = 2;
+				this.sleepEndSelectedIndex = 19;
 			},
-			resetRating() {
+			reset() {
 				this.questionDoneForToday = false;
 				this.savingEnabled = true;
 				this.isDysphoric = false;
 				this.moodRating = 50;
 				this.currentRecordKey = null;
+				this.sleepStartedSameDay = true;
 
 				this.resetTimeSlept();
 				this.updateTimeSlept();
@@ -349,14 +349,18 @@
 			onCheckButtonTap() {
 				let that = this;
 				dialogs.confirm({
-									title           : "",
-									message         : "alles erledigt für heute",
-									cancelButtonText: "cool",
-									okButtonText    : "vergiss den Tag"
+									title            : "",
+									message          : "deine Angaben für den Tag habe ich mir gemerkt",
+									neutralButtonText : "cool",
+									cancelButtonText: "vergiss den Tag",
+									okButtonText     : "vergiss den Tag komplett"
 								}).then(function (result) {
-					if (result) {
+					if (result === true) {
+						console.log("TODO: REMOVE DAY");
+					}
+					else if (result === false) {
 						LifeChart.removeDailyAssessment(that.currentRecordKey).then((result) => {
-							that.resetRating();
+							that.reset();
 						});
 					}
 				});
@@ -475,6 +479,7 @@
 		font-size: 15;
 		margin-top: 3;
 	}
+
 	.slide {
 		margin-left: -5;
 	}
