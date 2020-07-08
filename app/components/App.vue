@@ -49,7 +49,6 @@ import Activity from "./Activity.vue";
 import Charts from "./Charts.vue";
 import FunctionalImpairment from "./FunctionalImpairment.vue";
 import DailyAssessment from "./DailyAssessment.vue";
-import Question from "./Question.vue";
 
 export default {
   components: {
@@ -57,8 +56,7 @@ export default {
     Activity,
     Charts,
     DailyAssessment,
-    FunctionalImpairment,
-    Question
+    FunctionalImpairment
   }
 };
 </script>
