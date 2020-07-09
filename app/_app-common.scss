@@ -92,3 +92,90 @@ android-selected-tab-highlight-color: #4e7ac7;
 .p {
     line-height: 7;
 }
+
+.nsChatView-avatar {
+    margin-top: 30;
+    width: 30;
+}
+
+    .nsChatView-view .nsChatView-sendMessageArea {
+        margin: 4, 0, 0, 0;
+        background-color: transparent;
+    }
+
+    .nsChatView-view .nsChatView-sendMessageArea Button {
+        background-color: transparent;
+        margin: 0;
+    }
+
+    .nsChatView-view .nsChatView-messageList {
+        background-color: transparent;
+        border-color: transparent;
+        border-width: 0;
+        margin: 0;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-avatar,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-avatar {
+        margin: 8;
+        border-radius: 32;
+        width: 64;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-separator,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-separator {
+        border-color: transparent;
+        border-width: 0;
+        width: 32;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-message,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-message {
+        margin: 8;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea {
+        border-radius: 8;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea {
+        background-color: #FAFAFA;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea {
+        background-color: #6600CAAB;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea .nsChatView-content,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea .nsChatView-content {
+        margin: 12, 16, 12, 16;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea Label,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea Label {
+        margin: 0;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea .nsChatView-content Label {
+        color: #111;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea .nsChatView-content Label {
+        color: #111;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-messageArea .nsChatView-content .nsChatView-date,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-messageArea .nsChatView-content .nsChatView-date {
+        font-size: 10;
+        color: #99111111;
+    }
+
+    .nsChatView-view .nsChatView-messageField {
+        font-size: 14;
+        placeholder-color: #CCC;
+    }
+
+    .nsChatView-view .nsChatView-sendMessageButton {
+        visibility: collapse;
+    }

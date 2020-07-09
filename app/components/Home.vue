@@ -1,8 +1,9 @@
 <template lang="html">
-    <Page @navigatingTo="onPageLoaded" actionBarHidden="true">
+    <Page @navigatingTo="onPageLoaded" actionBarHidden="true" class="m-t-30">
+        <!--
         <ScrollView class="m-t-30" orientation="vertical">
             <stack-layout>
-               <card-view v-for="item in items" v-bind:data="item" v-bind:key="item.link" ripple="true" @tap="openLink($event, item)" height="60" marginRight="40" marginLeft="40" marginTop="40"  marginBottom="0" elevation="30" radius="10">-->
+               <card-view v-for="item in items" v-bind:data="item" v-bind:key="item.link" ripple="true" @tap="openLink($event, item)" height="60" marginRight="40" marginLeft="40" marginTop="40"  marginBottom="0" elevation="30" radius="10">
                     <stack-layout id="stack">
                         <label id="stack-text" opacity="1" class="m-x-20 m-y-20" :text="item.text"></label>
                         <label id="stack-question" opacity="0" class="m-x-20 m-y-20" :text="item.question"></label>
@@ -10,20 +11,28 @@
                     </stack-layout>
                 </card-view>
             </stack-layout>
-        </ScrollView>
+        </ScrollView>-->
     </Page>
 </template>
 
 <script>
+    const ChatView = require("nativescript-chatview");
     const timerModule = require("tns-core-modules/timer");
     import Question from './Question';
+	const app = require('tns-core-modules/application');
+
+    function getTime() {
+        let now = new Date();
+        let hours = now.getHours();
+        return String(hours).padStart(2, '0') + ":" +  String(now.getMinutes()).padStart(2, '0');
+    }
 
     export default {
     data: () => {
         return {
-            timerId: null,
-            page: null,
-            items : [],
+            timerId      : null,
+            page         : null,
+            items        : [],
             currentObject: null
         };
     },
@@ -33,6 +42,50 @@
         },
         onPageLoaded(_event) {
             this.page = _event.object.page;
+            let chatView = new ChatView.ChatView();
+
+            setTimeout(() => {
+                chatView.appendMessages({
+                                                    date   : getTime(),
+                                                    isRight: false,
+                                                    image: "res://user",
+                                                    message: 'hey na, wie gehts?',
+                                                });
+                chatView.typeMessageHint = 'Hier kannst du deine Antwort eingeben';
+            }, 750);
+
+            chatView.notifyOnSendMessageTap((eventData) => {
+                chatView.resetMessage();
+
+                // add a chat message
+                eventData.object.appendMessages({
+                                                    date   : getTime(),
+                                                    isRight: true,
+                                                    image: "res://user",
+                                                    message: eventData.message,
+                                                });
+                eventData.scrollToBottom();
+
+                setTimeout(() => {
+                    chatView.appendMessages({
+                                                date   : getTime(),
+                                                isRight: false,
+                                                image  : "res://user",
+                                                message: 'easy',
+                                            });
+                    chatView.typeMessageHint = '';
+                    chatView.scrollToBottom();
+
+                    if (Math.random() > 0.5)
+                        chatView.focusMessageField();
+                }, 1000);
+            });
+
+            // focus text field
+            chatView.focusMessageField();
+
+            this.page.content = chatView;
+
             this.timerId = timerModule.setInterval(() => {
                 if (this.items.length < 1) {
                     this.items.push({
@@ -98,9 +151,9 @@
 </script>
 
 <style lang="scss" scoped>
-// Start custom common variables
-@import "~@nativescript/theme/scss/variables/blue";
-// End custom common variables
+    // Start custom common variables
+    @import "~@nativescript/theme/scss/variables/blue";
+    // End custom common variables
 
-// Custom styles
+    // Custom styles
 </style>
