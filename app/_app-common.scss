@@ -93,10 +93,10 @@ android-selected-tab-highlight-color: #4e7ac7;
     line-height: 7;
 }
 
-.nsChatView-avatar {
-    margin-top: 30;
-    width: 30;
-}
+    .nsChatView-avatar {
+        margin-top: 30;
+        width: 30;
+    }
 
     .nsChatView-view .nsChatView-sendMessageArea {
         margin: 4, 0, 0, 0;
@@ -111,8 +111,15 @@ android-selected-tab-highlight-color: #4e7ac7;
     .nsChatView-view .nsChatView-messageList {
         background-color: transparent;
         border-color: transparent;
-        border-width: 0;
+        border-width: 1;
         margin: 0;
+    }
+
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-right,
+    .nsChatView-view .nsChatView-messageList .nsChatView-item-left {
+        border-width: 1;
+        border-color: transparent;
+        background-color: transparent;
     }
 
     .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-avatar,
@@ -125,7 +132,7 @@ android-selected-tab-highlight-color: #4e7ac7;
     .nsChatView-view .nsChatView-messageList .nsChatView-item-left .nsChatView-separator,
     .nsChatView-view .nsChatView-messageList .nsChatView-item-right .nsChatView-separator {
         border-color: transparent;
-        border-width: 0;
+        border-width: 1;
         width: 32;
     }
 
@@ -174,8 +181,14 @@ android-selected-tab-highlight-color: #4e7ac7;
     .nsChatView-view .nsChatView-messageField {
         font-size: 14;
         placeholder-color: #CCC;
+        margin-left: 30;
+        margin-right: 30;
+        padding-bottom: 4;
     }
 
     .nsChatView-view .nsChatView-sendMessageButton {
         visibility: collapse;
+    }
+
+    .nsChatView-view {
     }

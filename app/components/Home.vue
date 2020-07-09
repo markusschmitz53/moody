@@ -43,6 +43,7 @@
         onPageLoaded(_event) {
             this.page = _event.object.page;
             let chatView = new ChatView.ChatView();
+            chatView.typeMessageHint = '';
 
             setTimeout(() => {
                 chatView.appendMessages({
