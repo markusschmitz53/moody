@@ -16,10 +16,14 @@
 </template>
 
 <script>
+    import LifeChartService from '~/LifeChart.service';
+
     const ChatView = require("nativescript-chatview");
+	import JaneService from '~/Jane.service';
     const timerModule = require("tns-core-modules/timer");
-    import Question from './Question';
 	const app = require('tns-core-modules/application');
+
+	const Jane = new JaneService();
 
     function getTime() {
         let now = new Date();
@@ -28,127 +32,156 @@
     }
 
     export default {
-    data: () => {
-        return {
-            timerId      : null,
-            page         : null,
-            items        : [],
-            currentObject: null
-        };
-    },
-    methods: {
-        onReturnpress(event, item) {
-
+        data   : () => {
+            return {
+                timerId      : null,
+                page         : null,
+                items        : [],
+                chatview: null,
+                currentObject: null
+            };
         },
-        onPageLoaded(_event) {
-            this.page = _event.object.page;
-            let chatView = new ChatView.ChatView();
-            chatView.typeMessageHint = '';
+        methods: {
+            onReturnpress(event, item) {
 
-            setTimeout(() => {
-                chatView.appendMessages({
-                                                    date   : getTime(),
-                                                    isRight: false,
-                                                    image: "res://user",
-                                                    message: 'hey na, wie gehts?',
-                                                });
-                chatView.typeMessageHint = 'Hier kannst du deine Antwort eingeben';
-            }, 750);
+            },
+            _conversationOutputCallback(_eventData) {
+                if (!this.chatview) {
+                    return;
+                }
 
-            chatView.notifyOnSendMessageTap((eventData) => {
-                chatView.resetMessage();
-
-                // add a chat message
-                eventData.object.appendMessages({
-                                                    date   : getTime(),
-                                                    isRight: true,
-                                                    image: "res://user",
-                                                    message: eventData.message,
-                                                });
-                eventData.scrollToBottom();
-
-                setTimeout(() => {
-                    chatView.appendMessages({
+                this.chatview.appendMessages({
                                                 date   : getTime(),
                                                 isRight: false,
                                                 image  : "res://user",
-                                                message: 'easy',
+                                                message: _eventData.output,
                                             });
-                    chatView.typeMessageHint = '';
-                    chatView.scrollToBottom();
-
-                    if (Math.random() > 0.5)
-                        chatView.focusMessageField();
-                }, 1000);
-            });
-
-            // focus text field
-            chatView.focusMessageField();
-
-            this.page.content = chatView;
-
-            this.timerId = timerModule.setInterval(() => {
-                if (this.items.length < 1) {
-                    this.items.push({
-                                        text: 'Beantwortest du mir eine Frage?',
-                                        question: 'Wie heißt du?'
-                                    });
-                } else {
-                    timerModule.clearInterval(this.timerId);
+            },
+            _conversationHumanInputCallback(_eventData) {
+                if (!this.chatview) {
+                    return;
                 }
-            }, 1000);
-        },
-        showQuestion(_object, _animationDuration) {
-            if (!_object || typeof _object.animate !== 'function') {
-                throw new Error('Invalid object passed to showQuestion()');
-            }
 
-            let page = this.page;
-            this.currentObject = _object;
-            this.currentObject.animate({height: 150, duration: _animationDuration});
-            this.page.getViewById('stack-text').animate({opacity: 0, duration: _animationDuration}).then(function () {
-                page.getViewById('stack-text').visibility = "collapsed";
-                page.getViewById('stack-question').visibility = "visible";
-                page.getViewById('stack-question-field').visibility = "visible";
-                page.getViewById('stack-question').animate({opacity: 1, duration: _animationDuration});
-                page.getViewById('stack-question-field').animate({opacity: 1, duration: _animationDuration});
-            });
-        },
-        hideQuestion(_object, _animationDuration) {
-            if (!_object || typeof _object.animate !== 'function') {
-                throw new Error('Invalid object passed to hideQuestion()');
-            }
+                this.chatview.appendMessages({
+                                                date   : getTime(),
+                                                isRight: false,
+                                                image  : "res://user",
+                                                message: _eventData.output,
+                                            });
+            },
+            onPageLoaded(_event) {
+                this.page = _event.object.page;
+                let chatView = new ChatView.ChatView();
+                chatView.typeMessageHint = '';
 
-            let page = this.page;
+                this.chatview = chatView;
 
-            _object.animate({height: 60, duration: _animationDuration});
-            this.page.getViewById('stack-question').animate({
+                Jane.on('JANE_CONVERSATION_OUTPUT', this._conversationOutputCallback);
+                Jane.on('JANE_CONVERSATION_HUMANINPUT', this._conversationHumanInputCallback);
+                Jane.startConversation();
+                setTimeout(() => {
+
+                }, 750);
+
+                chatView.notifyOnSendMessageTap((eventData) => {
+                    chatView.resetMessage();
+
+                    // add a chat message
+                    eventData.object.appendMessages({
+                                                        date   : getTime(),
+                                                        isRight: true,
+                                                        image  : "res://user",
+                                                        message: eventData.message,
+                                                    });
+                    eventData.scrollToBottom();
+
+                    setTimeout(() => {
+                        chatView.appendMessages({
+                                                    date   : getTime(),
+                                                    isRight: false,
+                                                    image  : "res://user",
+                                                    message: 'easy',
+                                                });
+                        chatView.typeMessageHint = '';
+                        chatView.scrollToBottom();
+
+                        if (Math.random() > 0.5) {
+                            chatView.focusMessageField();
+                        }
+                    }, 1000);
+                });
+
+                // focus text field
+                chatView.focusMessageField();
+
+                this.page.content = chatView;
+
+                this.timerId = timerModule.setInterval(() => {
+                    if (this.items.length < 1) {
+                        this.items.push({
+                                            text    : 'Beantwortest du mir eine Frage?',
+                                            question: 'Wie heißt du?'
+                                        });
+                    }
+                    else {
+                        timerModule.clearInterval(this.timerId);
+                    }
+                }, 1000);
+            },
+            showQuestion(_object, _animationDuration) {
+                if (!_object || typeof _object.animate !== 'function') {
+                    throw new Error('Invalid object passed to showQuestion()');
+                }
+
+                let page = this.page;
+                this.currentObject = _object;
+                this.currentObject.animate({height: 150, duration: _animationDuration});
+                this.page.getViewById('stack-text').animate({
                                                                 opacity : 0,
                                                                 duration: _animationDuration
                                                             }).then(function () {
-                page.getViewById('stack-question').visibility = "collapsed";
-                page.getViewById('stack-question-field').visibility = "collapsed";
-                page.getViewById('stack-text').visibility = "visible";
-                page.getViewById('stack-text').animate({opacity: 1, duration: _animationDuration});
-            });
-            this.currentObject = null;
-        },
-        openLink(_event, _item) {
-            let index = this.items.indexOf(_item);
-            let animationDuration = 500;
-            if (index > -1) {
-                if (!this.items[index].isFullscreen) {
-                    this.items[index].isFullscreen = true;
-                    this.showQuestion(_event.object, animationDuration)
+                    page.getViewById('stack-text').visibility = "collapsed";
+                    page.getViewById('stack-question').visibility = "visible";
+                    page.getViewById('stack-question-field').visibility = "visible";
+                    page.getViewById('stack-question').animate({opacity: 1, duration: _animationDuration});
+                    page.getViewById('stack-question-field').animate({opacity: 1, duration: _animationDuration});
+                });
+            },
+            hideQuestion(_object, _animationDuration) {
+                if (!_object || typeof _object.animate !== 'function') {
+                    throw new Error('Invalid object passed to hideQuestion()');
                 }
-                else {
-                    this.items[index].isFullscreen = false;
-                    this.hideQuestion(_event.object, animationDuration);
+
+                let page = this.page;
+
+                _object.animate({height: 60, duration: _animationDuration});
+                this.page.getViewById('stack-question').animate({
+                                                                    opacity : 0,
+                                                                    duration: _animationDuration
+                                                                }).then(function () {
+                    page.getViewById('stack-question').visibility = "collapsed";
+                    page.getViewById('stack-question-field').visibility = "collapsed";
+                    page.getViewById('stack-text').visibility = "visible";
+                    page.getViewById('stack-text').animate({opacity: 1, duration: _animationDuration});
+                });
+                this.currentObject = null;
+            },
+            openLink(_event, _item) {
+                let index = this.items.indexOf(_item);
+                let animationDuration = 500;
+                if (index > -1) {
+                    if (!this.items[index].isFullscreen) {
+                        this.items[index].isFullscreen = true;
+                        this.showQuestion(_event.object, animationDuration)
+                    }
+                    else {
+                        this.items[index].isFullscreen = false;
+                        this.hideQuestion(_event.object, animationDuration);
+                    }
                 }
             }
         }
     }
-}
 </script>
 
 <style lang="scss" scoped>
