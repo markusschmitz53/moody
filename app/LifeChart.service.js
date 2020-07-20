@@ -1,15 +1,23 @@
-import * as firebase from 'nativescript-plugin-firebase';
+import { Couchbase, QueryLogicalOperator, ConcurrencyMode } from 'nativescript-couchbase-plugin';
 
 export default class LifeChartService {
 
     constructor() {
         this.TYPE_COMORBID_SYMPTOM = 'comorbidSymptom';
         this.TYPE_LIFE_EVENT = 'lifeEvent';
+        this.TYPE_DAILY_ASSESSMENT = 'dailyAssessment';
+        this.TYPE_FUNCTIONAL_IMPAIRMENT = 'functionalImpairment';
 
+        this.databaseCommon = new Couchbase('ka4821LO-0041-common');
+        this.databaseLifechart = new Couchbase('ka4821LO-0041-lifechart');
+        this.databaseHuman = new Couchbase('ka4821LO-0041-human');
+        this.databaseStatus = new Couchbase('ka4821LO-0041-lifechart');
+
+        this._setTimeItems();
+    }
+
+    _setTimeItems() {
         this.timeItems = ['23:30'];
-        this.rootPathEvents = '/eventsV2/';
-        this.rootPathChart = this.rootPathEvents + 'chart/';
-
         for (let i = 0; i < 24; i++) {
             let number = i + '';
             number = number.padStart(2, '0');
@@ -105,219 +113,140 @@ export default class LifeChartService {
     }
 
     getAssessments(_callback) {
-         return firebase.query(
-            _callback,
-            this.rootPathChart + 'dailyAssessments/',
-            {
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                }
-            }
-        );
+        console.log("TODO: check loaded records order");
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [],
+                                                order : [{property: 'date', direction: 'asc'}]
+                                            });
     }
 
-    getFunctionalImpairments(_callback) {
-         return firebase.query(
-            _callback,
-            this.rootPathChart + 'functionalImpairments/',
-            {
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                }
-            }
-        );
+    getFunctionalImpairments() {
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [
+                                                    {
+                                                        property  : 'type',
+                                                        comparison: 'equalTo',
+                                                        value     : this.TYPE_FUNCTIONAL_IMPAIRMENT,
+                                                        logical   : QueryLogicalOperator.AND
+                                                    }
+                                                ],
+                                                order : [{property: 'timestamp', direction: 'asc'}]
+                                            });
     }
 
-    getRatingForDay(_date, _callback) {
-         return firebase.query(
-            _callback,
-            this.rootPathChart + 'dailyAssessments/',
-            {
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                },
-                range      : {
-                    type : firebase.QueryRangeType.EQUAL_TO,
-                    value: _date
-                }
-            }
-        );
+    getRatingForDay(_date) {
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [
+                                                    {property: 'date', comparison: 'equalTo', value: _date},
+                                                    {property     : 'type',
+                                                        comparison: 'equalTo',
+                                                        value     : this.TYPE_DAILY_ASSESSMENT,
+                                                        logical   : QueryLogicalOperator.AND
+                                                    }
+                                                ],
+                                                order : [],
+                                                limit : 1
+                                            });
     }
 
-    getFunctionalImpairmentsForDay(_date, _callback) {
-         return firebase.query(
-            _callback,
-            this.rootPathChart + 'functionalImpairments/',
-            {
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                },
-                range      : {
-                    type : firebase.QueryRangeType.EQUAL_TO,
-                    value: _date
-                }
-            }
-        );
+    getFunctionalImpairmentsForDay(_date) {
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [
+                                                    {property: 'date', comparison: 'equalTo', value: _date},
+                                                    {
+                                                        property  : 'type',
+                                                        comparison: 'equalTo',
+                                                        value     : this.TYPE_FUNCTIONAL_IMPAIRMENT,
+                                                        logical   : QueryLogicalOperator.AND
+                                                    }
+                                                ],
+                                                order : [{property: 'timestamp', direction: 'desc'}]
+                                            });
     }
 
     saveFunctionalImpairment(_object) {
-        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.timestamp = java.lang.System.currentTimeMillis();
+        _object.type = this.TYPE_FUNCTIONAL_IMPAIRMENT;
 
-        let path = this.rootPathChart + 'functionalImpairments/';
-
-        return firebase.push(
-            path,
-            _object
-        ).then(function (result) {
-            firebase.update(path + result.key, {
-                key: result.key
-            });
-
-            return result;
-        });
+        return this.databaseLifechart.createDocument(_object);
     }
 
-    removeFunctionalImpairment(key) {
-        let data = {};
-        data[key] = null;
-        return firebase.update(this.rootPathChart + 'functionalImpairments/', data);
+    removeFunctionalImpairment(_id) {
+        return this.databaseLifechart.deleteDocument(_id);
     }
 
-    updateDailyAssessment(_key, _object) {
-        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.timestamp = java.lang.System.currentTimeMillis();
+    updateDailyAssessment(_id, _object) {
+        _object.editTimestamp = java.lang.System.currentTimeMillis();
 
-        let path = this.rootPathChart + 'dailyAssessments/';
-
-        return firebase.update(path + _key, _object);
+        this.databaseLifechart.updateDocument(_id, _object);
     }
 
-    removeDailyAssessment(key) {
-        let data = {};
-        data[key] = null;
-        return firebase.update(this.rootPathChart + 'dailyAssessments/', data);
+    removeDailyAssessment(_id) {
+        return this.databaseLifechart.deleteDocument(_id);
     }
 
     saveDailyAssessment(_object) {
-        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
         _object.timestamp = java.lang.System.currentTimeMillis();
+        _object.type = this.TYPE_DAILY_ASSESSMENT;
 
-        let path = this.rootPathChart + 'dailyAssessments/';
-
-        return firebase.push(
-            path,
-            _object
-        ).then(function (result) {
-            firebase.update(path + result.key, {
-                key: result.key
-            });
-
-            return result;
-        });
+        return this.databaseLifechart.createDocument(_object);
     }
 
     saveLifeEvent(_object) {
-        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.type = this.TYPE_LIFE_EVENT;
         _object.timestamp = java.lang.System.currentTimeMillis();
+        _object.type = this.TYPE_LIFE_EVENT;
 
-        let path = this.rootPathChart + 'lifeEvents/';
-
-       return firebase.push(
-            path,
-            _object
-        ).then(function (result) {
-            firebase.update(path + result.key, {
-                key: result.key
-            });
-
-            return result;
-        });
-
-
+        return this.databaseLifechart.createDocument(_object);
     }
 
     saveComorbidSymptom(_object) {
-        _object.serverTimestamp = firebase.ServerValue.TIMESTAMP;
-        _object.type = this.TYPE_COMORBID_SYMPTOM;
         _object.timestamp = java.lang.System.currentTimeMillis();
+        _object.type = this.TYPE_COMORBID_SYMPTOM;
 
-        let path = this.rootPathChart + 'comorbidSymptoms/';
-
-       return firebase.push(
-            path,
-            _object
-        ).then(function (result) {
-            firebase.update(path + result.key, {
-                key: result.key
-            });
-
-            return result;
-        });
-
-
+        return this.databaseLifechart.createDocument(_object);
     }
 
-    removeLifeEvent(key) {
-        let data = {};
-        data[key] = null;
-        return firebase.update(this.rootPathChart + 'lifeEvents/', data);
+    removeLifeEvent(_id) {
+        return this.databaseLifechart.deleteDocument(_id);
     }
 
-    getLifeEvents(date, callback) {
-        return firebase.query(
-            callback,
-            this.rootPathChart + 'lifeEvents/',
-            {
-                // set this to true if you want to check if the value exists or just want the event to fire once
-                // default false, so it listens continuously.
-                // Only when true, this function will return the data in the promise as well!
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                },
-                range      : {
-                    type : firebase.QueryRangeType.EQUAL_TO,
-                    value: date
-                }
-            }
-        );
+    getLifeEvents(_date) {
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [
+                                                    {property: 'date', comparison: 'equalTo', value: _date},
+                                                    {
+                                                        property  : 'type',
+                                                        comparison: 'equalTo',
+                                                        value     : this.TYPE_LIFE_EVENT,
+                                                        logical   : QueryLogicalOperator.AND
+                                                    }
+                                                ],
+                                                order : [{property: 'timestamp', direction: 'asc'}]
+                                            });
     }
 
-    removeComorbidSymptom(key) {
-        let data = {};
-        data[key] = null;
-        return firebase.update(this.rootPathChart + 'comorbidSymptoms/', data);
+    removeComorbidSymptom(_id) {
+        return this.databaseLifechart.deleteDocument(_id);
     }
 
-    getComborbidSymptoms(date, callback) {
-        return firebase.query(
-            callback,
-            this.rootPathChart + 'comorbidSymptoms/',
-            {
-                // set this to true if you want to check if the value exists or just want the event to fire once
-                // default false, so it listens continuously.
-                // Only when true, this function will return the data in the promise as well!
-                singleEvent: true,
-                orderBy    : {
-                    type : firebase.QueryOrderByType.CHILD,
-                    value: 'date' // mandatory when type is 'child'
-                },
-                range      : {
-                    type : firebase.QueryRangeType.EQUAL_TO,
-                    value: date
-                }
-            }
-        );
+    getComborbidSymptoms(_date) {
+        return this.databaseLifechart.query({
+                                                select: [],
+                                                where : [
+                                                    {property: 'date', comparison: 'equalTo', value: _date},
+                                                    {
+                                                        property  : 'type',
+                                                        comparison: 'equalTo',
+                                                        value     : this.TYPE_COMORBID_SYMPTOM,
+                                                        logical   : QueryLogicalOperator.AND
+                                                    }
+                                                ],
+                                                order : [{property: 'timestamp', direction: 'asc'}]
+                                            });
     }
 }

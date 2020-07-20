@@ -46,7 +46,9 @@
 	import LifeChartService from '~/LifeChart.service';
 	import { ObservableArray } from 'tns-core-modules/data/observable-array';
 	import ComorbidSymptoms from '~/components/hints/ComorbidSymptoms';
+	import JaneService from '~/Jane.service';
 
+	const Jane = new JaneService();
 	const LifeChart = new LifeChartService();
 
     export default {
@@ -71,29 +73,22 @@
 				setTimeout(() => {
 					this.minimumLoadingTimeDone = true;
 				}, 750);
-				LifeChart.getComborbidSymptoms(this.dateTodayDb, this.onComborbidSymptomQueryEvent);
+				this.setRecords(LifeChart.getComborbidSymptoms(this.dateTodayDb));
 			},
-			onComborbidSymptomQueryEvent(result) {
-				if (!result.error) {
-					let records = result.children;
-
-					if (records && records.length) {
-						this.noSymptoms = false;
-						for (let i = 0; i < records.length; i++) {
-							++this.symptomCount;
-							this.symptoms.unshift({
-												   text        : records[i].symptom,
-												   key         : records[i].key,
-												   valueFieldId: 'value-' + this.symptomCount,
-												   buttonId    : this.symptomCount
-											   });
-						}
+			setRecords(_records) {
+				if (_records && _records.length) {
+					this.noSymptoms = false;
+					for (let i = 0; i < _records.length; i++) {
+						++this.symptomCount;
+						let record = _records[i];
+						this.symptoms.unshift({
+												  text        : record.symptom,
+												  id          : record.id,
+												  valueFieldId: 'value-' + this.symptomCount,
+												  buttonId    : this.symptomCount
+											  });
 					}
 				}
-				else {
-					console.error(result.error);
-				}
-
 				this.isLoading = false;
 			},
 			onTapDone(event) {
@@ -103,8 +98,8 @@
 				let selectedRecord = event.object.bindingContext,
 						symptomArrayLengthBeforeChange = this.symptoms.length;
 
-				let promise = LifeChart.removeComorbidSymptom(selectedRecord.key);
-				promise.then((result) => {
+
+				if (LifeChart.removeComorbidSymptom(selectedRecord.id)) {
 					this.symptoms.splice(this.symptoms.indexOf(selectedRecord), 1);
 					if (symptomArrayLengthBeforeChange === this.symptoms.length) {
 						dialogs.alert({
@@ -115,13 +110,14 @@
 						return;
 					}
 					this.noSymptoms = (this.symptoms.length === 0);
-				}, (error) => {
+				}
+				else {
 					dialogs.alert({
 									  title       : "Fehler!",
 									  message     : "hat nicht geklappt",
 									  okButtonText: "shitte"
 								  });
-				});
+				}
 			},
 			showExplanation() {
 				this.$showModal(ComorbidSymptoms, {
@@ -138,27 +134,19 @@
 				this.currentSymptomText = '';
 				event.object.text = '';
 
-				let promise = LifeChart.saveComorbidSymptom({
-																symptom: text,
-																date   : this.dateTodayDb
-															});
+				let documentId = LifeChart.saveComorbidSymptom({
+																   symptom: text,
+																   date   : this.dateTodayDb
+															   });
 
-				promise.then((result) => {
-					this.noSymptoms = false;
-					++this.symptomCount;
-					this.symptoms.unshift({
-										   text        : text,
-										   key         : result.key,
-										   valueFieldId: 'value-' + this.symptomCount,
-										   buttonId    : this.symptomCount
-									   });
-				}, (error) => {
-					dialogs.alert({
-									  title       : "Fehler!",
-									  message     : "hat nicht geklappt",
-									  okButtonText: "shitte"
-								  });
-				});
+				this.noSymptoms = false;
+				++this.symptomCount;
+				this.symptoms.unshift({
+										  text        : text,
+										  id          : documentId,
+										  valueFieldId: 'value-' + this.symptomCount,
+										  buttonId    : this.symptomCount
+									  });
 			}
 		}
 	}

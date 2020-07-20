@@ -69,28 +69,22 @@
 				setTimeout(() => {
 					this.minimumLoadingTimeDone = true;
 				}, 750);
-				LifeChart.getLifeEvents(this.dateTodayDb, this.onQueryEvent);
+				this.setRecords(LifeChart.getLifeEvents(this.dateTodayDb));
 			},
-			onQueryEvent(result) {
+			setRecords(_records) {
 				this.isLoading = false;
-				if (!result.error) {
-					let records = result.children;
-
-					if (records && records.length) {
-						this.noRecords = false;
-						for (let i = 0; i < records.length; i++) {
-							++this.recordCount;
-							this.records.unshift({
-												   text        : records[i].event,
-												   key         : records[i].key,
-												   valueFieldId: 'value-' + this.recordCount,
-												   buttonId    : this.recordCount
-											   });
-						}
+				if (_records && _records.length) {
+					this.noRecords = false;
+					for (let i = 0; i < _records.length; i++) {
+						++this.recordCount;
+						let record = _records[i];
+						this.records.unshift({
+												 text        : record.event,
+												 id          : record.id,
+												 valueFieldId: 'value-' + this.recordCount,
+												 buttonId    : this.recordCount
+											 });
 					}
-				}
-				else {
-					console.error(result.error);
 				}
 			},
 			onTapDone(event) {
@@ -109,8 +103,7 @@
 
 				item = page.getViewById('value-' + id).text;
 
-				let promise = LifeChart.removeLifeEvent(selectedRecord.key);
-				promise.then((result) => {
+				if (LifeChart.removeLifeEvent(selectedRecord.id)) {
 					this.records.splice(this.records.indexOf(selectedRecord), 1);
 					if (recordArrayLengthBeforeChange === this.records.length) {
 						dialogs.alert({
@@ -121,13 +114,14 @@
 						return;
 					}
 					this.noRecords = (this.records.length === 0);
-				}, (error) => {
+				}
+				else {
 					dialogs.alert({
 									  title       : "Fehler!",
 									  message     : "hat nicht geklappt",
 									  okButtonText: "shitte"
 								  });
-				});
+				}
 			},
 			onReturnPress(event) {
 				let text = event.object.text;
@@ -139,27 +133,20 @@
 				this.currentText = '';
 				event.object.text = '';
 
-				let promise = LifeChart.saveLifeEvent({
-																event: text,
-																date   : this.dateTodayDb
-															});
+				let documentId = LifeChart.saveLifeEvent({
+															 event: text,
+															 date : this.dateTodayDb
+														 });
 
-				promise.then((result) => {
-					this.noRecords = false;
-					++this.recordCount;
-					this.records.unshift({
-										   text        : text,
-										   key         : result.key,
-										   valueFieldId: 'value-' + this.recordCount,
-										   buttonId    : this.recordCount
-									   });
-				}, (error) => {
-					dialogs.alert({
-									  title       : "Fehler!",
-									  message     : "hat nicht geklappt",
-									  okButtonText: "shitte"
-								  });
-				});
+				this.noRecords = false;
+				++this.recordCount;
+
+				this.records.unshift({
+										 text        : text,
+										 id          : documentId,
+										 valueFieldId: 'value-' + this.recordCount,
+										 buttonId    : this.recordCount
+									 });
 			}
 		}
 	}

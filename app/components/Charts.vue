@@ -1,6 +1,6 @@
 <template lang="html">
     <Page @loaded="onPageLoaded" actionBarHidden="true">
-        <FlexboxLayout flexDirection="column" justifyContent="center" class="">
+        <FlexboxLayout flexDirection="column" justifyContent="center" class="background-gradient">
             <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
                          @swipe="onSwipe">
                 <Button @tap="onTapMonthBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
@@ -87,49 +87,41 @@
                     this.onTapMonthForward();
                 }
             },
-            onAssessmentsLoaded(result) {
-                if (!result.error) {
-                    let records = result.children;
+            loadAssessments(_records) {
+                if (_records && _records.length) {
+                    let minValue = 100,
+                            maxValue = 0;
 
-                    if (records && records.length) {
-                        let minValue = 100,
-                                maxValue = 0;
+                    this.items = _records;
 
-                        this.items = records;
-
-                        for (let i = 0; i < records.length; i++) {
-                            let currentValue = records[i].mood;
-                            if (currentValue < minValue) {
-                                minValue = currentValue;
-                            }
-                            if (currentValue > maxValue) {
-                                maxValue = currentValue;
-                            }
-
-                            if (maxValue < 50) {
-                                maxValue = 54;
-                            }
+                    for (let i = 0; i < _records.length; i++) {
+                        let currentValue = _records[i].mood;
+                        if (currentValue < minValue) {
+                            minValue = currentValue;
+                        }
+                        if (currentValue > maxValue) {
+                            maxValue = currentValue;
                         }
 
-                        this.moodMinValue = minValue - 1;
-                        this.moodMaxValue = maxValue + 1;
-                        this.majorStepValue = this.moodMaxValue - this.moodMinValue;
+                        if (maxValue < 50) {
+                            maxValue = 54;
+                        }
                     }
+
+                    this.moodMinValue = minValue - 1;
+                    this.moodMaxValue = maxValue + 1;
+                    this.majorStepValue = this.moodMaxValue - this.moodMinValue;
                 }
             },
-            onFunctionalImpairmentsLoaded(result) {
-                if (!result.error) {
-                    let records = result.children;
-
-                    if (records && records.length) {
-                        this.impairmentRecords = records;
-                    }
+            loadFunctionalImpairments(_records) {
+                if (_records && _records.length) {
+                    this.impairmentRecords = _records;
                 }
             },
             onPageLoaded() {
                 this.setDateToday();
-                LifeChart.getAssessments(this.onAssessmentsLoaded);
-                LifeChart.getFunctionalImpairments(this.onFunctionalImpairmentsLoaded);
+                this.loadAssessments(LifeChart.getAssessments());
+                this.loadFunctionalImpairments(LifeChart.getFunctionalImpairments());
             },
             setDateToday(_changeDate) {
                 if (_changeDate === 1) {

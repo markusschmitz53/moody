@@ -1,6 +1,6 @@
 <template>
-	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
-		<FlexboxLayout flexDirection="column" class="m-t-20" justifyContent="space-between">
+	<Page actionBarHidden="true" @navigatingTo="onPageLoaded">
+		<FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
 			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" @swipe="onSwipe" >
 				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
@@ -68,9 +68,9 @@
 			</StackLayout>
 			<FlexboxLayout class="m-x-10" width="100%">
 				<Button width="100%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
-				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index reduced-margin">
+				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index reduced-margin transparent-bg">
 					<FormattedString>
-						<Span class="far button-icon-day-done" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
+						<Span class="far button-icon-day-done transparent-bg" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
 					</FormattedString>
 				</Button>
 			</FlexboxLayout>
@@ -90,26 +90,28 @@
 	import Mood from './FunctionalImpairment';
 	import {Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
+	import JaneService from '~/Jane.service';
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
+	const Jane = new JaneService();
 
 	export default {
 		data: () => {
 			return {
-				oneSuccessfulLoadDone   : false,
-				savingEnabled           : true,
-				currentRecordKey        : null,
-				isDysphoric             : false,
-				questionDoneForToday    : false,
-				sleepHoursColor         : '#CCC',
-				dateToday               : '',
-				currentHourAndMinute    : '',
-				currentDate             : null,
-				isDysphoricTintColor    : '#CCCCCC',
-				dayToday                : '',
-				sleepHours              : 0,
-				sleepStart              : 0,
+				oneSuccessfulLoadDone: false,
+				savingEnabled        : true,
+				currentRecordId      : null,
+				isDysphoric          : false,
+				questionDoneForToday : false,
+				sleepHoursColor      : '#CCC',
+				dateToday            : '',
+				currentHourAndMinute : '',
+				currentDate          : null,
+				isDysphoricTintColor : '#CCCCCC',
+				dayToday             : '',
+				sleepHours           : 0,
+				sleepStart           : 0,
 				sleepEnd                : 0,
 				sleepStartedSameDay     : true,
 				sleepStartSelectedIndex : 2,
@@ -186,12 +188,12 @@
 			onTapDayForward() {
 				this.setDateToday(1);
 				this.reset();
-				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
+				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
 			onTapDayBackward() {
 				this.setDateToday(-1);
 				this.reset();
-				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
+				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
 			onSliderValueChange(event) {
 				this.moodRatingColor = this.moodRatingHighlightColor;
@@ -289,53 +291,49 @@
 				this.dateTodayDb = yyyy + '-' + mm + '-' + dd;
 				this.currentHourAndMinute = hh + ':' + ii;
 			},
-			onRecordLoaded(result) {
-				if (!result.error) {
-					let records = result.children;
+			onRecordLoaded(_records) {
+				if (_records && _records.length) {
+					let record = _records[0];
 
-					if (records && records.length) {
-						let record = records[0];
+					let sleepStartIndex = record.sleepStartIndex;
+					let sleepEndIndex = record.sleepEndIndex;
+					this.currentRecordId = record.id;
+					this.moodRating = record.mood;
+					this.sleepHours = record.sleepHours;
+					this.isDysphoric = record.dysphoric;
 
-						let sleepStartIndex = record.sleepStartIndex;
-						let sleepEndIndex = record.sleepEndIndex;
-						this.currentRecordKey = record.key;
-						this.moodRating = record.mood;
-						this.sleepHours = record.sleepHours;
-						this.isDysphoric = record.dysphoric;
-
-						if (!record.key) {
-							throw new Error("Record is missing key");
-						}
-
-						if (!sleepStartIndex) {
-							this.sleepStartSelectedIndex = 2;
-						}
-						else {
-							this.sleepStartSelectedIndex = sleepStartIndex;
-						}
-
-						if (!sleepEndIndex) {
-							this.sleepEndSelectedIndex = 19;
-						}
-						else {
-							this.sleepEndSelectedIndex = sleepEndIndex;
-						}
-
-						this.sleepStartedSameDay = record.sleepStartedSameDay;
-
-						this.questionDoneForToday = true;
-						this.assessmentStatusColor = '#444';
-
-						this.oneSuccessfulLoadDone = true;
+					if (!record.id) {
+						throw new Error("Record is missing id");
 					}
-				} else {
-					console.error(result.error);
+
+					if (!sleepStartIndex) {
+						this.sleepStartSelectedIndex = 2;
+					}
+					else {
+						this.sleepStartSelectedIndex = sleepStartIndex;
+					}
+
+					if (!sleepEndIndex) {
+						this.sleepEndSelectedIndex = 19;
+					}
+					else {
+						this.sleepEndSelectedIndex = sleepEndIndex;
+					}
+
+					this.sleepStartedSameDay = record.sleepStartedSameDay;
+
+					this.questionDoneForToday = true;
+					this.assessmentStatusColor = '#444';
+
+					this.oneSuccessfulLoadDone = true;
 				}
 			},
 			onPageLoaded(event) {
 				if (this.oneSuccessfulLoadDone) {
 					return;
 				}
+
+				Jane.graspSituation();
 
 				this.page = event.object.page;
 
@@ -346,7 +344,7 @@
 				this.resetTimeSlept();
 				this.updateTimeSlept();
 
-				LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
+				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
 			resetTimeSlept() {
 				this.sleepStart = this.timeItems[2];
@@ -359,7 +357,7 @@
 				this.savingEnabled = true;
 				this.isDysphoric = false;
 				this.moodRating = 50;
-				this.currentRecordKey = null;
+				this.currentRecordId = null;
 				this.sleepStartedSameDay = true;
 
 				this.resetTimeSlept();
@@ -378,9 +376,12 @@
 						console.log("TODO: REMOVE DAY");
 					}
 					else if (result === false) {
-						LifeChart.removeDailyAssessment(that.currentRecordKey).then((result) => {
+						if (LifeChart.removeDailyAssessment(that.currentRecordId)) {
 							that.reset();
-						});
+						}
+						else {
+							console.error('Could not remove');
+						}
 					}
 				});
 			},
@@ -410,10 +411,8 @@
 
 				Vibrator.vibrate(75);
 
-				let promise;
-
-				if (!this.currentRecordKey) {
-					promise = LifeChart.saveDailyAssessment(
+				if (!this.currentRecordId) {
+					this.currentRecordId = LifeChart.saveDailyAssessment(
 							{
 								sleepHours         : this.sleepHours,
 								sleepStartIndex    : this.sleepStartSelectedIndex,
@@ -426,7 +425,7 @@
 					);
 				}
 				else {
-					promise = LifeChart.updateDailyAssessment(this.currentRecordKey,
+					LifeChart.updateDailyAssessment(this.currentRecordId,
 															  {
 																  sleepStartedSameDay: this.sleepStartedSameDay,
 																  sleepStartIndex    : this.sleepStartSelectedIndex,
@@ -436,30 +435,9 @@
 																  dysphoric          : this.isDysphoric,
 																  date               : this.dateTodayDb
 															  }
+
 					);
 				}
-
-				promise.then((result) => {
-					if (!this.currentRecordKey) {
-						this.currentRecordKey = result.key;
-					}
-					let message = 'Tag: ' + this.dateTodayDb + "\n" +
-								  'Schlaf Stunden: ' + this.sleepHours + "\n" +
-								  'Stimmung: ' + this.moodRating + "\n" +
-								  'Dysphorisch: ' + this.isDysphoric;
-					dialogs.alert({
-									  title       : "",
-									  message     : message,
-									  okButtonText: "cool"
-								  });
-				}, (error) => {
-					console.error("error");
-					dialogs.alert({
-									  title       : "",
-									  message     : "es gab einen Fehler:" + error,
-									  okButtonText: "oh no :("
-								  });
-				});
 			}
 		}
 	};
@@ -502,4 +480,11 @@
 	.slide {
 		margin-left: -5;
 	}
+
+	.transparent-bg {
+		border-radius: 20;
+		border-width: 1;padding: 0;
+		background: white;
+	}
+
 </style>

@@ -93,47 +93,39 @@
 
 				this.selectedItemIndex = 4;
 				this.currentHint = this.items[this.selectedItemIndex].hint;
-				LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb, this.onRecordsLoaded);
+				this.setRecords(LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb));
 			},
-			onRecordsLoaded(result) {
-				this.isLoading = false;
-				if (!result.error) {
-					let records = result.children;
+			setRecords(_records) {
+				this.noRecords = true;
+				this.records = [];
 
-					if (records && records.length) {
-						this.noRecords = false;
-						for (let i = 0; i < records.length; i++) {
-							this.records.push({
-												  impairment: records[i].impairment,
-												  key       : records[i].key
-											  });
-						}
+				this.isLoading = false;
+
+				if (_records && _records.length) {
+					this.noRecords = false;
+					for (let i = 0; i < _records.length; i++) {
+						let record = _records[i];
+						this.records.push({
+											  impairment: record.impairment,
+											  id        : record.id
+										  });
 					}
 				}
 			},
 			onTapRemoveRecord(event) {
-				let selectedRecord = event.object.bindingContext,
-						recordArrayLengthBeforeChange = this.records.length;
-
-				let promise = LifeChart.removeFunctionalImpairment(selectedRecord.key);
-				promise.then(() => {
-					this.records.splice(this.records.indexOf(selectedRecord), 1);
-					if (recordArrayLengthBeforeChange === this.records.length) {
-						dialogs.alert({
-										  title       : "",
-										  message     : "da ist was schief gegangen",
-										  okButtonText: "oopsie"
-									  });
-						return;
-					}
-					this.noRecords = (this.records.length === 0);
-				}, (error) => {
+				let selectedRecord = event.object.bindingContext;
+				console.log("REMOVE");
+console.log(selectedRecord);
+				if (LifeChart.removeFunctionalImpairment(selectedRecord.id)) {
+					this.setRecords(LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb));
+				}
+				else {
 					dialogs.alert({
 									  title       : "Fehler!",
 									  message     : "hat nicht geklappt",
 									  okButtonText: "shitte"
 								  });
-				});
+				}
 			},
 			selectedIndexChanged() {
 				if (this.items[this.selectedItemIndex]) {
@@ -149,7 +141,7 @@
 								   });
 			},
 			onTapDone() {
-				let promise = LifeChart.saveFunctionalImpairment(
+				LifeChart.saveFunctionalImpairment(
 						{
 							impairment: this.items[this.selectedItemIndex].value,
 							date      : this.dateTodayDb,
@@ -157,26 +149,17 @@
 						}
 				);
 
-				promise.then((result) => {
-					let message = 'Datum: ' + this.dateToday + "\n" +
-								  'Einschränkung: ' + this.items[this.selectedItemIndex].name;
-					Vibrator.vibrate(75);
-					dialogs.alert({
-									  title       : "",
-									  message     : message,
-									  okButtonText: "cool"
-								  });
-					this.$navigateBack({
-										   frame: 'main'
-									   });
-				}, (error) => {
-					console.error("error");
-					dialogs.alert({
-									  title       : "",
-									  message     : "es gab einen Fehler:" + error,
-									  okButtonText: "oh no :("
-								  });
-				});
+				let message = 'Datum: ' + this.dateToday + "\n" +
+							  'Einschränkung: ' + this.items[this.selectedItemIndex].name;
+				Vibrator.vibrate(75);
+				dialogs.alert({
+								  title       : "",
+								  message     : message,
+								  okButtonText: "cool"
+							  });
+				this.$navigateBack({
+									   frame: 'main'
+								   });
 			}
 		}
 	};

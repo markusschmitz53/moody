@@ -18,25 +18,25 @@
         </TabStrip>
 
         <TabContentItem>
-            <Frame id="main" class="m-b-10">
+            <Frame id="main">
                 <DailyAssessment />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
-            <Frame class="m-b-10">
+            <Frame>
                 <Charts />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
-            <Frame class="m-b-10">
+            <Frame>
                 <Home />
             </Frame>
         </TabContentItem>
 
         <TabContentItem>
-            <Frame class="m-b-10">
+            <Frame>
                 <Activity />
             </Frame>
         </TabContentItem>
@@ -66,7 +66,6 @@ export default {
 @import "~@nativescript/theme/scss/variables/blue";
 // End custom common variables
 
-// Custom styles
 TabStrip {
     background-color: #FFF;
     border-color: #FAFAFA;
