@@ -19,7 +19,7 @@
 									 :items="records">
 							<v-template>
 								<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
-									<Label :text="item.impairment" width="80%" class="m-l-20 m-t-10 h3"></Label>
+									<Label :text="item.label" width="80%" class="m-l-20 m-t-10 h3"></Label>
 									<Button text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
 											@tap="onTapRemoveRecord" color="#CCC"></Button>
 								</StackLayout>
@@ -84,7 +84,7 @@
 		},
 		methods: {
 			onPageLoaded() {
-				this.items = LifeChart.getMoodItems();
+				this.items = LifeChart.getImpairmentItems();
 				this.isLoading = true;
 				this.minimumLoadingTimeDone = false;
 				setTimeout(() => {
@@ -105,8 +105,11 @@
 					this.noRecords = false;
 					for (let i = 0; i < _records.length; i++) {
 						let record = _records[i];
+						console.log(LifeChart.getImpairmentLabelForValue(record.impairment));
+						console.log(record.impairment);
 						this.records.push({
 											  impairment: record.impairment,
+											  label     : LifeChart.getImpairmentLabelForValue(record.impairment),
 											  id        : record.id
 										  });
 					}
@@ -114,8 +117,7 @@
 			},
 			onTapRemoveRecord(event) {
 				let selectedRecord = event.object.bindingContext;
-				console.log("REMOVE");
-console.log(selectedRecord);
+
 				if (LifeChart.removeFunctionalImpairment(selectedRecord.id)) {
 					this.setRecords(LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb));
 				}
@@ -149,14 +151,7 @@ console.log(selectedRecord);
 						}
 				);
 
-				let message = 'Datum: ' + this.dateToday + "\n" +
-							  'Einschränkung: ' + this.items[this.selectedItemIndex].name;
 				Vibrator.vibrate(75);
-				dialogs.alert({
-								  title       : "",
-								  message     : message,
-								  okButtonText: "cool"
-							  });
 				this.$navigateBack({
 									   frame: 'main'
 								   });

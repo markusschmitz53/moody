@@ -1,13 +1,41 @@
 import { Observable } from 'tns-core-modules/data/observable';
+import * as simpleLibsodium from 'nativescript-simple-libsodium';
+const application = require("tns-core-modules/application");
 
 export default class JaneService extends Observable {
 
     constructor() {
         super();
+        this.simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
+        this.key = this.simpleLibsodium.generateKeyWithSuppliedString("x921x44=18120-jf", 32);
+    }
+
+    encrypt(_mixedEncrypt) {
+        if (typeof _mixedEncrypt === 'object') {
+            _mixedEncrypt = JSON.stringify(_mixedEncrypt);
+        }
+
+        let enc = this.simpleLibsodium.AEDEncrypt(2, _mixedEncrypt, this.key.raw);
+        return enc;
+    }
+
+    decrypt(_encryptedObject) {
+        let decoded = this.simpleLibsodium.AEDDecrypt(2, _encryptedObject.rawCrypted, this.key.raw, _encryptedObject.rawNonce);
+
+        try {
+            decoded = JSON.parse(decoded.string);
+        } catch (_error) {
+            decoded = decoded.string;
+        }
+        return decoded;
+    }
+
+    getSecret(_key) {
+
     }
 
     graspSituation() {
-        console.log("test");
+        this.getSecret();
     }
 
     say(_expression) {

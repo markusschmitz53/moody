@@ -39,16 +39,13 @@
 </template>
 
 <script>
-	import { Label } from 'tns-core-modules/ui/label';
-	import { Button } from 'tns-core-modules/ui/button';
-	import { StackLayout } from 'tns-core-modules/ui/layouts/stack-layout';
 	import * as dialogs from 'tns-core-modules/ui/dialogs';
 	import LifeChartService from '~/LifeChart.service';
 	import { ObservableArray } from 'tns-core-modules/data/observable-array';
 	import ComorbidSymptoms from '~/components/hints/ComorbidSymptoms';
-	import JaneService from '~/Jane.service';
+	import VibratorService from '~/Vibrator.service';
 
-	const Jane = new JaneService();
+	const Vibrator = new VibratorService();
 	const LifeChart = new LifeChartService();
 
     export default {
@@ -133,6 +130,8 @@
 
 				this.currentSymptomText = '';
 				event.object.text = '';
+
+				Vibrator.vibrate(75);
 
 				let documentId = LifeChart.saveComorbidSymptom({
 																   symptom: text,

@@ -15,7 +15,7 @@ dependencies {
 // create a file named before-plugins.gradle in the current directory and place it there
 android {
   defaultConfig {
-    minSdkVersion 17
+    minSdkVersion 24
     generatedDensities = []
     applicationVariants.all { variant ->
         variant.outputs.all {

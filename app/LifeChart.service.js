@@ -13,30 +13,7 @@ export default class LifeChartService {
         this.databaseHuman = new Couchbase('ka4821LO-0041-human');
         this.databaseStatus = new Couchbase('ka4821LO-0041-lifechart');
 
-        this._setTimeItems();
-    }
-
-    _setTimeItems() {
-        this.timeItems = ['23:30'];
-        for (let i = 0; i < 24; i++) {
-            let number = i + '';
-            number = number.padStart(2, '0');
-            this.timeItems.push(number + ':00');
-            this.timeItems.push(number + ':30');
-        }
-        this.timeItems.push('00:00');
-    }
-
-    getData() {
-        return '';
-    }
-
-    getTimeItems() {
-        return this.timeItems;
-    }
-
-    getMoodItems() {
-        return [
+        this._impairmentItems = [
             {
                 value   : 4,
                 name    : 'manie_4',
@@ -110,13 +87,52 @@ export default class LifeChartService {
                 }
             }
         ];
+
+        this._setTimeItems();
+    }
+
+    _setTimeItems() {
+        this.timeItems = ['23:30'];
+        for (let i = 0; i < 24; i++) {
+            let number = i + '';
+            number = number.padStart(2, '0');
+            this.timeItems.push(number + ':00');
+            this.timeItems.push(number + ':30');
+        }
+        this.timeItems.push('00:00');
+    }
+
+    getData() {
+        return '';
+    }
+
+    getTimeItems() {
+        return this.timeItems;
+    }
+
+    getImpairmentLabelForValue(_value) {
+        let items = this._impairmentItems;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].value === _value) {
+                return items[i].toString();
+            }
+        }
+
+        return _value;
+    }
+
+    getImpairmentItems() {
+        return this._impairmentItems;
     }
 
     getAssessments(_callback) {
-        console.log("TODO: check loaded records order");
         return this.databaseLifechart.query({
                                                 select: [],
-                                                where : [],
+                                                where : [{
+                                                    property  : 'type',
+                                                    comparison: 'equalTo',
+                                                    value     : this.TYPE_DAILY_ASSESSMENT
+                                                }],
                                                 order : [{property: 'date', direction: 'asc'}]
                                             });
     }
@@ -128,11 +144,10 @@ export default class LifeChartService {
                                                     {
                                                         property  : 'type',
                                                         comparison: 'equalTo',
-                                                        value     : this.TYPE_FUNCTIONAL_IMPAIRMENT,
-                                                        logical   : QueryLogicalOperator.AND
+                                                        value     : this.TYPE_FUNCTIONAL_IMPAIRMENT
                                                     }
                                                 ],
-                                                order : [{property: 'timestamp', direction: 'asc'}]
+                                                order : [{property: 'date', direction: 'asc'}]
                                             });
     }
 

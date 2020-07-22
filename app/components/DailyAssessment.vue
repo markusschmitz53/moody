@@ -42,9 +42,9 @@
 			</FlexboxLayout>
 			<StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
 				<StackLayout class="m-r-10" orientation="horizontal">
-					<Button width="40" @tap="showDysphoricExplanation" class="far reduced-margin button-z-index" >
+					<Button width="40" @tap="showDysphoricExplanation" class="far reduced-margin button-z-index transparent-bg" >
 						<FormattedString>
-							<Span class="far h1" :color="isDysphoricTintColor"
+							<Span class="far h1  transparent-bg" :color="isDysphoricTintColor"
 								  text.decode="&#xf556;"></Span>
 						</FormattedString>
 					</Button>
@@ -474,7 +474,7 @@
 	.dateLabel {
 		color: #444444;
 		font-size: 15;
-		margin-top: 3;
+		margin-top: 5;
 	}
 
 	.slide {
@@ -482,9 +482,8 @@
 	}
 
 	.transparent-bg {
-		border-radius: 20;
-		border-width: 1;padding: 0;
 		background: white;
 	}
+
 
 </style>

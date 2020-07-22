@@ -78,7 +78,7 @@
 
                 Jane.on('JANE_CONVERSATION_OUTPUT', this._conversationOutputCallback);
                 Jane.on('JANE_CONVERSATION_HUMANINPUT', this._conversationHumanInputCallback);
-                Jane.startConversation();
+             //   Jane.startConversation();
                 setTimeout(() => {
 
                 }, 750);

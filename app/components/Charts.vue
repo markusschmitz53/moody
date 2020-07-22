@@ -58,16 +58,7 @@
                 moodMaxValue     : 100,
                 items            : [],
                 currentMonth     : '',
-                impairmentRecords: [
-                    {key: '2020-07-08', value: -4},
-                    {key: '2020-07-06', value: -3},
-                    {key: '2020-07-05', value: -2},
-                    {key: '2020-07-04', value: -1},
-                    {key: '2020-07-03', value: 0},
-                    {key: '2020-07-02', value: 2},
-                    {key: '2020-07-01', value: 3},
-                    {key: '2020-06-31', value: 4}
-                ]
+                impairmentRecords: []
             };
         },
         methods: {
@@ -87,7 +78,7 @@
                     this.onTapMonthForward();
                 }
             },
-            loadAssessments(_records) {
+            setAssessmentRecords(_records) {
                 if (_records && _records.length) {
                     let minValue = 100,
                             maxValue = 0;
@@ -108,20 +99,20 @@
                         }
                     }
 
-                    this.moodMinValue = minValue - 1;
-                    this.moodMaxValue = maxValue + 1;
+                    this.moodMinValue = minValue - 2;
+                    this.moodMaxValue = maxValue + 2;
                     this.majorStepValue = this.moodMaxValue - this.moodMinValue;
                 }
             },
-            loadFunctionalImpairments(_records) {
+            setImpairmentRecords(_records) {
                 if (_records && _records.length) {
                     this.impairmentRecords = _records;
                 }
             },
             onPageLoaded() {
                 this.setDateToday();
-                this.loadAssessments(LifeChart.getAssessments());
-                this.loadFunctionalImpairments(LifeChart.getFunctionalImpairments());
+                this.setAssessmentRecords(LifeChart.getAssessments());
+                this.setImpairmentRecords(LifeChart.getFunctionalImpairments());
             },
             setDateToday(_changeDate) {
                 if (_changeDate === 1) {
@@ -201,7 +192,7 @@
 .dateLabel {
     color: #444444;
     font-size: 15;
-    margin-top: 3;
+    margin-top: 5;
 }
 
 .reduced-margin-and-padding {
