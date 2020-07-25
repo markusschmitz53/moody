@@ -6,6 +6,7 @@ export default class JaneService extends Observable {
 
     constructor() {
         super();
+        this.lastUsedExpression = {};
         this.simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
         this.key = this.simpleLibsodium.generateKeyWithSuppliedString("x921x44=18120-jf", 32);
     }
@@ -63,12 +64,23 @@ export default class JaneService extends Observable {
             case 'gotit':
                 expressions = ['Alles klar', 'In Ordnung'];
                 break;
+            case 'updatedit':
+                expressions = ['Die Änderungen habe ich mir gemerkt.', 'Die Änderungen sind angekommen, danke.', 'Alles klar, danke.'];
+                break;
+            case 'rememberedIt':
+                expressions = ['Hab\'s mir gemerkt', 'Ist gespeichert', 'Danke dir'];
+                break;
         }
 
         let expression = _expression;
 
-        if (expressions.length > 0)
-            expression = expressions[Math.floor(Math.random() * expressions.length)];
+        if (expressions.length > 0) {
+            do {
+                expression = expressions[Math.floor(Math.random() * expressions.length)];
+            } while (this.lastUsedExpression[_expression] === expression);
+
+            this.lastUsedExpression[_expression] = expression;
+        }
 
         return expression;
     }
