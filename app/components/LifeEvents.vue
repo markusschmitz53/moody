@@ -1,5 +1,5 @@
 <template>
-	<Page @load="onPageLoaded" @shownModally="onShownModally">
+	<Page @shownModally="onShownModally">
 		<StackLayout backgroundColor="#FFFFFF" orientation="vertical">
 			<StackLayout orientation="vertical">
 				<DockLayout stretchLastChild="false" height="48" width="100%">
@@ -39,7 +39,7 @@
 <script>
 	import * as dialogs from 'tns-core-modules/ui/dialogs';
 	import LifeChartService from '~/LifeChart.service';
-	import { ObservableArray } from 'tns-core-modules/data/observable-array';
+	import {ObservableArray} from 'tns-core-modules/data/observable-array';
 	import VibratorService from '~/Vibrator.service';
 
 	const Vibrator = new VibratorService();
@@ -50,7 +50,6 @@
 		data: () => {
 			return {
 				records               : new ObservableArray([]),
-				recordCount           : 0,
 				currentText           : '',
 				isLoading             : false,
 				minimumLoadingTimeDone: false,
@@ -59,10 +58,8 @@
 			}
 		},
 		methods: {
-			onPageLoaded(event) {
-			},
-			onShownModally(event) {
-				this.page = event.object.page;
+			onShownModally(_event) {
+				this.page = _event.object.page;
 				this.isLoading = true;
 				this.minimumLoadingTimeDone = false;
 				setTimeout(() => {
@@ -75,24 +72,21 @@
 				if (_records && _records.length) {
 					this.noRecords = false;
 					for (let i = 0; i < _records.length; i++) {
-						++this.recordCount;
 						let record = _records[i];
 						this.records.unshift({
 												 text        : record.event,
-												 id          : record.id,
-												 valueFieldId: 'value-' + this.recordCount,
-												 buttonId    : this.recordCount
+												 id          : record.id
 											 });
 					}
 				}
 			},
-			onTapDone(event) {
-				event.object.page.closeModal();
+			onTapDone(_event) {
+				_event.object.page.closeModal();
 			},
-			onTapRemoveRecord(event) {
-				let page = event.object.page,
-						id = event.object.id,
-						selectedRecord = event.object.bindingContext,
+			onTapRemoveRecord(_event) {
+				let page = _event.object.page,
+						id = _event.object.id,
+						selectedRecord = _event.object.bindingContext,
 						item,
 						recordArrayLengthBeforeChange = this.records.length;
 
@@ -122,15 +116,15 @@
 								  });
 				}
 			},
-			onReturnPress(event) {
-				let text = event.object.text;
+			onReturnPress(_event) {
+				let text = _event.object.text;
 
 				if (!text || text === '') {
 					return;
 				}
 
 				this.currentText = '';
-				event.object.text = '';
+				_event.object.text = '';
 
 				Vibrator.vibrate(75);
 
@@ -140,13 +134,9 @@
 														 });
 
 				this.noRecords = false;
-				++this.recordCount;
-
 				this.records.unshift({
-										 text        : text,
-										 id          : documentId,
-										 valueFieldId: 'value-' + this.recordCount,
-										 buttonId    : this.recordCount
+										 text: text,
+										 id  : documentId
 									 });
 			}
 		}

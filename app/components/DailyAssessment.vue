@@ -79,7 +79,6 @@
 </template>
 <script>
 	import * as dialogs from "tns-core-modules/ui/dialogs";
-	import * as appSettings from "tns-core-modules/application-settings";
 	import LifeChartService from '~/LifeChart.service';
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
@@ -88,30 +87,32 @@
 	import MoodRating from "./hints/MoodRating";
 	import LifeEventsComponent from "./LifeEvents";
 	import Mood from './FunctionalImpairment';
-	import {Observable} from '@nativescript/core';
+	import {Color, Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
 	import JaneService from '~/Jane.service';
+	import { Feedback, FeedbackType, FeedbackPosition } from "nativescript-feedback";
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
 	const Jane = new JaneService();
+    const FeedbackService = new Feedback();
 
 	export default {
 		data: () => {
 			return {
-				oneSuccessfulLoadDone: false,
-				savingEnabled        : true,
-				currentRecordId      : null,
-				isDysphoric          : false,
-				questionDoneForToday : false,
-				sleepHoursColor      : '#CCC',
-				dateToday            : '',
-				currentHourAndMinute : '',
-				currentDate          : null,
-				isDysphoricTintColor : '#CCCCCC',
-				dayToday             : '',
-				sleepHours           : 0,
-				sleepStart           : 0,
+				oneSuccessfulLoadDone   : false,
+				savingEnabled           : true,
+				currentRecordId         : null,
+				isDysphoric             : false,
+				questionDoneForToday    : false,
+				sleepHoursColor         : '#CCC',
+				dateToday               : '',
+				currentHourAndMinute    : '',
+				currentDate             : null,
+				isDysphoricTintColor    : '#CCCCCC',
+				dayToday                : '',
+				sleepHours              : 0,
+				sleepStart              : 0,
 				sleepEnd                : 0,
 				sleepStartedSameDay     : true,
 				sleepStartSelectedIndex : 2,
@@ -129,15 +130,15 @@
 			};
 		},
 		methods: {
-			onSwipe(args) {
-				if (args.direction === 1) {
+			onSwipe(_args) {
+				if (_args.direction === 1) {
 					this.onTapDayBackward();
-				} else if (args.direction === 2) {
+				} else if (_args.direction === 2) {
 					this.onTapDayForward();
 				}
 			},
-			onIsDysphoricChange(event) {
-				this.isDysphoric = event.value;
+			onIsDysphoricChange(_event) {
+				this.isDysphoric = _event.value;
 				this.isDysphoricTintColor = this.isDysphoric ? '#FF4400' : '#CCCCCC';
 			},
 			showDysphoricExplanation() {
@@ -195,7 +196,7 @@
 				this.reset();
 				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
-			onSliderValueChange(event) {
+			onSliderValueChange() {
 				this.moodRatingColor = this.moodRatingHighlightColor;
 				let currentBasecolor = this.moodRatingBaseColor;
 
@@ -230,21 +231,21 @@
 
 				this.moodRatingLabel = face;
 			},
-			sleepValueChangeStart(event) {
-				if (event.oldValue === this.timeItems.length - 2 && event.value === this.timeItems.length - 1) {
+			sleepValueChangeStart(_event) {
+				if (_event.oldValue === this.timeItems.length - 2 && _event.value === this.timeItems.length - 1) {
 					this.sleepStartSelectedIndex = 1;
 					this.sleepStartedSameDay = true;
 				}
-				else if (event.value === 0 && event.oldValue === 1) {
+				else if (_event.value === 0 && _event.oldValue === 1) {
 					this.sleepStartSelectedIndex = this.timeItems.length - 2;
 					this.sleepStartedSameDay = false;
 				}
 
-				this.sleepStart = this.timeItems[event.value];
+				this.sleepStart = this.timeItems[_event.value];
 				this.updateTimeSlept();
 			},
-			sleepValueChangeEnd(event) {
-				this.sleepEnd = this.timeItems[event.value];
+			sleepValueChangeEnd(_event) {
+				this.sleepEnd = this.timeItems[_event.value];
 				this.updateTimeSlept();
 			},
 			updateTimeSlept() {
@@ -328,14 +329,12 @@
 					this.oneSuccessfulLoadDone = true;
 				}
 			},
-			onPageLoaded(event) {
+			onPageLoaded(_event) {
 				if (this.oneSuccessfulLoadDone) {
 					return;
 				}
 
-				Jane.graspSituation();
-
-				this.page = event.object.page;
+				this.page = _event.object.page;
 
 				this.setDateToday();
 				this.onSliderValueChange();
@@ -410,7 +409,6 @@
 				this.assessmentStatusColor = '#444';
 
 				Vibrator.vibrate(75);
-
 				if (!this.currentRecordId) {
 					this.currentRecordId = LifeChart.saveDailyAssessment(
 							{
@@ -423,6 +421,13 @@
 								date               : this.dateTodayDb
 							}
 					);
+
+					FeedbackService.show({
+											 type           : FeedbackType.Success,
+											 position       : FeedbackPosition.Bottom,
+											 backgroundColor: new Color('#009680'),
+											 message        : Jane.say('rememberedIt')
+										 });
 				}
 				else {
 					LifeChart.updateDailyAssessment(this.currentRecordId,
@@ -437,6 +442,13 @@
 															  }
 
 					);
+
+					FeedbackService.show({
+											 type           : FeedbackType.Success,
+											 position       : FeedbackPosition.Bottom,
+											 backgroundColor: new Color('#009680'),
+											 message        : Jane.say('updatedit')
+										 });
 				}
 			}
 		}

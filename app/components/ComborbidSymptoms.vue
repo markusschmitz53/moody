@@ -20,9 +20,8 @@
 							<RadListView class="listview" ref="listView" :items="symptoms" @itemTap="onItemTap">
 								<v-template>
 									<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
-										<Label :text="item.text" :id="item.valueFieldId" width="80%"
-											   class="m-l-20 m-t-10 h3"></Label>
-										<Button :id="item.buttonId" text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
+										<Label :text="item.text" width="80%" class="m-l-20 m-t-10 h3"></Label>
+										<Button text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
 												@tap="onTapRemoveSymptom" color="#CCC"></Button>
 									</StackLayout>
 								</v-template>
@@ -41,7 +40,7 @@
 <script>
 	import * as dialogs from 'tns-core-modules/ui/dialogs';
 	import LifeChartService from '~/LifeChart.service';
-	import { ObservableArray } from 'tns-core-modules/data/observable-array';
+	import {ObservableArray} from 'tns-core-modules/data/observable-array';
 	import ComorbidSymptoms from '~/components/hints/ComorbidSymptoms';
 	import VibratorService from '~/Vibrator.service';
 
@@ -53,7 +52,6 @@
 		data: () => {
 			return {
 				symptoms: new ObservableArray([]),
-				symptomCount: 0,
 				currentSymptomText: '',
 				isLoading: false,
 				minimumLoadingTimeDone: false,
@@ -62,8 +60,8 @@
 			}
 		},
 		methods: {
-			onShownModally(event) {
-				this.page = event.object.page;
+			onShownModally(_event) {
+				this.page = _event.object.page;
 				this.isLoading = true;
 
 				this.minimumLoadingTimeDone = false;
@@ -76,23 +74,20 @@
 				if (_records && _records.length) {
 					this.noSymptoms = false;
 					for (let i = 0; i < _records.length; i++) {
-						++this.symptomCount;
 						let record = _records[i];
 						this.symptoms.unshift({
 												  text        : record.symptom,
-												  id          : record.id,
-												  valueFieldId: 'value-' + this.symptomCount,
-												  buttonId    : this.symptomCount
+												  id          : record.id
 											  });
 					}
 				}
 				this.isLoading = false;
 			},
-			onTapDone(event) {
-				event.object.page.closeModal();
+			onTapDone(_event) {
+				_event.object.page.closeModal();
 			},
-			onTapRemoveSymptom(event) {
-				let selectedRecord = event.object.bindingContext,
+			onTapRemoveSymptom(_event) {
+				let selectedRecord = _event.object.bindingContext,
 						symptomArrayLengthBeforeChange = this.symptoms.length;
 
 
@@ -121,15 +116,15 @@
 					animated  : true
 				});
 			},
-			onReturnPress(event) {
-				let text = event.object.text;
+			onReturnPress(_event) {
+				let text = _event.object.text;
 
 				if (!text || text === '') {
 					return;
 				}
 
 				this.currentSymptomText = '';
-				event.object.text = '';
+				_event.object.text = '';
 
 				Vibrator.vibrate(75);
 
@@ -139,12 +134,9 @@
 															   });
 
 				this.noSymptoms = false;
-				++this.symptomCount;
 				this.symptoms.unshift({
-										  text        : text,
-										  id          : documentId,
-										  valueFieldId: 'value-' + this.symptomCount,
-										  buttonId    : this.symptomCount
+										  text: text,
+										  id  : documentId
 									  });
 			}
 		}

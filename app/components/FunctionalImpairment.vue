@@ -52,10 +52,9 @@
 </template>
 <script>
 	import * as dialogs from "tns-core-modules/ui/dialogs";
-	import * as appSettings from "tns-core-modules/application-settings";
 	import LifeChartService from "../LifeChart.service";
 	import VibratorService from "../Vibrator.service";
-	import { ObservableArray } from 'tns-core-modules/data/observable-array';
+	import {ObservableArray} from 'tns-core-modules/data/observable-array';
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
@@ -105,8 +104,6 @@
 					this.noRecords = false;
 					for (let i = 0; i < _records.length; i++) {
 						let record = _records[i];
-						console.log(LifeChart.getImpairmentLabelForValue(record.impairment));
-						console.log(record.impairment);
 						this.records.push({
 											  impairment: record.impairment,
 											  label     : LifeChart.getImpairmentLabelForValue(record.impairment),
@@ -115,8 +112,8 @@
 					}
 				}
 			},
-			onTapRemoveRecord(event) {
-				let selectedRecord = event.object.bindingContext;
+			onTapRemoveRecord(_event) {
+				let selectedRecord = _event.object.bindingContext;
 
 				if (LifeChart.removeFunctionalImpairment(selectedRecord.id)) {
 					this.setRecords(LifeChart.getFunctionalImpairmentsForDay(this.dateTodayDb));
@@ -143,18 +140,24 @@
 								   });
 			},
 			onTapDone() {
-				LifeChart.saveFunctionalImpairment(
-						{
-							impairment: this.items[this.selectedItemIndex].value,
-							date      : this.dateTodayDb,
-							time      : this.currentHourAndMinute
-						}
-				);
+				let record = {
+					impairment: this.items[this.selectedItemIndex].value,
+					date      : this.dateTodayDb,
+					time      : this.currentHourAndMinute
+				};
+
+				record.id = LifeChart.saveFunctionalImpairment(record);
+				record.label = LifeChart.getImpairmentLabelForValue(record.impairment);
+
+				this.noRecords = false;
+				this.records.unshift(record);
 
 				Vibrator.vibrate(75);
+				/*
 				this.$navigateBack({
 									   frame: 'main'
 								   });
+				 */
 			}
 		}
 	};
