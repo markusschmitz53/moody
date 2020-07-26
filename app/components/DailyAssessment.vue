@@ -67,7 +67,7 @@
 				</Button>
 			</StackLayout>
 			<FlexboxLayout class="m-x-10" width="100%">
-				<Button width="100%" text="fertig" :isEnabled="savingEnabled" @tap="onTapSave" class="-primary -rounded-lg"></Button>
+				<Button width="100%" text="fertig" :isEnabled="dataWasChanged" @tap="onTapSave" class="-primary -rounded-lg"></Button>
 				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index reduced-margin transparent-bg">
 					<FormattedString>
 						<Span class="far button-icon-day-done transparent-bg" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
@@ -100,8 +100,9 @@
 	export default {
 		data: () => {
 			return {
+				lastSavedRecord         : null,
 				oneSuccessfulLoadDone   : false,
-				savingEnabled           : true,
+				dataWasChanged          : false,
 				currentRecordId         : null,
 				isDysphoric             : false,
 				questionDoneForToday    : false,
@@ -122,6 +123,7 @@
 				moodRatingColor         : '#CCC',
 				moodRatingBaseColor     : '#CCC',
 				moodRatingHighlightColor: '#00CAAB',
+				highlightChangeDuration : 1250,
 				moodRatingWarningColor  : '#55FF4400',
 				moodRatingLabel         : String.fromCharCode(parseInt('f11a', 16)),
 				items                   : [],
@@ -140,6 +142,7 @@
 			onIsDysphoricChange(_event) {
 				this.isDysphoric = _event.value;
 				this.isDysphoricTintColor = this.isDysphoric ? '#FF4400' : '#CCCCCC';
+				this.dataWasChanged = (!this.lastSavedRecord || this.lastSavedRecord && this.lastSavedRecord.dysphoric !== this.isDysphoric);
 			},
 			showDysphoricExplanation() {
 				this.$showModal(DysphoricMania, {
@@ -189,15 +192,16 @@
 			onTapDayForward() {
 				this.setDateToday(1);
 				this.reset();
-				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
+				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
 			onTapDayBackward() {
 				this.setDateToday(-1);
 				this.reset();
-				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
+				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
-			onSliderValueChange() {
-				this.moodRatingColor = this.moodRatingHighlightColor;
+			onSliderValueChange(_event) {
+				this.dataWasChanged = (!this.lastSavedRecord || this.lastSavedRecord && this.lastSavedRecord.mood !== this.moodRating);
+
 				let currentBasecolor = this.moodRatingBaseColor;
 
 				let face = String.fromCharCode(parseInt('f11a', 16));
@@ -225,9 +229,15 @@
 					currentBasecolor = this.moodRatingWarningColor;
 				}
 
-				setTimeout(() => {
-					this.moodRatingColor = currentBasecolor;
-				}, 1250);
+				this.moodRatingColor = currentBasecolor;
+
+				if (this.dataWasChanged) {
+					this.moodRatingColor = this.moodRatingHighlightColor;
+
+					setTimeout(() => {
+						this.moodRatingColor = currentBasecolor;
+					}, this.highlightChangeDuration);
+				}
 
 				this.moodRatingLabel = face;
 			},
@@ -242,18 +252,32 @@
 				}
 
 				this.sleepStart = this.timeItems[_event.value];
+				this.dataWasChanged = (!this.lastSavedRecord || this.lastSavedRecord && this.lastSavedRecord.sleepStartIndex !== this.sleepStartSelectedIndex);
+				if (this.dataWasChanged) {
+					this.sleepHoursColor = '#00CAAB';
+
+					setTimeout(() => {
+						this.sleepHoursColor = '#CCC';
+					}, this.highlightChangeDuration);
+				}
+
 				this.updateTimeSlept();
 			},
 			sleepValueChangeEnd(_event) {
 				this.sleepEnd = this.timeItems[_event.value];
+
+				this.dataWasChanged = (!this.lastSavedRecord || this.lastSavedRecord && this.lastSavedRecord.sleepEndIndex !== this.sleepEndSelectedIndex);
+				if (this.dataWasChanged) {
+					this.sleepHoursColor = '#00CAAB';
+
+					setTimeout(() => {
+						this.sleepHoursColor = '#CCC';
+					}, this.highlightChangeDuration);
+				}
+
 				this.updateTimeSlept();
 			},
 			updateTimeSlept() {
-				this.sleepHoursColor = '#00CAAB';
-
-				setTimeout(() => {
-					this.sleepHoursColor = '#CCC';
-				}, 1250);
 				let sleepStartTimeParts = this.sleepStart.split(':');
 				let sleepEndTimeParts = this.sleepEnd.split(':');
 
@@ -292,9 +316,11 @@
 				this.dateTodayDb = yyyy + '-' + mm + '-' + dd;
 				this.currentHourAndMinute = hh + ':' + ii;
 			},
-			onRecordLoaded(_records) {
+			setRecord(_records) {
 				if (_records && _records.length) {
 					let record = _records[0];
+
+					this.lastSavedRecord = record;
 
 					let sleepStartIndex = record.sleepStartIndex;
 					let sleepEndIndex = record.sleepEndIndex;
@@ -327,6 +353,10 @@
 					this.assessmentStatusColor = '#444';
 
 					this.oneSuccessfulLoadDone = true;
+					this.dataWasChanged = false;
+				} else {
+					this.lastSavedRecord = null;
+					this.dataWasChanged = true;
 				}
 			},
 			onPageLoaded(_event) {
@@ -338,12 +368,13 @@
 
 				this.setDateToday();
 				this.onSliderValueChange();
+				this.dataWasChanged = false;
 
 				this.timeItems = LifeChart.getTimeItems();
 				this.resetTimeSlept();
 				this.updateTimeSlept();
 
-				this.onRecordLoaded(LifeChart.getRatingForDay(this.dateTodayDb));
+				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
 			},
 			resetTimeSlept() {
 				this.sleepStart = this.timeItems[2];
@@ -352,8 +383,8 @@
 				this.sleepEndSelectedIndex = 19;
 			},
 			reset() {
+				this.dataWasChanged = false;
 				this.questionDoneForToday = false;
-				this.savingEnabled = true;
 				this.isDysphoric = false;
 				this.moodRating = 50;
 				this.currentRecordId = null;
@@ -407,20 +438,21 @@
 
 				this.questionDoneForToday = true;
 				this.assessmentStatusColor = '#444';
+				this.dataWasChanged = false;
+
+				let record = {
+					sleepStartedSameDay: this.sleepStartedSameDay,
+					sleepStartIndex    : this.sleepStartSelectedIndex,
+					sleepEndIndex      : this.sleepEndSelectedIndex,
+					sleepHours         : this.sleepHours,
+					mood               : this.moodRating,
+					dysphoric          : this.isDysphoric,
+					date               : this.dateTodayDb
+				};
 
 				Vibrator.vibrate(75);
 				if (!this.currentRecordId) {
-					this.currentRecordId = LifeChart.saveDailyAssessment(
-							{
-								sleepHours         : this.sleepHours,
-								sleepStartIndex    : this.sleepStartSelectedIndex,
-								sleepEndIndex      : this.sleepEndSelectedIndex,
-								sleepStartedSameDay: this.sleepStartedSameDay,
-								mood               : this.moodRating,
-								dysphoric          : this.isDysphoric,
-								date               : this.dateTodayDb
-							}
-					);
+					this.currentRecordId = LifeChart.saveDailyAssessment(record);
 
 					FeedbackService.show({
 											 type           : FeedbackType.Success,
@@ -430,18 +462,7 @@
 										 });
 				}
 				else {
-					LifeChart.updateDailyAssessment(this.currentRecordId,
-															  {
-																  sleepStartedSameDay: this.sleepStartedSameDay,
-																  sleepStartIndex    : this.sleepStartSelectedIndex,
-																  sleepEndIndex      : this.sleepEndSelectedIndex,
-																  sleepHours         : this.sleepHours,
-																  mood               : this.moodRating,
-																  dysphoric          : this.isDysphoric,
-																  date               : this.dateTodayDb
-															  }
-
-					);
+					LifeChart.updateDailyAssessment(this.currentRecordId, record);
 
 					FeedbackService.show({
 											 type           : FeedbackType.Success,
@@ -450,6 +471,8 @@
 											 message        : Jane.say('updatedit')
 										 });
 				}
+
+				this.lastSavedRecord = record;
 			}
 		}
 	};
