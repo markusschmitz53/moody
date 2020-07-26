@@ -1,54 +1,65 @@
 <template>
 	<Page actionBarHidden="true" @navigatingTo="onPageLoaded">
 		<FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
-			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center" @swipe="onSwipe" >
-				<Button @tap="onTapDayBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
+			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
+						 @swipe="onSwipe">
+				<Button :isEnabled="setDateBackwardsEnabled" @tap="onTapDayBackward"
+						class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
-						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC" text.decode="&#xf0d9;"></Span>
+						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC"
+							  text.decode="&#xf0d9;"></Span>
 					</FormattedString>
 				</Button>
 				<Label width="30%" class="dateLabel text-center" :text="dateToday"></Label>
 				<Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
 					<FormattedString>
-						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC" text.decode="&#xf0da;"></Span>
+						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC"
+							  text.decode="&#xf0da;"></Span>
 					</FormattedString>
 				</Button>
 			</StackLayout>
 			<StackLayout horizontalAlignment="left" orientation="horizontal" class="">
 				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-start">
-					<Label @tap="showSleepHoursExplanation" textAlignment="center" width="25%" class="h1 m-x-20" :color="sleepHoursColor" verticalAlignment="center"
+					<Label @tap="showSleepHoursExplanation" textAlignment="center" width="25%" class="h1 m-x-20"
+						   :color="sleepHoursColor" verticalAlignment="center"
 						   :text="sleepHours"></Label>
-					<Button @tap="showSleepHoursExplanation" class="button-z-index">
+					<Button @tap="showSleepHoursExplanation" class="transparent-bg button-z-index">
 						<FormattedString>
 							<Span class="fas" :color="sleepHoursColor" fontSize="20" text.decode="&#xf236;"></Span>
 						</FormattedString>
 					</Button>
 				</FlexboxLayout>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart" v-model="sleepStartSelectedIndex"
+				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart"
+							v-model="sleepStartSelectedIndex"
 							class="m-r-20"/>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd" v-model="sleepEndSelectedIndex"
+				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd"
+							v-model="sleepEndSelectedIndex"
 							class=""/>
 			</StackLayout>
 			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
 				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-center">
-					<Label @tap="showMoodRatingExplanation" textWrap="true" textAlignment="center" width="25%" class="m-x-20">
+					<Label @tap="showMoodRatingExplanation" textWrap="true" textAlignment="center" width="25%"
+						   class="m-x-20">
 						<FormattedString>
 							<Span class="far h1" :color="moodRatingColor" :text.decode="moodRatingLabel"></Span>
 						</FormattedString>
 					</Label>
-					<Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center" class="hint m-t-5" :text="moodRating"/>
+					<Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center"
+						   class="hint m-t-5" :text="moodRating"/>
 				</FlexboxLayout>
-				<Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100" @valueChange="onSliderValueChange($event)"></Slider>
+				<Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100"
+						@valueChange="onSliderValueChange($event)"></Slider>
 			</FlexboxLayout>
 			<StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
 				<StackLayout class="m-r-10" orientation="horizontal">
-					<Button width="40" @tap="showDysphoricExplanation" class="far reduced-margin button-z-index transparent-bg" >
+					<Button width="40" @tap="showDysphoricExplanation"
+							class="far reduced-margin button-z-index transparent-bg">
 						<FormattedString>
 							<Span class="far h1  transparent-bg" :color="isDysphoricTintColor"
 								  text.decode="&#xf556;"></Span>
 						</FormattedString>
 					</Button>
-					<check-box :checked="isDysphoric" @checkedChange="onIsDysphoricChange" />
+					<check-box :checked="isDysphoric" @checkedChange="onIsDysphoricChange"/>
 				</StackLayout>
 				<Button @tap="addLifeEvent" width="55" class="reduced-margin m-x-10">
 					<FormattedString>
@@ -67,14 +78,17 @@
 				</Button>
 			</StackLayout>
 			<FlexboxLayout class="m-x-10" width="100%">
-				<Button width="100%" text="fertig" :isEnabled="dataWasChanged" @tap="onTapSave" class="-primary -rounded-lg"></Button>
-				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap" class="button-z-index reduced-margin transparent-bg">
+				<Button width="100%" text="fertig" :isEnabled="dataWasChanged" @tap="onTapSave"
+						class="-primary -rounded-lg"></Button>
+				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap"
+						class="button-z-index reduced-margin transparent-bg">
 					<FormattedString>
-						<Span class="far button-icon-day-done transparent-bg" :color="assessmentStatusColor" text.decode="&#xf058;"></Span>
+							<Span class="far button-icon-day-done transparent-bg" :color="assessmentStatusColor"
+								  text.decode="&#xf058;"></Span>
 					</FormattedString>
 				</Button>
 			</FlexboxLayout>
-        </FlexboxLayout>
+		</FlexboxLayout>
 	</Page>
 </template>
 <script>
@@ -100,6 +114,7 @@
 	export default {
 		data: () => {
 			return {
+				setDateBackwardsEnabled : false,
 				lastSavedRecord         : null,
 				oneSuccessfulLoadDone   : false,
 				dataWasChanged          : false,
@@ -297,6 +312,8 @@
 				this.sleepHours = Math.abs(date2 - date1) / 36e5;
 			},
 			setDateToday(_changeDate) {
+				let realSystemDateToday = new Date();
+
 				if (_changeDate === 1) {
 					this.currentDate.setDate(this.currentDate.getDate() + 1);
 				} else if (_changeDate === -1) {
@@ -304,6 +321,10 @@
 				} else {
 					this.currentDate = new Date();
 				}
+
+				let millisecondsPerDay = 24 * 60 * 60 * 1000;
+				let daysBetween = Math.round((this.getUtc(this.currentDate) - this.getUtc(realSystemDateToday)) / millisecondsPerDay);
+				this.setDateBackwardsEnabled = (daysBetween >= -6);
 
 				let dd = String(this.currentDate.getDate()).padStart(2, '0');
 				let mm = String(this.currentDate.getMonth() + 1).padStart(2, '0'); //January is 0!
@@ -315,6 +336,11 @@
 				this.dateToday = (dd + '.' + mm + '.' + yyyy);
 				this.dateTodayDb = yyyy + '-' + mm + '-' + dd;
 				this.currentHourAndMinute = hh + ':' + ii;
+			},
+			getUtc(_date) {
+				let result = new Date(_date);
+				result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+				return result;
 			},
 			setRecord(_records) {
 				if (_records && _records.length) {
@@ -389,6 +415,7 @@
 				this.moodRating = 50;
 				this.currentRecordId = null;
 				this.sleepStartedSameDay = true;
+				this.dataWasChanged = true;
 
 				this.resetTimeSlept();
 				this.updateTimeSlept();
@@ -517,7 +544,9 @@
 	}
 
 	.transparent-bg {
-		background: white;
+		background: transparent;
+		border-color: transparent;
+		border-width: 1;
 	}
 
 
