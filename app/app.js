@@ -1,6 +1,9 @@
 import Vue from "nativescript-vue";
 import App from "./components/App";
 
+import Jane from '~/Jane';
+Vue.use(Jane);
+
 import RadChart from 'nativescript-ui-chart/vue';
 Vue.use(RadChart);
 

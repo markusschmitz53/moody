@@ -91,7 +91,7 @@
         </FlexboxLayout>
       </FlexboxLayout>
     </template>
-	</Page>
+  </Page>
 </template>
 <script>
 	import * as dialogs from "tns-core-modules/ui/dialogs";
@@ -104,20 +104,19 @@
 	import SleepHours from "./hints/SleepHours";
 	import MoodRating from "./hints/MoodRating";
 	import Mood from './FunctionalImpairment';
+	import Vue from "nativescript-vue";
 	import {Color, Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
-	import JaneService from '~/Jane.service';
 	import { Feedback, FeedbackType, FeedbackPosition } from "nativescript-feedback";
 
   const LifeChart = new LifeChartService();
   const Vibrator = new VibratorService();
-  const Jane = new JaneService();
   const FeedbackService = new Feedback();
 
 	export default {
 		data: () => {
 			return {
-			  isLoaded: false,
+			  isLoaded : false,
 				setDateBackwardsEnabled : false,
 				lastSavedRecord         : null,
 				oneSuccessfulLoadDone   : false,
@@ -383,33 +382,24 @@
 					this.assessmentStatusColor = '#444';
 
 					this.oneSuccessfulLoadDone = true;
-					this.dataWasChanged = false;12
+					this.dataWasChanged = false;
 				} else {
 					this.lastSavedRecord = null;
 					this.dataWasChanged = true;
 				}
 			},
-			checkAccessRightsAndReact() {
-				if (!Jane.personIsAuthenticated()) {
-					this.$navigateTo(LoginComponent, {
-						animated: true,
-						frame   : 'main'
-					});
-					return false;
-				}
-				return true;
-			},
-			onPageLoaded(_event) {
-				if (!this.checkAccessRightsAndReact()) {
-					return;
-				}
+      onPageLoaded(_event) {
+        if (!Vue.Jane.personIsAuthenticated()) {
+          return;
+        }
 
-				if (this.oneSuccessfulLoadDone) {
+        if (this.oneSuccessfulLoadDone) {
 					return;
 				}
 
 				this.page = _event.object.page;
 
+        this.isLoaded = true;
 				this.setDateToday();
 				this.onSliderValueChange();
 				this.dataWasChanged = false;
@@ -419,8 +409,6 @@
 				this.updateTimeSlept();
 
 				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
-
-				this.isLoaded = true;
 			},
 			resetTimeSlept() {
 				this.sleepStart = this.timeItems[2];
@@ -441,10 +429,6 @@
 				this.updateTimeSlept();
 			},
 			onCheckButtonTap() {
-				if (!this.checkAccessRightsAndReact()) {
-					return;
-				}
-
 				let that = this;
 				dialogs.confirm({
 									title            : "",
@@ -482,19 +466,16 @@
 				return true;
 			},
 			onTapSave() {
-				if (!this.checkAccessRightsAndReact()) {
-					return;
-				}
-
 				if (!this.validate()) {
-					// TODO: fix this error message
-					FeedbackService.show({
-											 type           : FeedbackType.Error,
-											 position       : FeedbackPosition.Bottom,
-											 backgroundColor: new Color('#009680'),
-											 message        : Jane.say('rememberedIt')
-										 });
-					return;
+          // TODO: fix this error message
+          FeedbackService.show({
+                                 type           : FeedbackType.Error,
+                                 position       : FeedbackPosition.Top,
+                                 duration       : 1000,
+                                 backgroundColor: new Color('#009680'),
+                                 message        : Vue.Jane.say('rememberedIt')
+                               });
+          return;
 				}
 
 				this.questionDoneForToday = true;
@@ -512,28 +493,30 @@
 				};
 
 				Vibrator.vibrate(75);
-				if (!this.currentRecordId) {
-					this.currentRecordId = LifeChart.saveDailyAssessment(record);
+        if (!this.currentRecordId) {
+          this.currentRecordId = LifeChart.saveDailyAssessment(record);
 
-					FeedbackService.show({
-											 type           : FeedbackType.Success,
-											 position       : FeedbackPosition.Bottom,
-											 backgroundColor: new Color('#009680'),
-											 message        : Jane.say('rememberedIt')
-										 });
-				}
-				else {
-					LifeChart.updateDailyAssessment(this.currentRecordId, record);
+          FeedbackService.show({
+                                 type           : FeedbackType.Success,
+                                 position       : FeedbackPosition.Top,
+                                 backgroundColor: new Color('#009680'),
+                                 duration       : 1000,
+                                 message        : Vue.Jane.say('rememberedIt')
+                               });
+        }
+        else {
+          LifeChart.updateDailyAssessment(this.currentRecordId, record);
 
-					FeedbackService.show({
-											 type           : FeedbackType.Success,
-											 position       : FeedbackPosition.Bottom,
-											 backgroundColor: new Color('#009680'),
-											 message        : Jane.say('updatedit')
-										 });
-				}
+          FeedbackService.show({
+                                 type           : FeedbackType.Success,
+                                 position       : FeedbackPosition.Top,
+                                 backgroundColor: new Color('#009680'),
+                                 duration       : 1000,
+                                 message        : Vue.Jane.say('updatedit')
+                               });
+        }
 
-				this.lastSavedRecord = record;
+        this.lastSavedRecord = record;
 			}
 		}
 	};

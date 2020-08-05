@@ -19,11 +19,8 @@
     import LifeChartService from '~/LifeChart.service';
 
     const ChatView = require("nativescript-chatview");
-	import JaneService from '~/Jane.service';
     const timerModule = require("tns-core-modules/timer");
 	const app = require('tns-core-modules/application');
-
-	const Jane = new JaneService();
 
     function getTime() {
         let now = new Date();
@@ -76,8 +73,8 @@
 
                 this.chatview = chatView;
 
-                Jane.on('JANE_CONVERSATION_OUTPUT', this._conversationOutputCallback);
-                Jane.on('JANE_CONVERSATION_HUMANINPUT', this._conversationHumanInputCallback);
+              //  Jane.on('JANE_CONVERSATION_OUTPUT', this._conversationOutputCallback);
+                //Jane.on('JANE_CONVERSATION_HUMANINPUT', this._conversationHumanInputCallback);
              //   Jane.startConversation();
                 setTimeout(() => {
 

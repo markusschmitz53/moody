@@ -1,48 +1,56 @@
 <template lang="html">
     <Page @loaded="onPageLoaded" actionBarHidden="true">
+      <template v-if="hasItems">
         <FlexboxLayout flexDirection="column" justifyContent="center" class="background-gradient">
-            <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
-                         @swipe="onSwipe">
-                <Button @tap="onTapMonthBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
-                    <FormattedString>
+          <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
+                       @swipe="onSwipe">
+            <Button @tap="onTapMonthBackward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
+              <FormattedString>
                         <Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC"
                               text.decode="&#xf0d9;"></Span>
-                    </FormattedString>
-                </Button>
-                <Label width="35%" class="dateLabel text-center" :text="currentMonth"></Label>
-                <Button @tap="onTapMonthForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
-                    <FormattedString>
+              </FormattedString>
+            </Button>
+            <Label width="35%" class="dateLabel text-center" :text="currentMonth"></Label>
+            <Button @tap="onTapMonthForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
+              <FormattedString>
                         <Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC"
                               text.decode="&#xf0da;"></Span>
-                    </FormattedString>
-                </Button>
-            </StackLayout>
-            <Label text="Stimmung" class="text-center"></Label>
-            <RadCartesianChart class="p-t-5 chart" height="35%">
-                <CategoricalAxis hidden="true" v-tkCartesianHorizontalAxis/>
-                <LinearAxis labelTextColor="#CCC" lineColor="#CCC" :majorStep="this.majorStepValue"
-                            v-tkCartesianVerticalAxis id="verBarAxis" labelFormat="%.0f" :maximum="this.moodMaxValue"
-                            :minimum="this.moodMinValue"/>
-                <SplineSeries v-tkCartesianSeries :items="items" categoryProperty="date" valueProperty="mood"/>
-                <ChartGridLineAnnotation v-tkCartesianAnnotations axisId="verBarAxis" hidden="false" value="50"
-                                         zPosition="AboveSeries" strokeWidth="2" strokeColor="#00CAAB">
-                </ChartGridLineAnnotation>
-                <Trackball v-tkCartesianTrackball></Trackball>
-            </RadCartesianChart>
-            <Label text="Funktionale Einschränkung" class="m-t-30 text-center"></Label>
-            <RadCartesianChart class="chart" height="35%">
-                <CategoricalAxis hidden="true" v-tkCartesianHorizontalAxis/>
-                <LinearAxis labelTextColor="#CCC" lineColor="#CCC" majorStep="1"
-                            v-tkCartesianVerticalAxis id="verBarAxisImpairment" labelFormat="%.0f" maximum="4"
-                            minimum="-4"/>
-                <SplineSeries v-tkCartesianSeries :items="impairmentRecords" categoryProperty="date" valueProperty="impairment"/>
-                <ChartGridLineAnnotation v-tkCartesianAnnotations axisId="verBarAxisImpairment" hidden="false" value="0"
-                                         zPosition="AboveSeries" strokeWidth="2" strokeColor="#00CAAB">
-                </ChartGridLineAnnotation>
-                <Trackball v-tkCartesianTrackball></Trackball>
-            </RadCartesianChart>
+              </FormattedString>
+            </Button>
+          </StackLayout>
+          <Label text="Stimmung" class="text-center"></Label>
+          <RadCartesianChart class="p-t-5 chart" height="35%">
+            <CategoricalAxis hidden="true" v-tkCartesianHorizontalAxis/>
+            <LinearAxis labelTextColor="#CCC" lineColor="#CCC" :majorStep="this.majorStepValue"
+                        v-tkCartesianVerticalAxis id="verBarAxis" labelFormat="%.0f" :maximum="this.moodMaxValue"
+                        :minimum="this.moodMinValue"/>
+            <SplineSeries v-tkCartesianSeries :items="items" categoryProperty="date" valueProperty="mood"/>
+            <ChartGridLineAnnotation v-tkCartesianAnnotations axisId="verBarAxis" hidden="false" value="50"
+                                     zPosition="AboveSeries" strokeWidth="2" strokeColor="#00CAAB">
+            </ChartGridLineAnnotation>
+            <Trackball v-tkCartesianTrackball></Trackball>
+          </RadCartesianChart>
+          <Label text="Funktionale Einschränkung" class="m-t-30 text-center"></Label>
+          <RadCartesianChart class="chart" height="35%">
+            <CategoricalAxis hidden="true" v-tkCartesianHorizontalAxis/>
+            <LinearAxis labelTextColor="#CCC" lineColor="#CCC" majorStep="1"
+                        v-tkCartesianVerticalAxis id="verBarAxisImpairment" labelFormat="%.0f" maximum="4"
+                        minimum="-4"/>
+            <SplineSeries v-tkCartesianSeries :items="impairmentRecords" categoryProperty="date"
+                          valueProperty="impairment"/>
+            <ChartGridLineAnnotation v-tkCartesianAnnotations axisId="verBarAxisImpairment" hidden="false" value="0"
+                                     zPosition="AboveSeries" strokeWidth="2" strokeColor="#00CAAB">
+            </ChartGridLineAnnotation>
+            <Trackball v-tkCartesianTrackball></Trackball>
+          </RadCartesianChart>
 
         </FlexboxLayout>
+      </template>
+      <template v-else>
+        <StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
+          <Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Ich habe noch keine Auswertung erstellt.</Label>
+        </StackLayout>
+      </template>
     </Page>
 </template>LifeChart
 
@@ -52,14 +60,15 @@
 
     export default {
         data   : () => {
-            return {
-                timerId          : null,
-                moodMinValue     : 0,
-                moodMaxValue     : 100,
-                items            : [],
-                currentMonth     : '',
-                impairmentRecords: []
-            };
+          return {
+            timerId          : null,
+            moodMinValue     : 0,
+            moodMaxValue     : 100,
+            items            : [],
+            hasItems         : false,
+            currentMonth     : '',
+            impairmentRecords: []
+          };
         },
         methods: {
             onTapMonthForward() {
@@ -79,7 +88,8 @@
                 }
             },
             setAssessmentRecords(_records) {
-                if (_records && _records.length) {
+              this.hasItems = _records && _records.length;
+                if (this.hasItems) {
                     let minValue = 100,
                             maxValue = 0;
 

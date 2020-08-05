@@ -14,33 +14,23 @@
 </template>
 
 <script>
-import JaneService from '~/Jane.service';
-
+import Vue from "nativescript-vue";
 const application = require('tns-core-modules/application');
-const Jane = new JaneService();
 
 export default {
     data() {
         return {};
     },
     methods: {
-
-      onNavigatedTo() {
-        let bottomBar = application.getRootView();
+      onNavigatedTo() {    let bottomBar = application.getRootView();
         if (bottomBar && bottomBar.android) {
           bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
         }
+
       },
       onTextChange(_event) {
-        if (_event.value.length === 4 && _event.value === '1234') {
-          if (Jane.authenticate(_event.value)) {
-            this.$navigateBack();
-
-            let bottomBar = application.getRootView();
-            if (bottomBar && bottomBar.android) {
-              bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
-            }
-          }
+        if (_event.value.length === 4) {
+          Vue.Jane.authenticate(_event.value);
         }
       },
 
@@ -102,6 +92,7 @@ export default {
 	.input {
     width: 75;
 		font-size: 18;
+    letter-spacing: 0.5;
 		placeholder-color: #A8A8A8;
 	}
 
