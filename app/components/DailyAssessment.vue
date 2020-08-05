@@ -1,94 +1,96 @@
 <template>
-	<Page actionBarHidden="true" @navigatingTo="onPageLoaded">
-		<FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
-			<StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
-						 @swipe="onSwipe">
-				<Button :isEnabled="setDateBackwardsEnabled" @tap="onTapDayBackward"
-						class="reduced-margin-and-padding m-b-30" width="30" height="36">
-					<FormattedString>
+  <Page actionBarHidden="true" @navigatingTo="onPageLoaded">
+    <template v-if="isLoaded">
+      <FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
+        <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
+                     @swipe="onSwipe">
+          <Button :isEnabled="setDateBackwardsEnabled" @tap="onTapDayBackward"
+                  class="reduced-margin-and-padding m-b-30" width="30" height="36">
+            <FormattedString>
 						<Span class="fas button-icon-size reduced-margin-and-padding" color="#CCC"
-							  text.decode="&#xf0d9;"></Span>
-					</FormattedString>
-				</Button>
-				<Label width="30%" class="dateLabel text-center" :text="dateToday"></Label>
-				<Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
-					<FormattedString>
+                  text.decode="&#xf0d9;"></Span>
+            </FormattedString>
+          </Button>
+          <Label width="30%" class="dateLabel text-center" :text="dateToday"></Label>
+          <Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
+            <FormattedString>
 						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC"
-							  text.decode="&#xf0da;"></Span>
-					</FormattedString>
-				</Button>
-			</StackLayout>
-			<StackLayout horizontalAlignment="left" orientation="horizontal" class="">
-				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-start">
-					<Label @tap="showSleepHoursExplanation" textAlignment="center" width="25%" class="h1 m-x-20"
-						   :color="sleepHoursColor" verticalAlignment="center"
-						   :text="sleepHours"></Label>
-					<Button @tap="showSleepHoursExplanation" class="transparent-bg button-z-index">
-						<FormattedString>
-							<Span class="fas" :color="sleepHoursColor" fontSize="20" text.decode="&#xf236;"></Span>
-						</FormattedString>
-					</Button>
-				</FlexboxLayout>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart"
-							v-model="sleepStartSelectedIndex"
-							class="m-r-20"/>
-				<ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd"
-							v-model="sleepEndSelectedIndex"
-							class=""/>
-			</StackLayout>
-			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
-				<FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-center">
-					<Label @tap="showMoodRatingExplanation" textWrap="true" textAlignment="center" width="25%"
-						   class="m-x-20">
-						<FormattedString>
-							<Span class="far h1" :color="moodRatingColor" :text.decode="moodRatingLabel"></Span>
-						</FormattedString>
-					</Label>
-					<Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center"
-						   class="hint m-t-5" :text="moodRating"/>
-				</FlexboxLayout>
-				<Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100"
-						@valueChange="onSliderValueChange($event)"></Slider>
-			</FlexboxLayout>
-			<StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
-				<StackLayout class="m-r-10" orientation="horizontal">
-					<Button width="40" @tap="showDysphoricExplanation"
-							class="far reduced-margin button-z-index transparent-bg">
-						<FormattedString>
+                  text.decode="&#xf0da;"></Span>
+            </FormattedString>
+          </Button>
+        </StackLayout>
+        <StackLayout horizontalAlignment="left" orientation="horizontal" class="">
+          <FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-start">
+            <Label @tap="showSleepHoursExplanation" textAlignment="center" width="25%" class="h1 m-x-20"
+                   :color="sleepHoursColor" verticalAlignment="center"
+                   :text="sleepHours"></Label>
+            <Button @tap="showSleepHoursExplanation" class="transparent-bg button-z-index">
+              <FormattedString>
+                <Span class="fas" :color="sleepHoursColor" fontSize="20" text.decode="&#xf236;"></Span>
+              </FormattedString>
+            </Button>
+          </FlexboxLayout>
+          <ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeStart"
+                      v-model="sleepStartSelectedIndex"
+                      class="m-r-20"/>
+          <ListPicker width="24%" :items="timeItems" @selectedIndexChange="sleepValueChangeEnd"
+                      v-model="sleepEndSelectedIndex"
+                      class=""/>
+        </StackLayout>
+        <FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
+          <FlexboxLayout flexDirection="column" justifyContent="center" alignContent="flex-center">
+            <Label @tap="showMoodRatingExplanation" textWrap="true" textAlignment="center" width="25%"
+                   class="m-x-20">
+              <FormattedString>
+                <Span class="far h1" :color="moodRatingColor" :text.decode="moodRatingLabel"></Span>
+              </FormattedString>
+            </Label>
+            <Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center"
+                   class="hint m-t-5" :text="moodRating"/>
+          </FlexboxLayout>
+          <Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100"
+                  @valueChange="onSliderValueChange($event)"></Slider>
+        </FlexboxLayout>
+        <StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
+          <StackLayout class="m-r-10" orientation="horizontal">
+            <Button width="40" @tap="showDysphoricExplanation"
+                    class="far reduced-margin button-z-index transparent-bg">
+              <FormattedString>
 							<Span class="far h1  transparent-bg" :color="isDysphoricTintColor"
-								  text.decode="&#xf556;"></Span>
-						</FormattedString>
-					</Button>
-					<check-box :checked="isDysphoric" @checkedChange="onIsDysphoricChange"/>
-				</StackLayout>
-				<Button @tap="addLifeEvent" width="55" class="reduced-margin m-x-10">
-					<FormattedString>
-						<Span class="far h2" color="#444" text.decode="&#xf073;"></Span>
-					</FormattedString>
-				</Button>
-				<Button @tap="addComorbidSymptom" width="55" class="reduced-margin m-x-10">
-					<FormattedString>
-						<Span class="far h2" color="#444" text.decode="&#xf0fe;"/>
-					</FormattedString>
-				</Button>
-				<Button @tap="addImpairmentRating" width="55" class="reduced-margin m-l-10">
-					<FormattedString>
-						<Span class="far h2" color="#444" text.decode="&#xf15c;"></Span>
-					</FormattedString>
-				</Button>
-			</StackLayout>
-			<FlexboxLayout class="m-x-10" width="100%">
-				<Button width="100%" text="fertig" :isEnabled="dataWasChanged" @tap="onTapSave"
-						class="-primary -rounded-lg"></Button>
-				<Button v-if="questionDoneForToday" @tap="onCheckButtonTap"
-						class="button-z-index reduced-margin transparent-bg">
-					<FormattedString>
+                    text.decode="&#xf556;"></Span>
+              </FormattedString>
+            </Button>
+            <check-box :checked="isDysphoric" @checkedChange="onIsDysphoricChange"/>
+          </StackLayout>
+          <Button @tap="addLifeEvent" width="55" class="reduced-margin m-x-10">
+            <FormattedString>
+              <Span class="far h2" color="#444" text.decode="&#xf073;"></Span>
+            </FormattedString>
+          </Button>
+          <Button @tap="addComorbidSymptom" width="55" class="reduced-margin m-x-10">
+            <FormattedString>
+              <Span class="far h2" color="#444" text.decode="&#xf0fe;"/>
+            </FormattedString>
+          </Button>
+          <Button @tap="addImpairmentRating" width="55" class="reduced-margin m-l-10">
+            <FormattedString>
+              <Span class="far h2" color="#444" text.decode="&#xf15c;"></Span>
+            </FormattedString>
+          </Button>
+        </StackLayout>
+        <FlexboxLayout class="m-x-10" width="100%">
+          <Button width="100%" text="fertig" :isEnabled="dataWasChanged" @tap="onTapSave"
+                  class="-primary -rounded-lg"></Button>
+          <Button v-if="questionDoneForToday" @tap="onCheckButtonTap"
+                  class="button-z-index reduced-margin transparent-bg">
+            <FormattedString>
 							<Span class="far button-icon-day-done transparent-bg" :color="assessmentStatusColor"
-								  text.decode="&#xf058;"></Span>
-					</FormattedString>
-				</Button>
-			</FlexboxLayout>
-		</FlexboxLayout>
+                    text.decode="&#xf058;"></Span>
+            </FormattedString>
+          </Button>
+        </FlexboxLayout>
+      </FlexboxLayout>
+    </template>
 	</Page>
 </template>
 <script>
@@ -96,24 +98,26 @@
 	import LifeChartService from '~/LifeChart.service';
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
+	import LifeEventsComponent from "./LifeEvents";
+	import LoginComponent from './Login';
 	import DysphoricMania from "./hints/DysphoricMania";
 	import SleepHours from "./hints/SleepHours";
 	import MoodRating from "./hints/MoodRating";
-	import LifeEventsComponent from "./LifeEvents";
 	import Mood from './FunctionalImpairment';
 	import {Color, Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
 	import JaneService from '~/Jane.service';
 	import { Feedback, FeedbackType, FeedbackPosition } from "nativescript-feedback";
 
-	const LifeChart = new LifeChartService();
-	const Vibrator = new VibratorService();
-	const Jane = new JaneService();
-    const FeedbackService = new Feedback();
+  const LifeChart = new LifeChartService();
+  const Vibrator = new VibratorService();
+  const Jane = new JaneService();
+  const FeedbackService = new Feedback();
 
 	export default {
 		data: () => {
 			return {
+			  isLoaded: false,
 				setDateBackwardsEnabled : false,
 				lastSavedRecord         : null,
 				oneSuccessfulLoadDone   : false,
@@ -379,13 +383,27 @@
 					this.assessmentStatusColor = '#444';
 
 					this.oneSuccessfulLoadDone = true;
-					this.dataWasChanged = false;
+					this.dataWasChanged = false;12
 				} else {
 					this.lastSavedRecord = null;
 					this.dataWasChanged = true;
 				}
 			},
+			checkAccessRightsAndReact() {
+				if (!Jane.personIsAuthenticated()) {
+					this.$navigateTo(LoginComponent, {
+						animated: true,
+						frame   : 'main'
+					});
+					return false;
+				}
+				return true;
+			},
 			onPageLoaded(_event) {
+				if (!this.checkAccessRightsAndReact()) {
+					return;
+				}
+
 				if (this.oneSuccessfulLoadDone) {
 					return;
 				}
@@ -401,6 +419,8 @@
 				this.updateTimeSlept();
 
 				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
+
+				this.isLoaded = true;
 			},
 			resetTimeSlept() {
 				this.sleepStart = this.timeItems[2];
@@ -421,12 +441,16 @@
 				this.updateTimeSlept();
 			},
 			onCheckButtonTap() {
+				if (!this.checkAccessRightsAndReact()) {
+					return;
+				}
+
 				let that = this;
 				dialogs.confirm({
 									title            : "",
-									message          : "deine Angaben für den Tag habe ich mir gemerkt",
-									neutralButtonText : "cool",
-									cancelButtonText: "vergiss den Tag",
+									message          : "Deine Angaben für den Tag habe ich mir gemerkt.",
+									neutralButtonText: "cool",
+									cancelButtonText : "vergiss den Tag",
 									okButtonText     : "vergiss den Tag komplett"
 								}).then(function (result) {
 					if (result === true) {
@@ -458,8 +482,18 @@
 				return true;
 			},
 			onTapSave() {
+				if (!this.checkAccessRightsAndReact()) {
+					return;
+				}
+
 				if (!this.validate()) {
-					console.error('Validation failed');
+					// TODO: fix this error message
+					FeedbackService.show({
+											 type           : FeedbackType.Error,
+											 position       : FeedbackPosition.Bottom,
+											 backgroundColor: new Color('#009680'),
+											 message        : Jane.say('rememberedIt')
+										 });
 					return;
 				}
 

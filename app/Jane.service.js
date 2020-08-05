@@ -1,14 +1,18 @@
 import { Observable } from 'tns-core-modules/data/observable';
 import * as simpleLibsodium from 'nativescript-simple-libsodium';
 const application = require("tns-core-modules/application");
+const appSettings = require("tns-core-modules/application-settings");
+const SecureStorage = require("nativescript-secure-storage").SecureStorage;
 
 export default class JaneService extends Observable {
 
     constructor() {
         super();
+        this.isAuthenticated = false;
         this.lastUsedExpression = {};
         this.simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
         this.key = this.simpleLibsodium.generateKeyWithSuppliedString("x921x44=18120-jf", 32);
+        this._secureStorage = new SecureStorage();
     }
 
     encrypt(_mixedEncrypt) {
@@ -32,10 +36,18 @@ export default class JaneService extends Observable {
     }
 
     getSecret(_key) {
+        var success = this._secureStorage.setSync({
+                                                      key  : this.key,
+                                                      value: 1234
+                                                  });
 
+        this._secret = this._secureStorage.getSync({
+                                                       key: this.key
+                                                   });
     }
 
     graspSituation() {
+        console.log("grasping");
         this.getSecret();
     }
 
@@ -142,4 +154,32 @@ export default class JaneService extends Observable {
 
         ++this.currentConversationPart;
     }
+
+    authenticate(_key) {
+        if (!appSettings.getBoolean('isAuthenticated')) {
+            appSettings.setBoolean('isAuthenticated', true);
+
+            application.android.on(application.AndroidApplication.saveActivityStateEvent, function () {
+                appSettings.setBoolean('isAuthenticated', false);
+            });
+
+            application.android.on(application.AndroidApplication.activityStoppedEvent, function () {
+                appSettings.setBoolean('isAuthenticated', false);
+            });
+
+            application.android.on(application.AndroidApplication.activityDestroyedEvent, function () {
+                appSettings.setBoolean('isAuthenticated', false);
+            });
+        }
+
+        return true;
+    }
+
+    personIsAuthenticated() {
+        let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
+        //console.dir(JSON.stringify(enc));
+        return appSettings.getBoolean('isAuthenticated');
+    }
+
+
 }

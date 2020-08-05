@@ -47,17 +47,19 @@
 import Home from "./Home.vue";
 import Activity from "./Activity.vue";
 import Charts from "./Charts.vue";
+import Login from "./Login.vue";
 import FunctionalImpairment from "./FunctionalImpairment.vue";
 import DailyAssessment from "./DailyAssessment.vue";
 
 export default {
-  components: {
-    Home,
-    Activity,
-    Charts,
-    DailyAssessment,
-    FunctionalImpairment
-  }
+    components: {
+        Home,
+        Login,
+        Activity,
+        Charts,
+        DailyAssessment,
+        FunctionalImpairment
+    }
 };
 </script>
 
