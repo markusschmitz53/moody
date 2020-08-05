@@ -15,50 +15,34 @@
 
 <script>
 import Vue from "nativescript-vue";
-const application = require('tns-core-modules/application');
 
 export default {
     data() {
         return {};
     },
     methods: {
-      onNavigatedTo() {    let bottomBar = application.getRootView();
-        if (bottomBar && bottomBar.android) {
-          bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
-        }
-
+      onNavigatedTo() {
+        this.$refs.password.nativeView.focus();
       },
       onTextChange(_event) {
         if (_event.value.length === 4) {
           Vue.Jane.authenticate(_event.value);
         }
       },
+      /*
+              login() {
 
-        login() {
-         /*
-          return Promise.resolve(user);
-            userService
-                .login(this.user)
-                .then(() => {
+                return Promise.resolve(user);
+                  userService
+                      .login(this.user)
+                      .then(() => {
 
-                })
-                .catch(() => {
-                    this.alert("Unfortunately we could not find your account.");
-                });
-          */
-        },
-
-        focusPassword() {
-            this.$refs.password.nativeView.focus();
-        },
-
-        alert(message) {
-            return alert({
-                title: "APP NAME",
-                okButtonText: "OK",
-                message: message
-            });
-        }
+                      })
+                      .catch(() => {
+                          this.alert("Unfortunately we could not find your account.");
+                      });
+              },
+        */
     }
 };
 </script>

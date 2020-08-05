@@ -54,6 +54,7 @@ import Home from "./Home.vue";
 import Activity from "./Activity.vue";
 import Charts from "./Charts.vue";
 import Login from "./Login.vue";
+import Question from "./Question.vue";
 import FunctionalImpairment from "./FunctionalImpairment.vue";
 import DailyAssessment from "./DailyAssessment.vue";
 import Vue from "nativescript-vue";
@@ -73,6 +74,7 @@ export default {
     Home,
     Login,
     Activity,
+    Question,
     Charts,
     DailyAssessment,
     FunctionalImpairment
@@ -104,6 +106,14 @@ export default {
         frame   : 'main'
       });
     },
+    requestSecret() {
+      this.hideBottomNavigationBar();
+
+      this.$navigateTo(Question, {
+        animated: true,
+        frame   : 'main'
+      });
+    },
     onLoaded(_args) {
       on(uncaughtErrorEvent, function() {
         // TODO: what to do on crash?
@@ -112,6 +122,7 @@ export default {
       // register callbacks for Jane lifecycle on app start
       Vue.Jane.on(Vue.Jane.EVENT_AUTHENTICATED, this.authenticationDone);
       Vue.Jane.on(Vue.Jane.EVENT_UNAUTHENTICATED, this.authenticationPending);
+      Vue.Jane.on(Vue.Jane.EVENT_MISSING_SECRET, this.requestSecret);
 
       Vue.Jane.graspSituation();
     }

@@ -1,6 +1,5 @@
 import * as simpleLibsodium from 'nativescript-simple-libsodium';
 import Vue from 'nativescript-vue';
-import LoginComponent from '~/components/Login';
 import {Observable} from '@nativescript/core';
 const application = require("tns-core-modules/application");
 const appSettings = require("tns-core-modules/application-settings");
@@ -15,14 +14,15 @@ export default {
 class Jane extends Observable {
     constructor() {
         super();
-        this.isAuthenticated = false;
+
         this.lastUsedExpression = {};
-        this.simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
-        this.key = this.simpleLibsodium.generateKeyWithSuppliedString("x921x44=18120-jf", 32);
+        this._simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
+        this._key = this._simpleLibsodium.generateKeyWithSuppliedString('x921x44=18120-jf', 32);
         this._secureStorage = new SecureStorage();
 
-        this.EVENT_AUTHENTICATED = 'authenticad';
-        this.EVENT_UNAUTHENTICATED = 'unauthenticad';
+        this.EVENT_MISSING_SECRET = 'missing_secret';
+        this.EVENT_AUTHENTICATED = 'authenticated';
+        this.EVENT_UNAUTHENTICATED = 'unauthenticated';
     }
 
     encrypt(_mixedEncrypt) {
@@ -30,12 +30,12 @@ class Jane extends Observable {
             _mixedEncrypt = JSON.stringify(_mixedEncrypt);
         }
 
-        let enc = this.simpleLibsodium.AEDEncrypt(2, _mixedEncrypt, this.key.raw);
+        let enc = this._simpleLibsodium.AEDEncrypt(2, _mixedEncrypt, this._key.raw);
         return enc;
     }
 
     decrypt(_encryptedObject) {
-        let decoded = this.simpleLibsodium.AEDDecrypt(2, _encryptedObject.rawCrypted, this.key.raw, _encryptedObject.rawNonce);
+        let decoded = this._simpleLibsodium.AEDDecrypt(2, _encryptedObject.rawCrypted, this._key.raw, _encryptedObject.rawNonce);
 
         try {
             decoded = JSON.parse(decoded.string);
@@ -45,21 +45,39 @@ class Jane extends Observable {
         return decoded;
     }
 
-    getSecret(_key) {
-        var success = this._secureStorage.setSync({
-                                                      key  : 'keyhash',
-                                                      value: '1234'
+    getSecret() {
+        /*
+        TODO: store secret safely one time and then load it again
+        let base64hash = this.base64encode(this.simpleLibsodium.passwordHash(_key));
+        let success = this._secureStorage.setSync({
+                                                      key  : 'secret',
+                                                      value: base64hash
                                                   });
+        */
 
-        this._secret = this._secureStorage.getSync({
-                                                       key: 'keyhash'
-                                                   });
+        let secret = this._secureStorage.getSync({
+                                        key: 'secret',
+                                    });
+
+        if (!secret) {
+            console.log("notify no secret");
+            this.notify({
+                            eventName: this.EVENT_MISSING_SECRET
+                        });
+            return false;
+        }
+
+        this._secret = this._simpleLibsodium.passwordHash('1234');
+        return true;
     }
 
     graspSituation() {
-        this.getSecret();
+        this.forgetAuthentication();
 
-        appSettings.setBoolean('isAuthenticated', false);
+        if (!this.getSecret()) {
+            return;
+        }
+
         if (!this.personIsAuthenticated()) {
             this.notify({
                             eventName: this.EVENT_UNAUTHENTICATED
@@ -171,38 +189,58 @@ class Jane extends Observable {
         ++this.currentConversationPart;
     }
 
+    base64encode(_var) {
+        if (typeof _var === 'object') {
+            _var = JSON.stringify(_var);
+        }
+
+        const text = new java.lang.String(_var);
+        const data = text.getBytes('UTF-8');
+        return android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT);
+    }
+
+    forgetAuthentication() {
+        this._secureStorage.setSync({
+                                        key : 'isAuthenticated',
+                                        value: '0'
+                                    });
+    }
+
     authenticate(_key) {
-        if (!appSettings.getBoolean('isAuthenticated')) {
-            if (_key !== '1234') {
+        if (!this._secret) {
+            // TODO: better way of handling this situation ...
+            return;
+            throw new Error('Person has no secret');
+        }
+
+        if (!this.personIsAuthenticated()) {
+            if (!this._simpleLibsodium.passwordHashVerify(this._secret.plainHash, _key)) {
                 return false;
             }
 
-            appSettings.setBoolean('isAuthenticated', true);
+            this._secureStorage.setSync({
+                                            key : 'isAuthenticated',
+                                            value: '1'
+                                        });
 
             this.notify({
                             eventName: this.EVENT_AUTHENTICATED,
                             object   : this
                         });
 
-            application.android.on(application.AndroidApplication.saveActivityStateEvent, function () {
-                appSettings.setBoolean('isAuthenticated', false);
-            });
-
-            application.android.on(application.AndroidApplication.activityStoppedEvent, function () {
-                appSettings.setBoolean('isAuthenticated', false);
-            });
-
-            application.android.on(application.AndroidApplication.activityDestroyedEvent, function () {
-                appSettings.setBoolean('isAuthenticated', false);
-            });
+            application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
+            application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
+            application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
         }
 
         return true;
     }
 
     personIsAuthenticated() {
-        let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
+        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
         //console.dir(JSON.stringify(enc));
-        return (appSettings.getBoolean('isAuthenticated') === true);
+        return (this._secureStorage.getSync({
+                                                key: 'isAuthenticated'
+                                            }) === '1');
     }
 }
