@@ -1,11 +1,18 @@
-import { Observable } from 'tns-core-modules/data/observable';
 import * as simpleLibsodium from 'nativescript-simple-libsodium';
+import Vue from 'nativescript-vue';
+import LoginComponent from '~/components/Login';
+import {Observable} from '@nativescript/core';
 const application = require("tns-core-modules/application");
 const appSettings = require("tns-core-modules/application-settings");
 const SecureStorage = require("nativescript-secure-storage").SecureStorage;
 
-export default class JaneService extends Observable {
+export default {
+    install(Vue, options) {
+        Vue.Jane = new Jane();
+    }
+}
 
+class Jane extends Observable {
     constructor() {
         super();
         this.isAuthenticated = false;
@@ -13,6 +20,9 @@ export default class JaneService extends Observable {
         this.simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
         this.key = this.simpleLibsodium.generateKeyWithSuppliedString("x921x44=18120-jf", 32);
         this._secureStorage = new SecureStorage();
+
+        this.EVENT_AUTHENTICATED = 'authenticad';
+        this.EVENT_UNAUTHENTICATED = 'unauthenticad';
     }
 
     encrypt(_mixedEncrypt) {
@@ -37,18 +47,24 @@ export default class JaneService extends Observable {
 
     getSecret(_key) {
         var success = this._secureStorage.setSync({
-                                                      key  : this.key,
-                                                      value: 1234
+                                                      key  : 'keyhash',
+                                                      value: '1234'
                                                   });
 
         this._secret = this._secureStorage.getSync({
-                                                       key: this.key
+                                                       key: 'keyhash'
                                                    });
     }
 
     graspSituation() {
-        console.log("grasping");
         this.getSecret();
+
+        appSettings.setBoolean('isAuthenticated', false);
+        if (!this.personIsAuthenticated()) {
+            this.notify({
+                            eventName: this.EVENT_UNAUTHENTICATED
+                        });
+        }
     }
 
     say(_expression) {
@@ -157,7 +173,16 @@ export default class JaneService extends Observable {
 
     authenticate(_key) {
         if (!appSettings.getBoolean('isAuthenticated')) {
+            if (_key !== '1234') {
+                return false;
+            }
+
             appSettings.setBoolean('isAuthenticated', true);
+
+            this.notify({
+                            eventName: this.EVENT_AUTHENTICATED,
+                            object   : this
+                        });
 
             application.android.on(application.AndroidApplication.saveActivityStateEvent, function () {
                 appSettings.setBoolean('isAuthenticated', false);
@@ -178,8 +203,6 @@ export default class JaneService extends Observable {
     personIsAuthenticated() {
         let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
         //console.dir(JSON.stringify(enc));
-        return appSettings.getBoolean('isAuthenticated');
+        return (appSettings.getBoolean('isAuthenticated') === true);
     }
-
-
 }
