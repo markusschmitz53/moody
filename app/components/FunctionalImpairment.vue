@@ -1,60 +1,59 @@
 <template>
-	<Page marginBottom="2%" actionBarHidden="true" @navigatingTo="onPageLoaded">
-		<template v-if="!questionDoneForToday">
-		<FlexboxLayout flexDirection="column" class="m-t-15" justifyContent="space-between">
-			<FlexboxLayout height="50%" class="scrollview m-t-15">
-				<template v-if="isLoading || !minimumLoadingTimeDone">
-					<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
-						<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
-					</StackLayout>
-				</template>
-				<template v-else>
-					<template v-if="noRecords">
-						<StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
-							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Wie schwer fielen dir Aktivitäten?</Label>
-						</StackLayout>
-					</template>
-					<template v-else>
-						<RadListView height="100%" class="m-t-10" ref="listView"
-									 :items="records">
-							<v-template>
-								<StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
-									<Label :text="item.label" width="80%" class="m-l-20 m-t-10 h3"></Label>
-									<Button text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
-											@tap="onTapRemoveRecord" color="#CCC"></Button>
-								</StackLayout>
-							</v-template>
-						</RadListView>
-					</template>
-				</template>
-			</FlexboxLayout>
-			<FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
-				<Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15" :text="currentHint"/>
-				<ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex" @selectedIndexChange="selectedIndexChanged"/>
-			</FlexboxLayout>
-			<FlexboxLayout flexDirection="row" justifyContent="center" alignItems="center">
-				<Button class="far -rounded-lg reduced-margin fontsize" width="10" color="#444"
-						text.decode="&#xf14a;" @tap="onTapBack"></Button>
-				<Button width="70%" text="hinzufügen" :isEnabled="savingEnabled" @tap="onTapDone"
-						class="-primary -rounded-lg reduced-margin"></Button>
-			</FlexboxLayout>
-        </FlexboxLayout>
-		</template>
-		<template v-else>
-			<FlexboxLayout flexDirection="column" justifyContent="space-between">
-				<Label text="Alles erledigt für heute :)"
-					   class="h2 w-100 text-center m-t-30 p-t-30"></Label>
-				<Button text="reset" @tap="onTapReset"
-						class="m-t-30 -outline -rounded-lg"></Button>
-			</FlexboxLayout>
-		</template>
-	</Page>
+  <Page width="100%" actionBarHidden="true" @shownModally="onShownModally">
+    <FlexboxLayout flexDirection="column" class="m-b-15" justifyContent="space-between">
+      <StackLayout orientation="vertical">
+        <DockLayout stretchLastChild="false" height="48" width="100%">
+          <Button dock="left" class="far transparent-bg button-z-index h2" margin="0" width="64" color="#CCC"
+                  text.decode="&#xf059;" @tap="showExplanation"></Button>
+          <Button dock="right" class="far transparent-bg button-z-index h2" margin="0" width="64" color="#444"
+                  text.decode="&#xf057;" @tap="onTapClose"></Button>
+        </DockLayout>
+      </StackLayout>
+      <FlexboxLayout height="35%" class="scrollview m-t-15">
+        <template v-if="isLoading || !minimumLoadingTimeDone">
+          <StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
+            <Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
+          </StackLayout>
+        </template>
+        <template v-else>
+          <template v-if="noRecords">
+            <StackLayout width="100%" height="100%" verticalAlignment="center" horizontalAlignment="center">
+              <Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Wie schwer fielen dir Aktivitäten?</Label>
+            </StackLayout>
+          </template>
+          <template v-else>
+            <RadListView height="100%" class="m-t-10" ref="listView"
+                         :items="records">
+              <v-template>
+                <StackLayout class="list-item" horizontalAlignment="center" orientation="horizontal">
+                  <Label :text="item.label" width="80%" class="m-l-20 m-t-10 h3"></Label>
+                  <Button text.decode="&#xf056;" class="m-l-10 m-r-20 fas list-item-button"
+                          @tap="onTapRemoveRecord" color="#CCC"></Button>
+                </StackLayout>
+              </v-template>
+            </RadListView>
+          </template>
+        </template>
+      </FlexboxLayout>
+      <FlexboxLayout flexDirection="row" justifyContent="flex-start" alignItems="center">
+        <Label textWrap="true" color="#CCC" textAlignment="center" width="40%" class="hint p-x-15 m-l-15"
+               :text="currentHint"/>
+        <ListPicker width="40%" selectedIndex="4" :items="items" v-model="selectedItemIndex"
+                    @selectedIndexChange="selectedIndexChanged"/>
+      </FlexboxLayout>
+      <FlexboxLayout flexDirection="row" justifyContent="center" alignItems="center">
+        <Button width="70%" text="hinzufügen" :isEnabled="savingEnabled" @tap="onTapDone"
+                class="-primary -rounded-lg reduced-margin"></Button>
+      </FlexboxLayout>
+    </FlexboxLayout>
+  </Page>
 </template>
 <script>
 	import * as dialogs from "tns-core-modules/ui/dialogs";
 	import LifeChartService from "../LifeChart.service";
 	import VibratorService from "../Vibrator.service";
 	import {ObservableArray} from 'tns-core-modules/data/observable-array';
+  import FunctionalImpairment from '~/components/hints/FunctionalImpairment';
 
 	const LifeChart = new LifeChartService();
 	const Vibrator = new VibratorService();
@@ -67,7 +66,6 @@
 				isLoading              : false,
 				minimumLoadingTimeDone : false,
 				noRecords              : true,
-				questionDoneForToday   : false,
 				currentDate            : null,
 				selectedItemIndex      : 0,
 				sleepHours             : 0,
@@ -82,7 +80,7 @@
 			};
 		},
 		methods: {
-			onPageLoaded() {
+			onShownModally() {
 				this.items = LifeChart.getImpairmentItems();
 				this.isLoading = true;
 				this.minimumLoadingTimeDone = false;
@@ -131,13 +129,16 @@
 					this.currentHint = this.items[this.selectedItemIndex].hint;
 				}
 			},
+      showExplanation() {
+				this.$showModal(FunctionalImpairment, {
+					animated  : true
+				});
+			},
 			onTapReset() {
 				this.selectedItemIndex = 4;
 			},
-			onTapBack() {
-				this.$navigateBack({
-									   frame: 'main'
-								   });
+			onTapClose() {
+		  	this.$modal.close();
 			},
 			onTapDone() {
 				let record = {
@@ -153,11 +154,6 @@
 				this.records.unshift(record);
 
 				Vibrator.vibrate(75);
-				/*
-				this.$navigateBack({
-									   frame: 'main'
-								   });
-				 */
 			}
 		}
 	};

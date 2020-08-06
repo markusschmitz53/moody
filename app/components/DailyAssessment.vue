@@ -103,7 +103,7 @@
 	import DysphoricMania from "./hints/DysphoricMania";
 	import SleepHours from "./hints/SleepHours";
 	import MoodRating from "./hints/MoodRating";
-	import Mood from './FunctionalImpairment';
+	import FunctionalImpairment from './FunctionalImpairment';
 	import Vue from "nativescript-vue";
 	import {Color, Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
@@ -198,17 +198,16 @@
 					}
 				});
 			},
-			addImpairmentRating() {
-				this.$navigateTo(Mood, {
-					animated: true,
-					frame: 'main',
-					props: {
-						dateToday           : this.dateToday,
-						dateTodayDb         : this.dateTodayDb,
-						currentHourAndMinute: this.currentHourAndMinute
-					}
-				});
-			},
+      addImpairmentRating() {
+        this.$showModal(FunctionalImpairment, {
+          animated: true,
+          props   : {
+            dateToday           : this.dateToday,
+            dateTodayDb         : this.dateTodayDb,
+            currentHourAndMinute: this.currentHourAndMinute
+          }
+        });
+      },
 			onTapDayForward() {
 				this.setDateToday(1);
 				this.reset();
@@ -574,12 +573,6 @@
 
 	.slide {
 		margin-left: -5;
-	}
-
-	.transparent-bg {
-		background: transparent;
-		border-color: transparent;
-		border-width: 1;
 	}
 
 

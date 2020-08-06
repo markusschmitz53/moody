@@ -3,8 +3,8 @@
 		<StackLayout backgroundColor="#FFFFFF" orientation="vertical">
 			<StackLayout orientation="vertical">
 				<DockLayout stretchLastChild="false" height="48" width="100%">
-					<Button dock="right" class="far btn h2" margin="0" width="64" color="#444"
-							text.decode="&#xf14a;" @tap="onTapDone"></Button>
+					<Button dock="right" class="far transparent-bg button-z-index h2" margin="0" width="64" color="#444"
+							text.decode="&#xf057;" @tap="onTapDone"></Button>
 				</DockLayout>
 				<ScrollView class="scrollview" id="scrollview" orientation="vertical">
 					<StackLayout margin="2">
@@ -80,8 +80,8 @@
 					}
 				}
 			},
-			onTapDone(_event) {
-				_event.object.page.closeModal();
+			onTapDone() {
+		  	this.$modal.close();
 			},
 			onTapRemoveRecord(_event) {
 				let page = _event.object.page,
@@ -147,11 +147,6 @@
 	// Start custom common variables
 	@import "~@nativescript/theme/scss/variables/blue";
 	// End custom common variables
-
-	.btn {
-		z-index: 0;
-		background-color: transparent;
-	}
 
 	.list-item {
 		margin: 5 20;

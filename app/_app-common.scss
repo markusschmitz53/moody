@@ -66,6 +66,12 @@ android-selected-tab-highlight-color: #4e7ac7;
     z-index: 0;
 }
 
+.transparent-bg {
+    background: transparent;
+    border-color: transparent;
+    border-width: 1;
+}
+
 .loadingImage {
     height: 32;
     width: 32;
