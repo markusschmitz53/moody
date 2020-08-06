@@ -85,8 +85,8 @@ export default {
   methods   : {
     showBottomNavigationBar() {
       let records = LifeChart.getAssessments();
-console.log(records);
-      if (records && records.length > 0) {
+
+      if (records && records.length > 1) {
         let bottomBar = getRootView();
         if (bottomBar && bottomBar.android) {
           bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
@@ -117,8 +117,7 @@ console.log(records);
       this.hideBottomNavigationBar();
 
       this.$showModal(Question, {
-        animated: true,
-        props   : {}
+        animated: true
       });
     },
     onLoaded(_args) {

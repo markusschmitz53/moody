@@ -108,6 +108,8 @@
 	import {Color, Observable} from '@nativescript/core';
 	const fromObject = require("tns-core-modules/data/observable").fromObject;
 	import { Feedback, FeedbackType, FeedbackPosition } from "nativescript-feedback";
+  import Question from '~/components/Question';
+  import ForgetDailyAssessment from '~/components/ForgetDailyAssessment';
 
   const LifeChart = new LifeChartService();
   const Vibrator = new VibratorService();
@@ -425,11 +427,27 @@
 				this.sleepStartedSameDay = true;
 				this.dataWasChanged = true;
 
-				this.resetTimeSlept();
-				this.updateTimeSlept();
-			},
+        this.resetTimeSlept();
+        this.updateTimeSlept();
+      },
+      forgetAssessment() {
+        if (LifeChart.removeDailyAssessment(this.currentRecordId)) {
+          this.reset();
+        }
+      },
+      resolveForgetDailyAssessmentPromise(data) {
+        if (data === 1) {
+          this.forgetAssessment();
+        }
+        else if (data === 2) {
+          console.log("TODO: delete alles")
+        }
+      },
 			onCheckButtonTap() {
-				let that = this;
+        this.$showModal(ForgetDailyAssessment, {
+          animated: true
+        }).then(this.resolveForgetDailyAssessmentPromise);
+			/*
 				dialogs.confirm({
 									title            : "",
 									message          : "Deine Angaben für den Tag habe ich mir gemerkt.",
@@ -441,14 +459,12 @@
 						console.log("TODO: REMOVE DAY");
 					}
 					else if (result === false) {
-						if (LifeChart.removeDailyAssessment(that.currentRecordId)) {
-							that.reset();
-						}
+
 						else {
 							console.error('Could not remove');
 						}
 					}
-				});
+				});*/
 			},
 			validate() {
 				if (!this.dateTodayDb || this.dateTodayDb === '') {
