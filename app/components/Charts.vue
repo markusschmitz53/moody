@@ -52,20 +52,19 @@
         </StackLayout>
       </template>
     </Page>
-</template>LifeChart
-
+</template>
 <script>
-	import LifeChartService from '~/LifeChart.service';
-    const LifeChart = new LifeChartService();
+import LifeChartService from '~/LifeChart.service';
+const LifeChart = new LifeChartService();
 
-    export default {
-        data   : () => {
+export default {
+  data: () => {
           return {
             timerId          : null,
             moodMinValue     : 0,
             moodMaxValue     : 100,
             items            : [],
-            hasItems         : false,
+            hasItems         : true,
             currentMonth     : '',
             impairmentRecords: []
           };

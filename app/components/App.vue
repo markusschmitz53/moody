@@ -61,13 +61,16 @@ import Vue from "nativescript-vue";
 import {FeedbackPosition, FeedbackType} from 'nativescript-feedback';
 import {Color} from '@nativescript/core';
 import {on, getRootView, uncaughtErrorEvent} from "tns-core-modules/application";
+import LifeChartService from '~/LifeChart.service';
+import DysphoricMania from '~/components/hints/DysphoricMania';
 
+const LifeChart = new LifeChartService();
 const application = require("tns-core-modules/application");
 
 export default {
   data      : () => {
     return {
-      isLoaded: false
+      isLoaded: false,
     }
   },
   components: {
@@ -81,9 +84,13 @@ export default {
   },
   methods   : {
     showBottomNavigationBar() {
-      let bottomBar = getRootView();
-      if (bottomBar && bottomBar.android) {
-        bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
+      let records = LifeChart.getAssessments();
+console.log(records);
+      if (records && records.length > 0) {
+        let bottomBar = getRootView();
+        if (bottomBar && bottomBar.android) {
+          bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
+        }
       }
     },
     hideBottomNavigationBar() {
@@ -109,9 +116,9 @@ export default {
     requestSecret() {
       this.hideBottomNavigationBar();
 
-      this.$navigateTo(Question, {
+      this.$showModal(Question, {
         animated: true,
-        frame   : 'main'
+        props   : {}
       });
     },
     onLoaded(_args) {

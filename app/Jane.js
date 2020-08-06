@@ -45,16 +45,21 @@ class Jane extends Observable {
         return decoded;
     }
 
-    getSecret() {
-        /*
-        TODO: store secret safely one time and then load it again
-        let base64hash = this.base64encode(this.simpleLibsodium.passwordHash(_key));
+    setSecret(_key) {
+        let base64hash = this.base64encode(this._simpleLibsodium.passwordHash(_key));
         let success = this._secureStorage.setSync({
                                                       key  : 'secret',
                                                       value: base64hash
                                                   });
-        */
 
+        if (success) {
+            this.graspSituation();
+        }
+
+        return success;
+    }
+
+    getSecret() {
         let secret = this._secureStorage.getSync({
                                         key: 'secret',
                                     });
@@ -200,10 +205,10 @@ class Jane extends Observable {
     }
 
     forgetAuthentication() {
-        this._secureStorage.setSync({
-                                        key : 'isAuthenticated',
-                                        value: '0'
-                                    });
+        new SecureStorage().setSync({
+                                  key  : 'isAuthenticated',
+                                  value: '0'
+                              });
     }
 
     authenticate(_key) {
@@ -237,8 +242,7 @@ class Jane extends Observable {
     }
 
     personIsAuthenticated() {
-        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
-        //console.dir(JSON.stringify(enc));
+        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256 
         return (this._secureStorage.getSync({
                                                 key: 'isAuthenticated'
                                             }) === '1');
