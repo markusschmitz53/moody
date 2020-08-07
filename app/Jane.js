@@ -72,7 +72,7 @@ class Jane extends Observable {
             return false;
         }
 
-        this._secret = this._simpleLibsodium.passwordHash('1234');
+        this._secret = this.base64decode(secret);
         return true;
     }
 
@@ -204,6 +204,12 @@ class Jane extends Observable {
         return android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT);
     }
 
+    base64decode(_var) {
+        let data = android.util.Base64.decode(_var, android.util.Base64.DEFAULT);
+        let decodedString = new java.lang.String(data, java.nio.charset.StandardCharsets.UTF_8);
+        return JSON.parse(decodedString);
+    }
+
     forgetAuthentication() {
         new SecureStorage().setSync({
                                   key  : 'isAuthenticated',
@@ -242,7 +248,7 @@ class Jane extends Observable {
     }
 
     personIsAuthenticated() {
-        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256 
+        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
         return (this._secureStorage.getSync({
                                                 key: 'isAuthenticated'
                                             }) === '1');
