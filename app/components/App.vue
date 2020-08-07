@@ -1,5 +1,5 @@
 <template lang="html">
-  <BottomNavigation @loaded="onLoaded">
+  <BottomNavigation id="mainNavigation" @loaded="onLoaded">
     <TabStrip>
       <TabStripItem class="navigation__item">
         <Image src.decode="font://&#xf274;" class="far"></Image>
@@ -57,20 +57,19 @@ import Login from "./Login.vue";
 import Question from "./Question.vue";
 import FunctionalImpairment from "./FunctionalImpairment.vue";
 import DailyAssessment from "./DailyAssessment.vue";
+
 import Vue from "nativescript-vue";
-import {FeedbackPosition, FeedbackType} from 'nativescript-feedback';
-import {Color} from '@nativescript/core';
 import {on, getRootView, uncaughtErrorEvent} from "tns-core-modules/application";
 import LifeChartService from '~/LifeChart.service';
-import DysphoricMania from '~/components/hints/DysphoricMania';
 
 const LifeChart = new LifeChartService();
 const application = require("tns-core-modules/application");
 
 export default {
-  data      : () => {
+  data: () => {
     return {
-      isLoaded: false,
+      isLoaded                : false,
+      _authenticationIsPending: false,
     }
   },
   components: {
@@ -83,38 +82,31 @@ export default {
     FunctionalImpairment
   },
   methods   : {
-    showBottomNavigationBar() {
-      let records = LifeChart.getAssessments();
-
-      if (records && records.length > 1) {
-        let bottomBar = getRootView();
-        if (bottomBar && bottomBar.android) {
-          bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
-        }
-      }
-    },
-    hideBottomNavigationBar() {
-      let bottomBar = getRootView();
-      if (bottomBar && bottomBar.android) {
-        bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
-      }
-    },
     authenticationDone() {
+      this._authenticationIsPending = false;
       this.$navigateTo(DailyAssessment, {
-        animated: true,
-        frame   : 'main'
-      }).then(this.showBottomNavigationBar);
-    },
-    authenticationPending() {
-      this.hideBottomNavigationBar();
-
-      this.$navigateTo(Login, {
         animated: true,
         frame   : 'main'
       });
     },
+    authenticationPending() {
+      if (this._authenticationIsPending) {
+        return;
+      }
+
+      this._authenticationIsPending = true;
+      this.$navigateTo(Login, {
+        animated: true,
+        frame   : 'main'
+      }).then(() => {
+                if (this._page.getViewById("mainNavigation").selectedIndex !== 0) {
+                  this._page.getViewById("mainNavigation").selectedIndex = 0;
+                }
+              }
+      );
+    },
     requestSecret() {
-      this.hideBottomNavigationBar();
+   //   this.hideBottomNavigationBar();
 
       this.$showModal(Question, {
         animated: true
@@ -124,6 +116,8 @@ export default {
       on(uncaughtErrorEvent, function() {
         // TODO: what to do on crash?
       });
+
+      this._page = _args.object;
 
       // register callbacks for Jane lifecycle on app start
       Vue.Jane.on(Vue.Jane.EVENT_AUTHENTICATED, this.authenticationDone);

@@ -1,5 +1,5 @@
 <template>
-  <Page @navigatingTo="onNavigatedTo" actionBarHidden="true">
+  <Page @navigatedTo="onNavigatedTo" @navigatedFrom="onNavigatedFrom" actionBarHidden="true">
     <FlexboxLayout class="page">
       <StackLayout class="form">
         <Label class="header" text="moody"/>
@@ -15,35 +15,56 @@
 
 <script>
 import Vue from "nativescript-vue";
+import {getRootView} from 'tns-core-modules/application';
+import LifeChartService from '~/LifeChart.service';
 
 export default {
-    data() {
-        return {};
-    },
-    methods: {
-      onNavigatedTo() {
-        this.$refs.password.nativeView.focus();
-      },
-      onTextChange(_event) {
-        if (_event.value.length === 4) {
-          Vue.Jane.authenticate(_event.value);
+  data() {
+    return {};
+  },
+  methods: {
+    showBottomNavigationBar() {
+      let records = new LifeChartService().getAssessments();
+      if (records && records.length > 1) {
+        let bottomBar = getRootView();
+        if (bottomBar && bottomBar.android) {
+          bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
         }
-      },
-      /*
-              login() {
+      }
+    },
+    hideBottomNavigationBar() {
+      let bottomBar = getRootView();
+      if (bottomBar && bottomBar.android) {
+        bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
+      }
+    },
+    onNavigatedTo() {
+      this.$refs.password.nativeView.focus();
+      this.hideBottomNavigationBar();
+    },
+    onNavigatedFrom() {
+      this.showBottomNavigationBar();
+    },
+    onTextChange(_event) {
+      if (_event.value.length === 4) {
+        Vue.Jane.authenticate(_event.value);
+      }
+    },
+    /*
+            login() {
 
-                return Promise.resolve(user);
-                  userService
-                      .login(this.user)
-                      .then(() => {
+              return Promise.resolve(user);
+                userService
+                    .login(this.user)
+                    .then(() => {
 
-                      })
-                      .catch(() => {
-                          this.alert("Unfortunately we could not find your account.");
-                      });
-              },
-        */
-    }
+                    })
+                    .catch(() => {
+                        this.alert("Unfortunately we could not find your account.");
+                    });
+            },
+      */
+  }
 };
 </script>
 

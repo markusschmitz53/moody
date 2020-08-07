@@ -99,7 +99,6 @@
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
 	import LifeEventsComponent from "./LifeEvents";
-	import LoginComponent from './Login';
 	import DysphoricMania from "./hints/DysphoricMania";
 	import SleepHours from "./hints/SleepHours";
 	import MoodRating from "./hints/MoodRating";
@@ -450,29 +449,11 @@
           console.log("TODO: delete alles")
         }
       },
-			onCheckButtonTap() {
+      onCheckButtonTap() {
         this.$showModal(ForgetDailyAssessment, {
           animated: true
         }).then(this.resolveForgetDailyAssessmentPromise);
-			/*
-				dialogs.confirm({
-									title            : "",
-									message          : "Deine Angaben für den Tag habe ich mir gemerkt.",
-									neutralButtonText: "cool",
-									cancelButtonText : "vergiss den Tag",
-									okButtonText     : "vergiss den Tag komplett"
-								}).then(function (result) {
-					if (result === true) {
-						console.log("TODO: REMOVE DAY");
-					}
-					else if (result === false) {
-
-						else {
-							console.error('Could not remove');
-						}
-					}
-				});*/
-			},
+      },
 			validate() {
 				if (!this.dateTodayDb || this.dateTodayDb === '') {
 					throw new Error('Invalid value exception for property dateToday');

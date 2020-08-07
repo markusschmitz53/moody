@@ -61,11 +61,10 @@ class Jane extends Observable {
 
     getSecret() {
         let secret = this._secureStorage.getSync({
-                                        key: 'secret',
-                                    });
+                                                     key: 'secret',
+                                                 });
 
         if (!secret) {
-            console.log("notify no secret");
             this.notify({
                             eventName: this.EVENT_MISSING_SECRET
                         });
