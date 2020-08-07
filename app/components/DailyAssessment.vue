@@ -432,6 +432,14 @@
       forgetAssessment() {
         if (LifeChart.removeDailyAssessment(this.currentRecordId)) {
           this.reset();
+
+          FeedbackService.show({
+                                 type           : FeedbackType.Success,
+                                 position       : FeedbackPosition.Top,
+                                 duration       : 1000,
+                                 backgroundColor: new Color('#E38E17'),
+                                 message        : 'Erledigt'
+                               });
         }
       },
       resolveForgetDailyAssessmentPromise(data) {
