@@ -1,5 +1,5 @@
 <template>
-  <Page actionBarHidden="true" @navigatingTo="onPageLoaded">
+  <Page actionBarHidden="true" @loaded="onLoaded" @navigatingTo="onPageLoaded">
     <template v-if="isLoaded">
       <FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
         <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
@@ -388,28 +388,37 @@
 					this.dataWasChanged = true;
 				}
 			},
+      onLoaded() {
+        Vue.Jane.on(Vue.Jane.EVENT_AUTHENTICATED, this.onAuthenticationDone.bind(this));
+      },
+      onAuthenticationDone() {
+			  this.initialize();
+      },
       onPageLoaded(_event) {
+				this.page = _event.object.page;
+
+        this.initialize();
+			},
+      initialize() {
         if (!Vue.Jane.personIsAuthenticated()) {
           return;
         }
 
         if (this.oneSuccessfulLoadDone) {
-					return;
-				}
-
-				this.page = _event.object.page;
+          return;
+        }
 
         this.isLoaded = true;
-				this.setDateToday();
-				this.onSliderValueChange();
-				this.dataWasChanged = false;
+        this.setDateToday();
+        this.onSliderValueChange();
+        this.dataWasChanged = false;
 
-				this.timeItems = LifeChart.getTimeItems();
-				this.resetTimeSlept();
-				this.updateTimeSlept();
+        this.timeItems = LifeChart.getTimeItems();
+        this.resetTimeSlept();
+        this.updateTimeSlept();
 
-				this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
-			},
+        this.setRecord(LifeChart.getRatingForDay(this.dateTodayDb));
+      },
 			resetTimeSlept() {
 				this.sleepStart = this.timeItems[2];
 				this.sleepEnd = this.timeItems[19];

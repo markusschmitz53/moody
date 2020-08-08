@@ -1,5 +1,5 @@
 <template>
-  <Page @navigatedTo="onNavigatedTo" @navigatedFrom="onNavigatedFrom" actionBarHidden="true">
+  <Page @shownModally="onShownModally" actionBarHidden="true">
     <FlexboxLayout class="page">
       <StackLayout class="form">
         <Label class="header" text="moody"/>
@@ -15,39 +15,22 @@
 
 <script>
 import Vue from "nativescript-vue";
-import {getRootView} from 'tns-core-modules/application';
-import LifeChartService from '~/LifeChart.service';
-
 export default {
   data() {
     return {};
   },
   methods: {
-    showBottomNavigationBar() {
-      let records = new LifeChartService().getAssessments();
-      if (records && records.length > 1) {
-        let bottomBar = getRootView();
-        if (bottomBar && bottomBar.android) {
-          bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
-        }
-      }
-    },
-    hideBottomNavigationBar() {
-      let bottomBar = getRootView();
-      if (bottomBar && bottomBar.android) {
-        bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
-      }
-    },
-    onNavigatedTo() {
+    onShownModally() {
       this.$refs.password.nativeView.focus();
-      this.hideBottomNavigationBar();
-    },
-    onNavigatedFrom() {
-      this.showBottomNavigationBar();
     },
     onTextChange(_event) {
       if (_event.value.length === 4) {
-        Vue.Jane.authenticate(_event.value);
+        if (Vue.Jane.authenticate(_event.value)) {
+          this.$modal.close();
+        } else {
+          // TODO: else
+          console.log("login wrong TODO");
+        }
       }
     },
     /*

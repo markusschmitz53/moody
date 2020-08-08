@@ -1,13 +1,20 @@
 import { Couchbase, QueryLogicalOperator, ConcurrencyMode } from 'nativescript-couchbase-plugin';
+import {Observable} from '@nativescript/core';
 import Vue from 'nativescript-vue';
 
-export default class LifeChartService {
+export default class LifeChartService extends Observable {
 
     constructor() {
+        super();
+
+        this._changeListenerAdded = false;
+
         this.TYPE_COMORBID_SYMPTOM = 'comorbidSymptom';
         this.TYPE_LIFE_EVENT = 'lifeEvent';
         this.TYPE_DAILY_ASSESSMENT = 'dailyAssessment';
         this.TYPE_FUNCTIONAL_IMPAIRMENT = 'functionalImpairment';
+
+        this.EVENT_DOCUMENT_CHANGE = 'document_change';
         /*
         this._databaseCommon = new Couchbase('ka4821LO-0041-common');
         this._databaseHuman = new Couchbase('ka4821LO-0041-human');
@@ -24,6 +31,7 @@ export default class LifeChartService {
     getLifechartDatabase() {
         if (!this._databaseLifechart) {
             this._databaseLifechart = new Couchbase('ka4821LO-0041-lifechart');
+            this._addLifechartChangeListener(this._databaseLifechart);
         }
 
         return this._databaseLifechart;
@@ -191,6 +199,42 @@ export default class LifeChartService {
                                                 order : [{property: 'timestamp', direction: 'asc'}]
                                             });
     }
+
+    _databaseChangedListener(_changes) {
+        let Frame = require("tns-core-modules/ui/frame").Frame;
+        Frame.topmost().notify({
+                                   eventName: this.EVENT_DOCUMENT_CHANGE
+                               });
+        return;
+
+        // todo: this here ...
+        let hasDocumentChanges = false;
+
+        for (let i = 0; i < _changes.length; i++) {
+            let document = this._databaseLifechart.getDocument(_changes[i]);
+            if (document && document.type) {
+                hasDocumentChanges = true;
+            }
+        }
+
+        if (hasDocumentChanges) {
+            let Frame = require("tns-core-modules/ui/frame").Frame;
+            Frame.topmost().notify({
+                            eventName: this.EVENT_DOCUMENT_CHANGE
+                        });
+        }
+    }
+
+    _addLifechartChangeListener() {
+        if (this._changeListenerAdded) {
+            return;
+        }
+
+        this._databaseLifechart.addDatabaseChangeListener(this._databaseChangedListener.bind(this));
+
+        this._changeListenerAdded = true;
+    }
+
     _setTimeItems() {
         this.timeItems = ['23:30'];
         for (let i = 0; i < 24; i++) {

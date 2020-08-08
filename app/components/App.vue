@@ -70,6 +70,7 @@ export default {
     return {
       isLoaded                : false,
       _authenticationIsPending: false,
+      _bottomNavigationHidden : false,
     }
   },
   components: {
@@ -84,10 +85,12 @@ export default {
   methods   : {
     authenticationDone() {
       this._authenticationIsPending = false;
-      this.$navigateTo(DailyAssessment, {
-        animated: true,
-        frame   : 'main'
-      });
+
+      // TODO: subscribe to changes on db to update navigation bar automatically
+      let Frame = require("tns-core-modules/ui/frame").Frame;
+      Frame.topmost().on(new LifeChartService().EVENT_DOCUMENT_CHANGE, this._onDocumentsChanged.bind(this));
+      this._onDocumentsChanged();
+
     },
     authenticationPending() {
       if (this._authenticationIsPending) {
@@ -95,22 +98,45 @@ export default {
       }
 
       this._authenticationIsPending = true;
-      this.$navigateTo(Login, {
-        animated: true,
-        frame   : 'main'
-      }).then(() => {
-                if (this._page.getViewById("mainNavigation").selectedIndex !== 0) {
-                  this._page.getViewById("mainNavigation").selectedIndex = 0;
-                }
-              }
-      );
+      this.$showModal(Login, {
+        animated  : true,
+        fullscreen: true
+      });
+    },
+    showBottomNavigationBar() {
+      if (!this._bottomNavigationHidden)
+        return;
+
+      let bottomBar = getRootView();
+      if (bottomBar && bottomBar.android) {
+        bottomBar._bottomNavigationBar.setVisibility(android.view.View.VISIBLE);
+        this._bottomNavigationHidden = false;
+      }
+    },
+    hideBottomNavigationBar() {
+      if (this._bottomNavigationHidden) {
+        return;
+      }
+
+      let bottomBar = getRootView();
+      if (bottomBar && bottomBar.android) {
+        bottomBar._bottomNavigationBar.setVisibility(android.view.View.GONE);
+        this._bottomNavigationHidden = true;
+      }
     },
     requestSecret() {
-   //   this.hideBottomNavigationBar();
-
       this.$showModal(Question, {
-        animated: true
+        animated  : true,
+        fullscreen: true
       });
+    },
+    _onDocumentsChanged() {
+      let records = new LifeChartService().getAssessments();
+      if (!records || records.length <= 1) {
+        this.hideBottomNavigationBar();
+      } else {
+        this.showBottomNavigationBar();
+      }
     },
     onLoaded(_args) {
       on(uncaughtErrorEvent, function() {
