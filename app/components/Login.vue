@@ -30,13 +30,13 @@ export default {
       this.$refs.password.nativeView.focus();
     },
     onTextChange(_event) {
-      this.inputTextColor = '#111111';
+      this.inputTextColor = '#CCCCCC';
 
       if (_event.value.length === 4) {
         ++this.pinTries;
+        this.isEditable = false;
 
-        if (this.pinTries > 1) {
-          this.isEditable = false;
+        if (this.pinTries > 3) {
           let counter = 30;
           this.labelText = 'Bitte warte ' + counter + ' Sekunden';
 
@@ -65,6 +65,7 @@ export default {
         } else {
           // TODO: nicer color
           this.inputTextColor = '#FF0000';
+          this.isEditable = true;
         }
       }
     },
