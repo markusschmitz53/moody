@@ -86,11 +86,9 @@ export default {
     authenticationDone() {
       this._authenticationIsPending = false;
 
-      // TODO: subscribe to changes on db to update navigation bar automatically
       let Frame = require("tns-core-modules/ui/frame").Frame;
       Frame.topmost().on(new LifeChartService().EVENT_DOCUMENT_CHANGE, this._onDocumentsChanged.bind(this));
       this._onDocumentsChanged();
-
     },
     authenticationPending() {
       if (this._authenticationIsPending) {

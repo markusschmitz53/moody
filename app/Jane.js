@@ -1,9 +1,11 @@
 import * as simpleLibsodium from 'nativescript-simple-libsodium';
-import Vue from 'nativescript-vue';
 import {Observable} from '@nativescript/core';
+
 const application = require("tns-core-modules/application");
-const appSettings = require("tns-core-modules/application-settings");
 const SecureStorage = require("nativescript-secure-storage").SecureStorage;
+const STATE_IDLE = 0;
+const STATE_THINKING = 1;
+
 
 export default {
     install(Vue, options) {
@@ -15,11 +17,15 @@ class Jane extends Observable {
     constructor() {
         super();
 
+        this.currentState = STATE_IDLE;
         this.lastUsedExpression = {};
+
         this._simpleLibsodium = new simpleLibsodium.SimpleLibsodium();
         this._key = this._simpleLibsodium.generateKeyWithSuppliedString('x921x44=18120-jf', 32);
         this._secureStorage = new SecureStorage();
 
+        this.EVENT_THINKING_START = 'thinking_start';
+        this.EVENT_THINKING_STOP = 'thinking_stop';
         this.EVENT_MISSING_SECRET = 'missing_secret';
         this.EVENT_AUTHENTICATED = 'authenticated';
         this.EVENT_UNAUTHENTICATED = 'unauthenticated';
@@ -217,6 +223,11 @@ class Jane extends Observable {
     }
 
     authenticate(_key) {
+        this.currentState = STATE_THINKING;
+        this.notify({
+                            eventName: this.EVENT_THINKING_START
+                        });
+
         if (!this._secret) {
             // TODO: better way of handling this situation ...
             return;
@@ -228,22 +239,32 @@ class Jane extends Observable {
                 return false;
             }
 
-            this._secureStorage.setSync({
+            let success = this._secureStorage.setSync({
                                             key : 'isAuthenticated',
                                             value: '1'
                                         });
 
-            this.notify({
-                            eventName: this.EVENT_AUTHENTICATED,
-                            object   : this
-                        });
+            if (success) {
+                this.notify({
+                                eventName: this.EVENT_AUTHENTICATED,
+                                object   : this
+                            });
 
-            application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
-            application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
-            application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
+                application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
+                application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
+                application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
+            }
         }
 
+        this.notify({
+                            eventName: this.EVENT_THINKING_STOP
+                        });
+        this.currentState = STATE_IDLE;
         return true;
+    }
+
+    isThinking() {
+        return (this.currentState === STATE_THINKING);
     }
 
     personIsAuthenticated() {

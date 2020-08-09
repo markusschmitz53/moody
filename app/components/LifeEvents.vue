@@ -12,7 +12,7 @@
 							<Image src="res://ai" class="m-t-30 m-b-10 loadingImage" stretch="aspectFill"></Image>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone && noRecords">
-							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Was ist passiert?</Label>
+							<Label class="m-t-30 m-b-10 text-center hint" color="#CCC">Was soll ich mir merken?</Label>
 						</template>
 						<template v-if="!isLoading && minimumLoadingTimeDone">
 							<RadListView class="listview" ref="listView" :items="records" @itemTap="onItemTap">
@@ -29,7 +29,7 @@
 					</StackLayout>
 				</ScrollView>
 			</StackLayout>
-			<TextField class="m-x-30 m-b-15" height="35" hint="Lebensereignis" :text='currentText'
+			<TextField class="m-x-30 m-b-15" height="35" hint="Notiz, Ereignis, Marker" :text='currentText'
 					   returnKeyType="done" @returnPress="onReturnPress($event)">
 			</TextField>
 		</StackLayout>
