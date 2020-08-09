@@ -39,13 +39,13 @@
 
 <script>
 	import * as dialogs from 'tns-core-modules/ui/dialogs';
-	import LifeChartService from '~/LifeChart.service';
 	import {ObservableArray} from 'tns-core-modules/data/observable-array';
 	import ComorbidSymptoms from '~/components/hints/ComorbidSymptoms';
 	import VibratorService from '~/Vibrator.service';
 
 	const Vibrator = new VibratorService();
-	const LifeChart = new LifeChartService();
+  const LifeChartService = require('../LifeChart.service');
+	let LifeChart = LifeChartService.getInstance();
 
     export default {
   		props: ['dateTodayDb'],

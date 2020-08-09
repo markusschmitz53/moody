@@ -1,8 +1,10 @@
-import { Couchbase, QueryLogicalOperator, ConcurrencyMode } from 'nativescript-couchbase-plugin';
-import {Observable} from '@nativescript/core';
-import Vue from 'nativescript-vue';
+const Couchbase = require('nativescript-couchbase-plugin').Couchbase;
+const QueryLogicalOperator = require('nativescript-couchbase-plugin').QueryLogicalOperator;
+const Observable = require('tns-core-modules/data/observable').Observable;
 
-export default class LifeChartService extends Observable {
+let instance;
+
+class LifeChartService extends Observable {
 
     constructor() {
         super();
@@ -321,5 +323,15 @@ export default class LifeChartService extends Observable {
                 }
             }
         ];
+    }
+}
+
+module.exports = {
+    getInstance: function () {
+        if (!instance) {
+            instance = new LifeChartService();
+        }
+
+        return instance;
     }
 }

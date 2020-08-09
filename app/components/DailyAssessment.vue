@@ -1,9 +1,8 @@
 <template>
-  <Page actionBarHidden="true" @loaded="onLoaded" @navigatingTo="onPageLoaded">
+  <Page actionBarHidden="true" @loaded="onLoaded" @navigatingTo="onPageLoaded" @swipe="onSwipe">
     <template v-if="isLoaded">
-      <FlexboxLayout flexDirection="column" class="background-gradient m-t-20 p-b-15" justifyContent="space-between">
-        <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
-                     @swipe="onSwipe">
+      <FlexboxLayout flexDirection="column" class="background-gradient m-t-30" justifyContent="space-around">
+        <StackLayout class="m-t-30 p-t-25" orientation="horizontal" horizontalAlignment="center">
           <Button :isEnabled="setDateBackwardsEnabled" @tap="onTapDayBackward"
                   class="reduced-margin-and-padding m-b-30" width="30" height="36">
             <FormattedString>
@@ -11,7 +10,7 @@
                   text.decode="&#xf0d9;"></Span>
             </FormattedString>
           </Button>
-          <Label width="30%" class="dateLabel text-center" :text="dateToday"></Label>
+          <Label width="40%" class="dateLabel text-center" :text="dateToday"></Label>
           <Button @tap="onTapDayForward" class="reduced-margin-and-padding m-b-30" width="30" height="36">
             <FormattedString>
 						<Span class="fas button-icon-size h2 reduced-margin-and-padding" color="#CCC"
@@ -48,8 +47,10 @@
             <Label @tap="showMoodRatingExplanation" textWrap="true" color="#CCC" textAlignment="center"
                    class="hint m-t-5" :text="moodRating"/>
           </FlexboxLayout>
-          <Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100"
-                  @valueChange="onSliderValueChange($event)"></Slider>
+          <StackLayout>
+            <Slider class="slide" width="55%" v-model="moodRating" value="50" minValue="0" maxValue="100"
+                    @valueChange="onSliderValueChange($event)"></Slider>
+          </StackLayout>
         </FlexboxLayout>
         <StackLayout class="m-t-15 m-x-30" orientation="horizontal" horizontalAlignment="center">
           <StackLayout class="m-r-10" orientation="horizontal">
@@ -94,8 +95,6 @@
   </Page>
 </template>
 <script>
-	import * as dialogs from "tns-core-modules/ui/dialogs";
-	import LifeChartService from '~/LifeChart.service';
 	import VibratorService from "../Vibrator.service";
 	import ComborbidSymptomsComponent from "./ComborbidSymptoms";
 	import LifeEventsComponent from "./LifeEvents";
@@ -105,12 +104,11 @@
 	import FunctionalImpairment from './FunctionalImpairment';
 	import Vue from "nativescript-vue";
 	import {Color, Observable} from '@nativescript/core';
-	const fromObject = require("tns-core-modules/data/observable").fromObject;
 	import { Feedback, FeedbackType, FeedbackPosition } from "nativescript-feedback";
-  import Question from '~/components/Question';
   import ForgetDailyAssessment from '~/components/ForgetDailyAssessment';
 
-  const LifeChart = new LifeChartService();
+  const LifeChartService = require('../LifeChart.service');
+  let LifeChart = LifeChartService.getInstance();
   const Vibrator = new VibratorService();
   const FeedbackService = new Feedback();
 
@@ -565,8 +563,8 @@
 
 	.dateLabel {
 		color: #444444;
-		font-size: 15;
-		margin-top: 5;
+		font-size: 14;
+		margin-top: 6;
 	}
 
 	.slide {

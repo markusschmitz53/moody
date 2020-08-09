@@ -50,12 +50,12 @@
 </template>
 <script>
 	import * as dialogs from "tns-core-modules/ui/dialogs";
-	import LifeChartService from "../LifeChart.service";
 	import VibratorService from "../Vibrator.service";
 	import {ObservableArray} from 'tns-core-modules/data/observable-array';
   import FunctionalImpairment from '~/components/hints/FunctionalImpairment';
 
-	const LifeChart = new LifeChartService();
+  const LifeChartService = require('../LifeChart.service');
+	const LifeChart = LifeChartService.getInstance();
 	const Vibrator = new VibratorService();
 
 	export default {

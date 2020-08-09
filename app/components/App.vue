@@ -60,12 +60,11 @@ import DailyAssessment from "./DailyAssessment.vue";
 
 import Vue from "nativescript-vue";
 import {on, getRootView, uncaughtErrorEvent} from "tns-core-modules/application";
-import LifeChartService from '~/LifeChart.service';
 
 const app = require("tns-core-modules/application");
-const traceModule = require("tns-core-modules/trace");
-const LifeChart = new LifeChartService();
 const application = require("tns-core-modules/application");
+const LifeChartService = require('../LifeChart.service');
+const LifeChart = LifeChartService.getInstance();
 
 export default {
   data: () => {
@@ -89,7 +88,7 @@ export default {
       this._authenticationIsPending = false;
 
       let Frame = require("tns-core-modules/ui/frame").Frame;
-      Frame.topmost().on(new LifeChartService().EVENT_DOCUMENT_CHANGE, this._onDocumentsChanged.bind(this));
+      Frame.topmost().on(LifeChart.EVENT_DOCUMENT_CHANGE, this._onDocumentsChanged.bind(this));
       this._onDocumentsChanged();
     },
     authenticationPending() {
@@ -131,7 +130,7 @@ export default {
       });
     },
     _onDocumentsChanged() {
-      let records = new LifeChartService().getAssessments();
+      let records = LifeChart.getAssessments();
       if (!records || records.length <= 1) {
         this.hideBottomNavigationBar();
       } else {
@@ -139,8 +138,9 @@ export default {
       }
     },
     onLoaded(_args) {
-      traceModule.enable();
-      traceModule.write('Component loaded: App', traceModule.categories.Debug);
+      if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+        console.log('Component loaded: App');
+      }
 
       on(uncaughtErrorEvent, function() {
         // TODO: what to do on crash?

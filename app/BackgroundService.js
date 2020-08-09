@@ -1,11 +1,7 @@
-const ad = require("tns-core-modules/utils/utils").ad;
 const NotificationService = require('~/NotificationService');
-const context = ad.getApplicationContext();
 
 android.app.job.JobService.extend("com.tns.notifications.BackgroundService", {
-    onStartJob: function(params) {
-        console.log("Job execution ...");
-
+    onStartJob: function (params) {
         let notificationService = NotificationService.getInstance();
         notificationService.showNotification('Tägliche Einschätzung', 'Jetzt die Stimmung erfassen');
 
@@ -13,7 +9,7 @@ android.app.job.JobService.extend("com.tns.notifications.BackgroundService", {
         return false;
     },
 
-    onStopJob: function() {
+    onStopJob: function () {
         console.log("Stopping job ...");
     }
 });

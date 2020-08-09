@@ -12,7 +12,10 @@
  //   builder.setRequiresDeviceIdle(true);
 
     const jobScheduler = context.getSystemService(android.content.Context.JOB_SCHEDULER_SERVICE);
-    console.log("Job Scheduled: " + jobScheduler.schedule(builder.build()));
+
+    if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+        console.log("Job Scheduled: " + jobScheduler.schedule(builder.build()));
+    }
 }
 
 module.exports.scheduleJob = scheduleJob;

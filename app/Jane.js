@@ -52,6 +52,9 @@ class Jane extends Observable {
     }
 
     setSecret(_key) {
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: setSecret');
+        }
         let base64hash = this.base64encode(this._simpleLibsodium.passwordHash(_key));
         let success = this._secureStorage.setSync({
                                                       key  : 'secret',
@@ -66,6 +69,10 @@ class Jane extends Observable {
     }
 
     getSecret() {
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: getSecret');
+        }
+
         let secret = this._secureStorage.getSync({
                                                      key: 'secret',
                                                  });
@@ -82,6 +89,9 @@ class Jane extends Observable {
     }
 
     graspSituation() {
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: graspSituation');
+        }
         this.forgetAuthentication();
 
         if (!this.getSecret()) {

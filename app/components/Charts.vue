@@ -54,8 +54,8 @@
     </Page>
 </template>
 <script>
-import LifeChartService from '~/LifeChart.service';
-const LifeChart = new LifeChartService();
+const LifeChartService = require('~/LifeChart.service');
+let LifeChart = LifeChartService.getInstance();
 
 export default {
   data: () => {
