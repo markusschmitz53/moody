@@ -62,6 +62,8 @@ import Vue from "nativescript-vue";
 import {on, getRootView, uncaughtErrorEvent} from "tns-core-modules/application";
 import LifeChartService from '~/LifeChart.service';
 
+const app = require("tns-core-modules/application");
+const traceModule = require("tns-core-modules/trace");
 const LifeChart = new LifeChartService();
 const application = require("tns-core-modules/application");
 
@@ -137,6 +139,9 @@ export default {
       }
     },
     onLoaded(_args) {
+      traceModule.enable();
+      traceModule.write('Component loaded: App', traceModule.categories.Debug);
+
       on(uncaughtErrorEvent, function() {
         // TODO: what to do on crash?
       });
@@ -149,6 +154,11 @@ export default {
       Vue.Jane.on(Vue.Jane.EVENT_MISSING_SECRET, this.requestSecret);
 
       Vue.Jane.graspSituation();
+
+      let utils = require("tns-core-modules/utils/utils");
+      let scheduler = require("../Scheduler");
+      let backgroundService = require("../BackgroundService"); // require so it's part of webpack bundle
+      scheduler.scheduleJob(utils.ad.getApplicationContext());
     }
   }
 };

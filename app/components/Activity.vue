@@ -14,7 +14,6 @@
 
 <script>
 	const ActivityDetection = require("../ActivityRecognitionV2");
-	const NotificationReceiveService = require("../NotificationReceiveService");
 	const NotificationService = require("../NotificationService");
 	const AppSettings = require("tns-core-modules/application-settings");
 	const timerModule = require("tns-core-modules/timer");
@@ -149,8 +148,6 @@
 													  (androidContext, intent) => {
 														  console.log("on")
 													  });
-		    	//let notificationServiceInstance = NotificationReceiveService.getInstance();
-				//notificationServiceInstance.on(NotificationReceiveService.notificationEvent, this.onNotification);
 			},
 
 			getDeleteIntent(context) {
