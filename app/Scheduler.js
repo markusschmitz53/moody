@@ -14,7 +14,7 @@
     const jobScheduler = context.getSystemService(android.content.Context.JOB_SCHEDULER_SERVICE);
 
     if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
-        console.log("Job Scheduled: " + jobScheduler.schedule(builder.build()));
+        console.log("Scheduler: Job Scheduled: " + jobScheduler.schedule(builder.build()));
     }
 }
 

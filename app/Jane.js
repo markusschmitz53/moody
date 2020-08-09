@@ -1,5 +1,9 @@
 import * as simpleLibsodium from 'nativescript-simple-libsodium';
 import {Observable} from '@nativescript/core';
+import {
+    getBoolean,
+    setBoolean,
+} from "application-settings";
 
 const application = require("tns-core-modules/application");
 const SecureStorage = require("nativescript-secure-storage").SecureStorage;
@@ -53,24 +57,33 @@ class Jane extends Observable {
 
     setSecret(_key) {
         if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
-            console.log('Jane: setSecret');
+            console.log('Jane: setSecret()');
         }
+
         let base64hash = this.base64encode(this._simpleLibsodium.passwordHash(_key));
-        let success = this._secureStorage.setSync({
-                                                      key  : 'secret',
-                                                      value: base64hash
-                                                  });
-
-        if (success) {
-            this.graspSituation();
-        }
-
-        return success;
+        this._secureStorage.set({
+                                    key  : 'secret',
+                                    value: base64hash
+                                }).then(
+            (success) => {
+                if (success) {
+                    if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+                        console.log('Jane: secret set successfully');
+                    }
+                    this.graspSituation();
+                }
+                else {
+                    if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+                        console.log('ERROR @Jane.setSecret(): failed to set secret');
+                    }
+                }
+            }
+        );
     }
 
     getSecret() {
         if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
-            console.log('Jane: getSecret');
+            console.log('Jane: getSecret()');
         }
 
         let secret = this._secureStorage.getSync({
@@ -90,9 +103,8 @@ class Jane extends Observable {
 
     graspSituation() {
         if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
-            console.log('Jane: graspSituation');
+            console.log('Jane: graspSituation()');
         }
-        this.forgetAuthentication();
 
         if (!this.getSecret()) {
             return;
@@ -226,13 +238,17 @@ class Jane extends Observable {
     }
 
     forgetAuthentication() {
-        new SecureStorage().setSync({
-                                  key  : 'isAuthenticated',
-                                  value: '0'
-                              });
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: forgetAuthentication()');
+        }
+
+        setBoolean('isAuthenticated', false);
     }
 
     authenticate(_key) {
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: authenticate()');
+        }
         this.currentState = STATE_THINKING;
         this.notify({
                             eventName: this.EVENT_THINKING_START
@@ -240,8 +256,10 @@ class Jane extends Observable {
 
         if (!this._secret) {
             // TODO: better way of handling this situation ...
-            return;
-            throw new Error('Person has no secret');
+            if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+                console.log('ERROR @Jane.authenticate(): person has no secret');
+            }
+            return false;
         }
 
         if (!this.personIsAuthenticated()) {
@@ -249,21 +267,15 @@ class Jane extends Observable {
                 return false;
             }
 
-            let success = this._secureStorage.setSync({
-                                            key : 'isAuthenticated',
-                                            value: '1'
-                                        });
+            setBoolean('isAuthenticated', true);
+            this.notify({
+                            eventName: this.EVENT_AUTHENTICATED,
+                            object   : this
+                        });
 
-            if (success) {
-                this.notify({
-                                eventName: this.EVENT_AUTHENTICATED,
-                                object   : this
-                            });
-
-                application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
-                application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
-                application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
-            }
+            application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
+            application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
+            application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
         }
 
         this.notify({
@@ -278,9 +290,10 @@ class Jane extends Observable {
     }
 
     personIsAuthenticated() {
-        //let enc = this.simpleLibsodium.SHA2Hash("MyPassword", 512); // or 256
-        return (this._secureStorage.getSync({
-                                                key: 'isAuthenticated'
-                                            }) === '1');
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: personIsAuthenticated()');
+        }
+
+        return (getBoolean('isAuthenticated') === true);
     }
 }
