@@ -30,9 +30,10 @@ export default {
       this.$refs.password.nativeView.focus();
     },
     onTextChange(_event) {
-      this.inputTextColor = '#CCCCCC';
+      this.inputTextColor = '#111111';
 
       if (_event.value.length === 4) {
+        this.inputTextColor = '#CCCCCC';
         ++this.pinTries;
         this.isEditable = false;
 
