@@ -1,5 +1,5 @@
 <template lang="html">
-    <Page @loaded="onPageLoaded" actionBarHidden="true">
+    <Page @loaded="onPageLoaded" actionBarHidden="true" @swipe="onSwipe">
       <template v-if="hasItems">
         <FlexboxLayout flexDirection="column" justifyContent="center" class="background-gradient">
           <StackLayout height="10%" class="m-t-30" orientation="horizontal" horizontalAlignment="center"
@@ -78,12 +78,9 @@ export default {
                 this.setDateToday(-1);
               //  LifeChart.getRatingForDay(this.dateTodayDb, this.onRecordLoaded);
             },
-            onSwipe(args) {
-                if (args.direction === 1) {
-                    this.onTapMonthBackward();
-                }
-                else if (args.direction === 2) {
-                    this.onTapMonthForward();
+            onSwipe(_args) {
+                if (_args.direction === 8) {
+                  this.$navigateBack();
                 }
             },
             setAssessmentRecords(_records) {

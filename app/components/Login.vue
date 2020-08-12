@@ -16,6 +16,7 @@
 
 <script>
 import Vue from "nativescript-vue";
+import * as utils from 'tns-core-modules/utils/utils';
 export default {
   data() {
     return {
@@ -57,17 +58,20 @@ export default {
           }, 1000);
         }
 
-        if (Vue.Jane.authenticate(_event.value)) {
-          this.inputTextColor = '#00FF00';
+         setTimeout(() => {
+           if (Vue.Jane.authenticate(_event.value)) {
+             this.inputTextColor = '#009680';
+             utils.ad.dismissSoftInput();123
 
-          setTimeout(() => {
-            this.$modal.close();
-          }, 800);
-        } else {
-          // TODO: nicer color
-          this.inputTextColor = '#FF0000';
-          this.isEditable = true;
-        }
+             setTimeout(() => {
+               this.$modal.close();
+             }, 400);
+           }
+           else {
+             this.inputTextColor = '#E31717';
+             this.isEditable = true;
+           }
+         }, 300);
       }
     },
     /*

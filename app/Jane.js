@@ -33,6 +33,18 @@ class Jane extends Observable {
         this.EVENT_MISSING_SECRET = 'missing_secret';
         this.EVENT_AUTHENTICATED = 'authenticated';
         this.EVENT_UNAUTHENTICATED = 'unauthenticated';
+
+        this._registerAuthenticationListeners();
+    }
+
+    _registerAuthenticationListeners() {
+        if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
+            console.log('Jane: _registerAuthenticationListeners()');
+        }
+
+        application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
+        application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
+        application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
     }
 
     encrypt(_mixedEncrypt) {
@@ -243,6 +255,9 @@ class Jane extends Observable {
         }
 
         setBoolean('isAuthenticated', false);
+        application.android.removeEventListener(application.AndroidApplication.saveActivityStateEvent);
+        application.android.removeEventListener(application.AndroidApplication.activityStoppedEvent);
+        application.android.removeEventListener(application.AndroidApplication.activityDestroyedEvent);
     }
 
     authenticate(_key) {
@@ -267,20 +282,17 @@ class Jane extends Observable {
                 return false;
             }
 
+            console.log('Jane: authenticate() -> set isAuthenticated');
             setBoolean('isAuthenticated', true);
             this.notify({
                             eventName: this.EVENT_AUTHENTICATED,
                             object   : this
                         });
-
-            application.android.on(application.AndroidApplication.saveActivityStateEvent, this.forgetAuthentication);
-            application.android.on(application.AndroidApplication.activityStoppedEvent, this.forgetAuthentication);
-            application.android.on(application.AndroidApplication.activityDestroyedEvent, this.forgetAuthentication);
         }
 
         this.notify({
-                            eventName: this.EVENT_THINKING_STOP
-                        });
+                        eventName: this.EVENT_THINKING_STOP
+                    });
         this.currentState = STATE_IDLE;
         return true;
     }

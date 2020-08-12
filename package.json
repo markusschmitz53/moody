@@ -28,9 +28,9 @@
     "nativescript-ui-chart": "^7.1.1",
     "nativescript-ui-listview": "^8.2.0",
     "nativescript-vibrate": "^3.0.0",
-    "nativescript-vue": "^2.6.4",
+    "nativescript-vue": "^2.7.1",
     "parse": "^2.13.0",
-    "tns-core-modules": "^6.5.8",
+    "tns-core-modules": "^6.5.13",
     "tns-platform-declarations": "^6.5.9"
   },
   "devDependencies": {
