@@ -162,26 +162,49 @@
 		      case 2: this.onTapDayForward(); break;
 		      case 4: this.onShowChart(); break;
         }
-			},
+      },
       onShowChart() {
         if (de.markusschmitz.Jane.BuildConfig.DEBUG) {
           console.log('DailyAssessment: onShowChart()');
         }
+        /*
+                const permissions = require('nativescript-permissions')
+                permissions.requestPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .then(() => {
+                      console.log('Required Android permissions have been granted');
 
-        const fileSystemModule = require("tns-core-modules/file-system");
+                      try {
+                        let HtmlConverter = com.itextpdf.html2pdf.HtmlConverter;
 
-        let FileOutputStream = java.io.FileOutputStream;
-        let PdfRendererBuilder = com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-        try {
-          let builder = new PdfRendererBuilder();
-          builder.useFastMode();
-          console.log(fileSystemModule.knownFolders.currentApp().path);
-          builder.withUri("file://" + fileSystemModule.knownFolders.currentApp().path + "/in.htm");
-          builder.toStream(new FileOutputStream(fileSystemModule.knownFolders.currentApp().path + "/out.pdf"));
-          builder.run();
-        } catch (e) {
-          console.log(e);
-        }
+                        let sdDownloadPath = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS).toString();
+                        console.log("writing to file: " + sdDownloadPath + "/output.pdf");
+                        /!*
+                        let fileSystemModule = require("tns-core-modules/file-system");
+                        let currentAppFolder = fileSystemModule.knownFolders.currentApp();
+                        let fileInputStream = new java.io.FileInputStream(new java.io.File(currentAppFolder.path + "/in.html"));
+                        *!/
+                        //    let fileOutputStream = new java.io.FileOutputStream(new java.io.File(sdDownloadPath + "/output.pdf"));
+
+                        const PageSize = com.itextpdf.kernel.geom.PageSize;
+                        let properties = new com.itextpdf.html2pdf.ConverterProperties();
+                        let fileOutputStream = new com.itextpdf.kernel.pdf.PdfDocument(new com.itextpdf.kernel.pdf.PdfWriter(sdDownloadPath + "/output.pdf"));
+                        fileOutputStream.setDefaultPageSize(PageSize.A4.rotate());
+                        // pdfHTML specific code
+                        HtmlConverter.convertToPdf('<table style="width:100%;background-color:#FF0000">' +
+                                                   '<tr><td>Test</td></tr>' +
+                                                   '</table>', fileOutputStream, properties);
+                      }
+                      catch (e) {
+                        console.log(e);
+                        console.log('ERROR! ##########');
+                      }
+                      console.log("converted! ####");
+                    })
+                    .catch(() => {
+                      console.error('Required Android permissions have been denied!');
+                      return;
+                    });
+                    */
 
         let records = LifeChart.getAssessments();
         if (!records || records.length <= 1) {

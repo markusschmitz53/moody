@@ -35,7 +35,7 @@ class NotificationService extends Observable {
                 .setContentIntent(pendingIntent)
                 .setVibrate([100, 200, 100])
                 .setChannelId(channelId)
-                .setSmallIcon(android.R.drawable.btn_star_big_on);
+                .setSmallIcon(android.R.drawable.checkbox_on_background);
 
             manager.notify(1, builder.build());
         }
