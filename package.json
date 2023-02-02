@@ -34,7 +34,7 @@
     "tns-platform-declarations": "^6.5.15"
   },
   "devDependencies": {
-    "@angular/cli": "^9.1.15",
+    "@angular/cli": "^15.1.4",
     "@babel/core": "~7.1.0",
     "@babel/preset-env": "~7.1.0",
     "@nativescript/schematics": "^1.0.0",
